@@ -9,7 +9,17 @@ import (
 )
 
 func CreateCourse(c *gin.Context) {
-	var input models.Course
+	var input struct {
+		Name        string `json:"Name"`
+		Description string `json:"Description"`
+		Grade       string `json:"Grade"`
+		Semester    string `json:"Semester"`
+		Subject     string `json:"Subject"`
+		Teacher     string `json:"Teacher"`
+		Credits     int    `json:"Credits"`
+		ImageURL    string `json:"ImageURL"`
+	}
+
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -31,7 +41,7 @@ func CreateCourse(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Course created successfully"})
+	c.JSON(http.StatusOK, gin.H{"data": course})
 }
 
 func GetCourses(c *gin.Context) {
@@ -67,7 +77,7 @@ func GetCourse(c *gin.Context) {
 
 func UpdateCourse(c *gin.Context) {
 	var course models.Course
-	if err := config.DB.Where("id = ?", c.Param("id")).First(&course).Error; err != nil {
+	if err := config.DB.First(&course, c.Param("id")).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Course not found"})
 		return
 	}
@@ -78,17 +88,37 @@ func UpdateCourse(c *gin.Context) {
 		return
 	}
 
-	config.DB.Model(&course).Updates(input)
+	// 只更新允许的字段
+	updateData := map[string]interface{}{
+		"Name":        input.Name,
+		"Description": input.Description,
+		"Grade":       input.Grade,
+		"Semester":    input.Semester,
+		"Subject":     input.Subject,
+		"Teacher":     input.Teacher,
+		"Credits":     input.Credits,
+		"ImageURL":    input.ImageURL,
+	}
+
+	if err := config.DB.Model(&course).Updates(updateData).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update course"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"data": course})
 }
 
 func DeleteCourse(c *gin.Context) {
 	var course models.Course
-	if err := config.DB.Where("id = ?", c.Param("id")).First(&course).Error; err != nil {
+	if err := config.DB.First(&course, c.Param("id")).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Course not found"})
 		return
 	}
 
-	config.DB.Delete(&course)
+	if err := config.DB.Delete(&course).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete course"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Course deleted successfully"})
 }
