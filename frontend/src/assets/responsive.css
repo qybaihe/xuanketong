@@ -1,0 +1,668 @@
+/* 选课通系统 - 响应式布局和移动端适配
+ * 基于 iOS HIG 原则和现代高技感设计
+ */
+
+/* ===== 1. 移动端优先基础样式 ===== */
+
+/* 基础移动端样式 */
+@media (max-width: 767px) {
+  /* 容器调整 */
+  .container {
+    padding: 0 var(--spacing-sm);
+    max-width: 100%;
+  }
+  
+  /* 标题大小调整 */
+  .hero-title {
+    font-size: 24px;
+    line-height: 1.2;
+  }
+  
+  .hero-subtitle {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  
+  /* 按钮全宽 */
+  .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 20px;
+    font-size: 16px;
+    min-height: 48px;
+  }
+  
+  /* 表单调整 */
+  .filter-form {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .form-group {
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .form-group--button {
+    margin-top: var(--spacing-sm);
+  }
+  
+  /* 课程网格 */
+  .course-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  /* 课程卡片调整 */
+  .course-card {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .course-card-image {
+    height: 180px;
+  }
+  
+  .course-card-content {
+    padding: var(--spacing-md);
+  }
+  
+  .course-card-title {
+    font-size: 18px;
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .course-card-description {
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: var(--spacing-sm);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* 课程元信息调整 */
+  .course-card-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .meta-info {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+  }
+  
+  .course-card-credits {
+    align-self: flex-end;
+  }
+  
+  /* 标签调整 */
+  .course-card-tags {
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .course-card-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  
+  /* 徽章调整 */
+  .course-badge {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+  
+  .badge-icon {
+    font-size: 10px;
+  }
+  
+  /* 评分调整 */
+  .course-card-rating {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+  
+  /* 底部调整 */
+  .home-footer {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+  
+  /* 英雄区域调整 */
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+  
+  /* 加载状态调整 */
+  .loading-container {
+    padding: var(--spacing-2xl);
+  }
+  
+  /* 空状态调整 */
+  .empty-state {
+    padding: var(--spacing-2xl);
+  }
+  
+  .empty-icon {
+    font-size: 36px;
+  }
+  
+  .empty-title {
+    font-size: 18px;
+  }
+  
+  .empty-description {
+    font-size: 14px;
+  }
+  
+  /* 触摸优化 */
+  .btn:active {
+    transform: scale(0.95);
+  }
+  
+  .course-card:active {
+    transform: scale(0.98);
+  }
+  
+  /* 防止文本溢出 */
+  .course-card-title,
+  .course-card-description {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+}
+
+/* ===== 2. 平板端样式 ===== */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* 容器调整 */
+  .container {
+    max-width: 900px;
+    padding: 0 var(--spacing-md);
+  }
+  
+  /* 标题大小调整 */
+  .hero-title {
+    font-size: 28px;
+  }
+  
+  .hero-subtitle {
+    font-size: 18px;
+  }
+  
+  /* 表单调整 */
+  .filter-form {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+  
+  /* 课程网格 */
+  .course-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+  
+  /* 课程卡片调整 */
+  .course-card-image {
+    height: 200px;
+  }
+  
+  .course-card-content {
+    padding: var(--spacing-md);
+  }
+  
+  /* 课程元信息 */
+  .course-card-meta {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .meta-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  /* 英雄区域 */
+  .hero-actions {
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--spacing-md);
+  }
+  
+  /* 按钮调整 */
+  .btn {
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+}
+
+/* ===== 3. 桌面端样式 ===== */
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  /* 容器调整 */
+  .container {
+    max-width: 1200px;
+    padding: 0 var(--spacing-lg);
+  }
+  
+  /* 标题大小调整 */
+  .hero-title {
+    font-size: 32px;
+  }
+  
+  .hero-subtitle {
+    font-size: 20px;
+  }
+  
+  /* 表单调整 */
+  .filter-form {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+  }
+  
+  /* 课程网格 */
+  .course-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+  
+  /* 课程卡片 */
+  .course-card-image {
+    height: 220px;
+  }
+  
+  /* 悬停效果 */
+  .course-card:hover {
+    transform: translateY(-8px);
+  }
+  
+  /* 动画延迟 */
+  .course-card:nth-child(1) { animation-delay: 0.1s; }
+  .course-card:nth-child(2) { animation-delay: 0.2s; }
+  .course-card:nth-child(3) { animation-delay: 0.3s; }
+  .course-card:nth-child(4) { animation-delay: 0.4s; }
+  .course-card:nth-child(5) { animation-delay: 0.5s; }
+  .course-card:nth-child(6) { animation-delay: 0.6s; }
+}
+
+/* ===== 4. 大屏幕样式 ===== */
+
+@media (min-width: 1440px) {
+  /* 容器调整 */
+  .container {
+    max-width: 1400px;
+    padding: 0 var(--spacing-xl);
+  }
+  
+  /* 标题大小调整 */
+  .hero-title {
+    font-size: 36px;
+  }
+  
+  .hero-subtitle {
+    font-size: 22px;
+  }
+  
+  /* 课程网格 */
+  .course-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-xl);
+  }
+  
+  /* 课程卡片 */
+  .course-card-image {
+    height: 240px;
+  }
+  
+  /* 增强悬停效果 */
+  .course-card:hover {
+    transform: translateY(-12px) scale(1.02);
+  }
+}
+
+/* ===== 5. 超宽屏幕样式 ===== */
+
+@media (min-width: 1920px) {
+  /* 容器调整 */
+  .container {
+    max-width: 1600px;
+    padding: 0 var(--spacing-2xl);
+  }
+  
+  /* 标题大小调整 */
+  .hero-title {
+    font-size: 42px;
+  }
+  
+  .hero-subtitle {
+    font-size: 24px;
+  }
+  
+  /* 课程网格 */
+  .course-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--spacing-2xl);
+  }
+  
+  /* 课程卡片 */
+  .course-card-image {
+    height: 260px;
+  }
+}
+
+/* ===== 6. 横屏模式优化 ===== */
+
+@media (max-width: 1023px) and (orientation: landscape) {
+  /* 横屏模式下的调整 */
+  .hero-section {
+    padding: var(--spacing-md) 0;
+  }
+  
+  .course-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+  
+  .course-card-image {
+    height: 160px;
+  }
+  
+  .course-card-content {
+    padding: var(--spacing-sm);
+  }
+  
+  .course-card-title {
+    font-size: 16px;
+  }
+  
+  .course-card-description {
+    font-size: 12px;
+    margin-bottom: var(--spacing-xs);
+  }
+}
+
+/* ===== 7. 设备特定优化 ===== */
+
+/* iPhone X 及以上机型适配 */
+@supports (padding: env(safe-area-inset-top)) {
+  .home-container {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .hero-section {
+    padding-top: calc(var(--spacing-lg) + env(safe-area-inset-top));
+  }
+  
+  .home-footer {
+    padding-bottom: calc(var(--spacing-xl) + env(safe-area-inset-bottom));
+  }
+}
+
+/* iPad 适配 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .course-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 高DPI屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .course-card-image img {
+    image-rendering: -webkit-optimize-contrast;
+  }
+  
+  .btn {
+    border-width: 0.5px;
+  }
+}
+
+/* ===== 8. 交互优化 ===== */
+
+/* 触摸设备优化 */
+@media (hover: none) {
+  /* 禁用悬停效果 */
+  .course-card:hover {
+    transform: none;
+  }
+  
+  .btn:hover {
+    transform: none;
+    background: var(--gradient-primary);
+  }
+  
+  /* 增强触摸反馈 */
+  .course-card:active {
+    transform: scale(0.98);
+  }
+  
+  .btn:active {
+    transform: scale(0.95);
+  }
+  
+  /* 增加可点击区域 */
+  .course-card {
+    cursor: pointer;
+  }
+  
+  .btn {
+    cursor: pointer;
+  }
+  
+  /* 优化滚动 */
+  .course-grid {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* 鼠标设备优化 */
+@media (hover: hover) {
+  /* 增强悬停效果 */
+  .course-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  }
+  
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(47, 169, 20, 0.3);
+  }
+  
+  /* 光标样式 */
+  .course-card {
+    cursor: pointer;
+  }
+  
+  .btn {
+    cursor: pointer;
+  }
+}
+
+/* ===== 9. 性能优化 ===== */
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .course-card,
+  .hero-title,
+  .hero-subtitle {
+    animation: none;
+    transition: none;
+  }
+  
+  .course-card:hover {
+    transform: none;
+  }
+  
+  .btn:hover {
+    transform: none;
+  }
+}
+
+/* 低性能设备优化 */
+@media (max-width: 768px) and (hover: none) {
+  /* 简化动画 */
+  .course-card {
+    transition: none;
+  }
+  
+  /* 禁用复杂效果 */
+  .shine-effect::before {
+    display: none;
+  }
+  
+  .glass-enhanced {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* ===== 10. 可访问性优化 ===== */
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .course-card {
+    border: 2px solid var(--text-primary);
+  }
+  
+  .btn {
+    border: 2px solid var(--text-primary);
+  }
+  
+  .input {
+    border: 2px solid var(--text-primary);
+  }
+  
+  .course-badge {
+    border: 1px solid white;
+  }
+}
+
+/* 减少透明度 */
+@media (prefers-reduced-transparency) {
+  .glass-enhanced,
+  .course-card-glass {
+    background: var(--background-primary);
+    border: 1px solid var(--separator-color);
+  }
+}
+
+/* ===== 11. 打印优化 ===== */
+
+@media print {
+  /* 隐藏不必要的元素 */
+  .hero-section,
+  .filter-section,
+  .home-footer,
+  .btn {
+    display: none !important;
+  }
+  
+  /* 调整布局 */
+  .course-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+  
+  /* 简化样式 */
+  .course-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    break-inside: avoid;
+  }
+  
+  .course-card-image {
+    height: 150px;
+  }
+  
+  /* 确保文本可见 */
+  .course-card-title,
+  .course-card-description,
+  .course-card-meta {
+    color: black !important;
+  }
+}
+
+/* ===== 12. 暗色主题响应式优化 ===== */
+
+@media (prefers-color-scheme: dark) {
+  /* 移动端暗色主题 */
+  @media (max-width: 767px) {
+    .home-container {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    }
+    
+    .course-card-glass {
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .input-glass {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    
+    .input-glass::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+  }
+  
+  /* 平板端暗色主题 */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .home-container {
+      background: linear-gradient(135deg, #0f0f0f 0%, #1f1f1f 100%);
+    }
+  }
+  
+  /* 桌面端暗色主题 */
+  @media (min-width: 1024px) {
+    .home-container {
+      background: linear-gradient(135deg, #121212 0%, #242424 100%);
+    }
+  }
+}
+
+/* ===== 13. 动态字体大小调整 ===== */
+
+/* 基于视口宽度的动态字体大小 */
+@media (min-width: 320px) {
+  .hero-title {
+    font-size: calc(24px + (32 - 24) * ((100vw - 320px) / (1920 - 320)));
+  }
+  
+  .hero-subtitle {
+    font-size: calc(16px + (22 - 16) * ((100vw - 320px) / (1920 - 320)));
+  }
+  
+  .course-card-title {
+    font-size: calc(16px + (20 - 16) * ((100vw - 320px) / (1920 - 320)));
+  }
+  
+  .course-card-description {
+    font-size: calc(14px + (17 - 14) * ((100vw - 320px) / (1920 - 320)));
+  }
+}
+
+/* 限制最大字体大小 */
+@media (min-width: 1920px) {
+  .hero-title {
+    font-size: 42px;
+  }
+  
+  .hero-subtitle {
+    font-size: 24px;
+  }
+  
+  .course-card-title {
+    font-size: 20px;
+  }
+  
+  .course-card-description {
+    font-size: 17px;
+  }
+}

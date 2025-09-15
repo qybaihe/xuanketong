@@ -1,0 +1,541 @@
+/* 选课通系统 - 动画和微交互效果
+ * 基于 iOS HIG 原则和现代高技感设计
+ */
+
+/* ===== 1. 高级玻璃态效果 ===== */
+
+/* 增强玻璃态背景 */
+.glass-enhanced {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.glass-enhanced-dark {
+  background: linear-gradient(135deg, 
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.2) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 彩色玻璃态 */
+.glass-primary {
+  background: linear-gradient(135deg, 
+    rgba(47, 169, 20, 0.1) 0%,
+    rgba(47, 169, 20, 0.05) 50%,
+    rgba(47, 169, 20, 0.1) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(47, 169, 20, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(47, 169, 20, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.glass-secondary {
+  background: linear-gradient(135deg, 
+    rgba(0, 122, 255, 0.1) 0%,
+    rgba(0, 122, 255, 0.05) 50%,
+    rgba(0, 122, 255, 0.1) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(0, 122, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 122, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* ===== 2. 高级微交互动画 ===== */
+
+/* 按钮波纹效果 */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-ripple:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* 卡片悬浮效果 */
+.card-float {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-float:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* 卡片倾斜效果 */
+.card-tilt {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.card-tilt:hover {
+  transform: rotateX(5deg) rotateY(5deg);
+}
+
+/* 光泽效果 */
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-effect::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  transform: rotate(45deg);
+  transition: all 0.6s;
+  opacity: 0;
+}
+
+.shine-effect:hover::before {
+  animation: shine 0.6s ease-in-out;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/* ===== 3. 高级动画效果 ===== */
+
+/* 弹性进入动画 */
+@keyframes elasticIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.elastic-in {
+  animation: elasticIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 呼吸动画 */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* 漂浮动画 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* 摇摆动画 */
+@keyframes sway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(1deg);
+  }
+  75% {
+    transform: rotate(-1deg);
+  }
+}
+
+.sway {
+  animation: sway 4s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+/* ===== 4. 文字动画 ===== */
+
+/* 打字机效果 */
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typewriter 3s steps(40, end);
+}
+
+/* 文字渐显 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* 文字闪光 */
+@keyframes textShine {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.text-shine {
+  background: linear-gradient(
+    90deg,
+    var(--text-primary) 0%,
+    var(--primary-color) 50%,
+    var(--text-primary) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShine 3s linear infinite;
+}
+
+/* ===== 5. 高级交互效果 ===== */
+
+/* 3D翻转卡片 */
+.card-3d-flip {
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
+
+.card-3d-flip:hover {
+  transform: rotateY(180deg);
+}
+
+.card-3d-front,
+.card-3d-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.card-3d-back {
+  transform: rotateY(180deg);
+}
+
+/* 磁性效果 */
+.magnetic {
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.magnetic::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.3s;
+}
+
+.magnetic:hover::before {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* 液态效果 */
+.liquid-button {
+  position: relative;
+  overflow: hidden;
+  border-radius: 50px;
+}
+
+.liquid-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.liquid-button:hover::before {
+  transform: translateX(100%);
+}
+
+/* ===== 6. 页面加载动画 ===== */
+
+/* 页面渐入 */
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.6s ease-out;
+}
+
+/* 元素依次出现 */
+.stagger-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.stagger-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.5s ease-out;
+}
+
+.stagger-enter-active:nth-child(1) { transition-delay: 0.1s; }
+.stagger-enter-active:nth-child(2) { transition-delay: 0.2s; }
+.stagger-enter-active:nth-child(3) { transition-delay: 0.3s; }
+.stagger-enter-active:nth-child(4) { transition-delay: 0.4s; }
+.stagger-enter-active:nth-child(5) { transition-delay: 0.5s; }
+.stagger-enter-active:nth-child(6) { transition-delay: 0.6s; }
+.stagger-enter-active:nth-child(7) { transition-delay: 0.7s; }
+.stagger-enter-active:nth-child(8) { transition-delay: 0.8s; }
+.stagger-enter-active:nth-child(9) { transition-delay: 0.9s; }
+.stagger-enter-active:nth-child(10) { transition-delay: 1.0s; }
+
+/* ===== 7. 滚动动画 ===== */
+
+/* 滚动显示 */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 滚动触发动画 */
+@keyframes scrollTrigger {
+  0% {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.scroll-trigger {
+  opacity: 0;
+  transform: translateY(50px);
+}
+
+.scroll-trigger.animated {
+  animation: scrollTrigger 0.8s ease-out forwards;
+}
+
+/* ===== 8. 特殊效果 ===== */
+
+/* 霓虹效果 */
+.neon-glow {
+  text-shadow: 
+    0 0 10px var(--primary-color),
+    0 0 20px var(--primary-color),
+    0 0 30px var(--primary-color),
+    0 0 40px var(--primary-color);
+  animation: neonFlicker 2s infinite alternate;
+}
+
+@keyframes neonFlicker {
+  0%, 100% {
+    text-shadow: 
+      0 0 10px var(--primary-color),
+      0 0 20px var(--primary-color),
+      0 0 30px var(--primary-color);
+  }
+  50% {
+    text-shadow: 
+      0 0 5px var(--primary-color),
+      0 0 10px var(--primary-color),
+      0 0 15px var(--primary-color);
+  }
+}
+
+/* 全息效果 */
+.holographic {
+  background: linear-gradient(
+    45deg,
+    rgba(255, 0, 255, 0.1),
+    rgba(0, 255, 255, 0.1),
+    rgba(255, 255, 0, 0.1)
+  );
+  background-size: 200% 200%;
+  animation: holographicShift 3s ease infinite;
+  position: relative;
+}
+
+.holographic::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  animation: holographicScan 2s linear infinite;
+}
+
+@keyframes holographicShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes holographicScan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ===== 9. 性能优化 ===== */
+
+/* 硬件加速优化 */
+.hardware-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* 动画性能优化 */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== 10. 暗色主题适配 ===== */
+
+@media (prefers-color-scheme: dark) {
+  .glass-enhanced {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.05) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .shine-effect::before {
+    background: linear-gradient(
+      45deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 70%
+    );
+  }
+}

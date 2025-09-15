@@ -1,0 +1,981 @@
+
+/* 选课通系统 - 现代化设计样式系统
+ * 基于 iOS HIG 原则和现代高技感设计
+ */
+
+/* ===== 1. CSS 变量系统 ===== */
+
+:root {
+  /* 主色调 - 基于AdminLTE品牌色 #2fa914 */
+  --primary-color: #2fa914;
+  --primary-color-light: #4fc830;
+  --primary-color-dark: #1e7a0f;
+  
+  /* Discreet Palette 配色方案 */
+  --discreet-primary: #2fa914;
+  --discreet-secondary: #7d9871;
+  --discreet-background: #f1fdeb;
+  --discreet-accent: #9999cc;
+  
+  /* Matching Palette 配色方案 */
+  --match-primary: #2fa914;
+  --match-secondary: #404a3b;
+  --match-tertiary: #a3ae9e;
+  --match-accent: #00a8ff;
+  --match-accent-dark: #0074e2;
+  
+  /* Natural Palette 配色方案 */
+  --natural-primary: #2fa914;
+  --natural-secondary: #7d9871;
+  --natural-background: #f5fbf2;
+  --natural-accent: #f6edd9;
+  
+  /* 辅助色 */
+  --secondary-color: #007aff;
+  --accent-color: #ff3b30;
+  --success-color: #34c759;
+  --warning-color: #ff9500;
+  --info-color: #5ac8fa;
+  
+  /* 中性色 */
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #8e8e93;
+  --text-quaternary: #c7c7cc;
+  
+  /* 背景色 */
+  --background-primary: #ffffff;
+  --background-secondary: #f2f2f7;
+  --background-tertiary: #e5e5ea;
+  --background-blur: rgba(255, 255, 255, 0.72);
+  
+  /* 边框色 */
+  --separator-color: #c6c6c8;
+  --separator-opaque: rgba(60, 60, 67, 0.36);
+  
+  /* 渐变色彩 */
+  --gradient-primary: linear-gradient(135deg, #2fa914 0%, #4fc830 100%);
+  --gradient-primary-alt: linear-gradient(135deg, #2fa914 0%, #00a350 100%);
+  --gradient-match: linear-gradient(135deg, #2fa914 0%, #00a350 0%, #00997e 33%, #008da5 66%, #007fbf 100%);
+  --gradient-match-simplified: linear-gradient(135deg, #2fa914 0%, #006ec8 100%);
+  --gradient-natural: linear-gradient(135deg, #2fa914 0%, #7d9871 50%, #f5fbf2 100%);
+  --gradient-natural-warm: linear-gradient(135deg, #2fa914 0%, #f5fbf2 50%, #f6edd9 100%);
+  
+  /* 玻璃态渐变 */
+  --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  --glass-gradient-natural: linear-gradient(135deg, rgba(245, 251, 242, 0.25) 0%, rgba(246, 237, 217, 0.1) 100%);
+  
+  /* 状态色彩 */
+  --success-light: #e0f8d5;
+  --success-base: #2fa914;
+  --success-dark: #1e7a0f;
+  --info-light: #cdf6ff;
+  --info-base: #004d72;
+  --info-dark: #003660;
+  --warning-light: #ffd688;
+  --warning-base: #dd9f54;
+  --warning-dark: #a26b22;
+  --error-light: #ffe0e0;
+  --error-base: #ff3b30;
+  --error-dark: #d70015;
+  
+  /* 字体系统 */
+  --font-size-title1: 28px;
+  --font-size-title2: 22px;
+  --font-size-title3: 20px;
+  --font-size-body: 17px;
+  --font-size-body2: 15px;
+  --font-size-caption: 12px;
+  --font-size-caption2: 11px;
+  
+  /* 字重 */
+  --font-weight-ultralight: 100;
+  --font-weight-thin: 200;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-heavy: 800;
+  --font-weight-black: 900;
+  
+  /* 间距系统 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  
+  /* 组件间距 */
+  --card-padding: 16px;
+  --card-margin: 8px;
+  --card-radius: 12px;
+  --list-item-height: 44px;
+  --list-item-padding: 12px 16px;
+  
+  /* 阴影系统 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-primary: 0 4px 12px rgba(47, 169, 20, 0.2);
+  --shadow-secondary: 0 4px 12px rgba(0, 122, 255, 0.2);
+  --shadow-accent: 0 4px 12px rgba(255, 59, 48, 0.2);
+  
+  /* 过渡动画 */
+  --transition-fast: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-standard: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-slow: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  /* 响应式断点 */
+  --mobile-breakpoint: 320px;
+  --mobile-max: 768px;
+  --tablet-breakpoint: 768px;
+  --tablet-max: 1024px;
+  --desktop-breakpoint: 1024px;
+}
+
+/* ===== 2. 基础样式重置和增强 ===== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--text-primary);
+  background: var(--background-secondary);
+  transition: color 0.5s, background-color 0.5s;
+  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: var(--font-size-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== 3. 布局系统 ===== */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.grid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.grid-2 {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ===== 4. 卡片组件 ===== */
+
+.card {
+  background: var(--background-primary);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  margin: var(--card-margin);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-standard);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 玻璃态卡片 */
+.card-glass {
+  background: var(--background-blur);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: var(--shadow-glass);
+}
+
+.card-glass:hover {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== 5. 按钮组件 ===== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-standard);
+  min-height: 44px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:active {
+  transform: scale(0.95);
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* 主色调按钮 */
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-primary);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(47, 169, 20, 0.3);
+  background: var(--gradient-primary-alt);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(47, 169, 20, 0.2);
+}
+
+/* Matching 主题按钮 */
+.btn-matching {
+  background: var(--gradient-match);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 168, 255, 0.2);
+}
+
+.btn-matching:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 168, 255, 0.3);
+}
+
+/* Natural 主题按钮 */
+.btn-natural {
+  background: var(--gradient-natural);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(125, 152, 113, 0.2);
+}
+
+.btn-natural:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(125, 152, 113, 0.3);
+}
+
+/* 玻璃态按钮 */
+.btn-glass {
+  background: var(--glass-gradient);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--text-primary);
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* ===== 6. 输入框组件 ===== */
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--separator-color);
+  border-radius: 8px;
+  font-size: var(--font-size-body);
+  background: var(--background-primary);
+  transition: var(--transition-standard);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(47, 169, 20, 0.1);
+}
+
+.input-glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ===== 7. 课程卡片组件 ===== */
+
+.course-card {
+  background: var(--background-primary);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-standard);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+}
+
+.course-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 课程卡片主题变体 */
+.course-card-primary {
+  border: 1px solid rgba(47, 169, 20, 0.1);
+  box-shadow: 0 2px 8px rgba(47, 169, 20, 0.1);
+}
+
+.course-card-primary:hover {
+  box-shadow: 0 8px 24px rgba(47, 169, 20, 0.2);
+}
+
+.course-card-matching {
+  border: 1px solid rgba(0, 168, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 168, 255, 0.1);
+}
+
+.course-card-matching:hover {
+  box-shadow: 0 8px 24px rgba(0, 168, 255, 0.2);
+}
+
+.course-card-natural {
+  border: 1px solid rgba(125, 152, 113, 0.1);
+  box-shadow: 0 2px 8px rgba(125, 152, 113, 0.1);
+}
+
+.course-card-natural:hover {
+  box-shadow: 0 8px 24px rgba(125, 152, 113, 0.2);
+}
+
+/* 课程卡片图片 */
+.course-card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  position: relative;
+}
+
+/* 课程卡片图片主题变体 */
+.course-card-primary .course-card-image {
+  background: linear-gradient(135deg, #e0f8d5 0%, #2fa914 100%);
+}
+
+.course-card-matching .course-card-image {
+  background: linear-gradient(135deg, #cdf6ff 0%, #004d72 100%);
+}
+
+.course-card-natural .course-card-image {
+  background: linear-gradient(135deg, #f5fbf2 0%, #7d9871 100%);
+}
+
+/* 课程卡片内容 */
+.course-card-content {
+  padding: var(--spacing-md);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.course-card-title {
+  font-size: var(--font-size-title3);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-primary);
+}
+
+.course-card-description {
+  font-size: var(--font-size-body2);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+  flex: 1;
+  line-height: 1.5;
+}
+
+.course-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-caption);
+  color: var(--text-tertiary);
+}
+
+.course-card-credits {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+/* 课程卡片学分主题变体 */
+.course-card-primary .course-card-credits {
+  background: var(--gradient-primary);
+}
+
+.course-card-matching .course-card-credits {
+  background: var(--gradient-match-simplified);
+}
+
+.course-card-natural .course-card-credits {
+  background: var(--gradient-natural);
+}
+
+/* 课程卡片标签 */
+.course-card-tags {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.course-card-tag {
+  background: var(--background-secondary);
+  color: var(--text-tertiary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: var(--font-size-caption2);
+  font-weight: var(--font-weight-medium);
+}
+
+.course-card-tag.primary {
+  background: var(--success-light);
+  color: var(--success-base);
+}
+
+.course-card-tag.secondary {
+  background: var(--info-light);
+  color: var(--info-base);
+}
+
+.course-card-tag.accent {
+  background: var(--warning-light);
+  color: var(--warning-base);
+}
+
+/* 玻璃态课程卡片 */
+.course-card-glass {
+  background: var(--background-blur);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: var(--shadow-glass);
+}
+
+.course-card-glass:hover {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== 8. 动画系统 ===== */
+
+/* 快速过渡 */
+.transition-fast {
+  transition: var(--transition-fast);
+}
+
+/* 标准过渡 */
+.transition-standard {
+  transition: var(--transition-standard);
+}
+
+/* 慢速过渡 */
+.transition-slow {
+  transition: var(--transition-slow);
+}
+
+/* Spring 动画 */
+.spring-light {
+  animation: spring-light 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.spring-standard {
+  animation: spring-standard 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.spring-heavy {
+  animation: spring-heavy 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes spring-light {
+  0% { transform: scale(0.9); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes spring-standard {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes spring-heavy {
+  0% { transform: scale(0.7); opacity: 0; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 卡片悬停效果 */
+.course-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+  pointer-events: none;
+}
+
+.course-card:hover::before {
+  transform: translateX(100%);
+}
+
+/* ===== 9. 响应式设计 ===== */
+
+/* 移动端 */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  .card {
+    margin: var(--spacing-sm) 0;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .course-card {
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+/* 平板端 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .container {
+    max-width: 900px;
+  }
+}
+
+/* 桌面端 */
+@media (min-width: 1025px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .container {
+    max-width: 1200px;
+  }
+}
+
+/* ===== 10. 安全区域处理 ===== */
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ===== 11. 浏览器兼容性降级方案 ===== */
+
+/* 不支持 backdrop-filter 的降级方案 */
+.no-backdrop-filter .card-glass,
+.no-backdrop-filter .course-card-glass,
+.no-backdrop-filter .btn-glass,
+.no-backdrop-filter .input-glass {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--separator-color);
+}
+
+/* 不支持 grid 的降级方案 */
+.no-grid .grid,
+.no-grid .grid-2,
+.no-grid .grid-3,
+.no-grid .grid-4 {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.no-grid .course-card {
+  flex: 1 1 300px;
+  margin: var(--spacing-sm);
+}
+
+/* ===== 12. 工具类 ===== */
+
+/* 文本工具类 */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* 字重工具类 */
+.font-light { font-weight: var(--font-weight-light); }
+.font-regular { font-weight: var(--font-weight-regular); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+
+/* 间距工具类 */
+.mt-xs { margin-top: var(--spacing-xs); }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mt-xl { margin-top: var(--spacing-xl); }
+.mt-2xl { margin-top: var(--spacing-2xl); }
+.mt-3xl { margin-top: var(--spacing-3xl); }
+
+.mb-xs { margin-bottom: var(--spacing-xs); }
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+.mb-xl { margin-bottom: var(--spacing-xl); }
+.mb-2xl { margin-bottom: var(--spacing-2xl); }
+.mb-3xl { margin-bottom: var(--spacing-3xl); }
+
+/* 内边距工具类 */
+.p-xs { padding: var(--spacing-xs); }
+.p-sm { padding: var(--spacing-sm); }
+.p-md { padding: var(--spacing-md); }
+.p-lg { padding: var(--spacing-lg); }
+.p-xl { padding: var(--spacing-xl); }
+.p-2xl { padding: var(--spacing-2xl); }
+.p-3xl { padding: var(--spacing-3xl); }
+
+/* 显示工具类 */
+.d-none { display: none; }
+.d-block { display: block; }
+.d-flex { display: flex; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+
+/* 弹性布局工具类 */
+.flex-column { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.align-center { align-items: center; }
+.align-start { align-items: flex-start; }
+.align-end { align-items: flex-end; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+.flex-grow-1 { flex-grow: 1; }
+.flex-shrink-0 { flex-shrink: 0; }
+
+/* 定位工具类 */
+.position-relative { position: relative; }
+.position-absolute { position: absolute; }
+.position-fixed { position: fixed; }
+.position-sticky { position: sticky; }
+
+/* 溢出工具类 */
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-scroll { overflow: scroll; }
+
+/* 阴影工具类 */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }
+.shadow-glass { box-shadow: var(--shadow-glass); }
+.shadow-primary { box-shadow: var(--shadow-primary); }
+.shadow-secondary { box-shadow: var(--shadow-secondary); }
+.shadow-accent { box-shadow: var(--shadow-accent); }
+
+/* 圆角工具类 */
+.rounded-sm { border-radius: 4px; }
+.rounded { border-radius: 8px; }
+.rounded-lg { border-radius: 12px; }
+.rounded-xl { border-radius: 16px; }
+.rounded-full { border-radius: 50%; }
+
+/* 光标工具类 */
+.cursor-pointer { cursor: pointer; }
+.cursor-default { cursor: default; }
+.cursor-not-allowed { cursor: not-allowed; }
+
+/* 用户选择工具类 */
+.user-select-none { user-select: none; }
+.user-select-auto { user-select: auto; }
+.user-select-text { user-select: text; }
+
+/* 过渡工具类 */
+.transition-none { transition: none; }
+.transition-fast { transition: var(--transition-fast); }
+.transition-standard { transition: var(--transition-standard); }
+.transition-slow { transition: var(--transition-slow); }
+
+/* 变换工具类 */
+.transform-none { transform: none; }
+.transform-scale-95 { transform: scale(0.95); }
+.transform-scale-100 { transform: scale(1); }
+.transform-scale-105 { transform: scale(1.05); }
+.transform-translate-y-0 { transform: translateY(0); }
+.transform-translate-y-1 { transform: translateY(-4px); }
+.transform-translate-y-2 { transform: translateY(-8px); }
+
+/* 不透明度工具类 */
+.opacity-0 { opacity: 0; }
+.opacity-25 { opacity: 0.25; }
+.opacity-50 { opacity: 0.5; }
+.opacity-75 { opacity: 0.75; }
+.opacity-100 { opacity: 1; }
+
+/* Z-index 工具类 */
+.z-0 { z-index: 0; }
+.z-10 { z-index: 10; }
+.z-20 { z-index: 20; }
+.z-30 { z-index: 30; }
+.z-40 { z-index: 40; }
+.z-50 { z-index: 50; }
+
+/* ===== 13. 主题类 ===== */
+
+/* Discreet 主题 */
+.theme-discreet {
+  --primary: var(--discreet-primary);
+  --secondary: var(--discreet-secondary);
+  --background: var(--discreet-background);
+  --accent: var(--discreet-accent);
+}
+
+/* Matching 主题 */
+.theme-matching {
+  --primary: var(--match-primary);
+  --secondary: var(--match-secondary);
+  --tertiary: var(--match-tertiary);
+  --accent: var(--match-accent);
+  --accent-dark: var(--match-accent-dark);
+}
+
+/* Natural 主题 */
+.theme-natural {
+  --primary: var(--natural-primary);
+  --secondary: var(--natural-secondary);
+  --background: var(--natural-background);
+  --accent: var(--natural-accent);
+}
+
+/* ===== 14. 特殊效果类 ===== */
+
+/* 发光效果 */
+.glow {
+  box-shadow: 0 0 20px rgba(47, 169, 20, 0.3);
+}
+
+.glow-primary {
+  box-shadow: 0 0 20px rgba(47, 169, 20, 0.3);
+}
+
+.glow-secondary {
+  box-shadow: 0 0 20px rgba(0, 122, 255, 0.3);
+}
+
+.glow-accent {
+  box-shadow: 0 0 20px rgba(255, 59, 48, 0.3);
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* 淡入动画 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* 滑入动画 */
+@keyframes slideInUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-in-up {
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-in-down {
+  animation: slideInDown 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+/* ===== 15. 加载动画 ===== */
+
+/* 加载器 */
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--background-secondary);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 骨架屏 */
+.skeleton {
+  background: linear-gradient(90deg, var(--background-secondary) 25%, var(--background-tertiary) 50%, var(--background-secondary) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ===== 16. 打印样式 ===== */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+}
