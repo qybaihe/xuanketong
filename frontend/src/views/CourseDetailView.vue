@@ -40,28 +40,8 @@ const newScore = ref(5)
 const newComment = ref('')
 const loading = ref(true)
 
-// 主题状态
-const currentTheme = ref('natural')
-const themes = ['discreet', 'matching', 'natural'] as const
-type Theme = typeof themes[number]
-
-// 切换主题
-const cycleTheme = () => {
-  const currentIndex = themes.indexOf(currentTheme.value as Theme)
-  currentTheme.value = themes[(currentIndex + 1) % themes.length]
-  
-  // 添加切换动画效果
-  const container = document.querySelector('.course-detail-container')
-  if (container) {
-    container.classList.add('elastic-in')
-    setTimeout(() => {
-      container.classList.remove('elastic-in')
-    }, 600)
-  }
-}
-
-// 获取主题类名
-const themeClass = computed(() => `theme-${currentTheme.value}`)
+// 只使用natural主题
+const themeClass = computed(() => 'theme-natural')
 
 // 计算平均评分
 const averageRating = computed(() => {
@@ -168,11 +148,6 @@ onMounted(async () => {
         <span class="btn-icon">←</span>
         返回课程列表
       </RouterLink>
-      
-      <button @click="cycleTheme" class="btn btn-glass theme-button">
-        <span class="btn-icon">🎨</span>
-        切换主题: {{ currentTheme }}
-      </button>
     </div>
 
     <!-- Loading State -->
@@ -350,17 +325,11 @@ onMounted(async () => {
   margin: 0 auto var(--spacing-lg);
   padding: 0 var(--spacing-md);
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
 }
 
 .back-button {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.theme-button {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);

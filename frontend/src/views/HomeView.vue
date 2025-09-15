@@ -27,33 +27,13 @@ const filters = reactive({
   subject: ''
 })
 
-// 主题状态
-const currentTheme = ref('natural')
-const themes = ['discreet', 'matching', 'natural'] as const
-type Theme = typeof themes[number]
-
-// 切换主题
-const cycleTheme = () => {
-  const currentIndex = themes.indexOf(currentTheme.value as Theme)
-  currentTheme.value = themes[(currentIndex + 1) % themes.length]
-  
-  // 添加切换动画效果
-  const container = document.querySelector('.home-container')
-  if (container) {
-    container.classList.add('elastic-in')
-    setTimeout(() => {
-      container.classList.remove('elastic-in')
-    }, 600)
-  }
-}
-
-// 获取主题类名
-const themeClass = computed(() => `theme-${currentTheme.value}`)
+// 只使用natural主题
+const themeClass = computed(() => 'theme-natural')
 
 // 获取卡片类名
 const getCardClass = (course: Course, index: number) => {
   const baseClasses = 'course-card course-card-glass card-float shine-effect hardware-accelerated'
-  const themeClass = `course-card-${currentTheme.value}`
+  const themeClass = 'course-card-natural'
   // 移除slide-in-up和slide-in-left动画，避免与scroll-reveal冲突
   // const animationClass = index % 2 === 0 ? 'slide-in-up' : 'slide-in-left'
   return `${baseClasses} ${themeClass}`
@@ -270,12 +250,6 @@ onMounted(() => {
       <div class="hero-content">
         <h1 class="hero-title">课程浏览</h1>
         <p class="hero-subtitle">发现优质课程，提升学习体验</p>
-        <div class="hero-actions">
-          <button @click="cycleTheme" class="btn btn-glass">
-            <span class="theme-icon">🎨</span>
-            切换主题: {{ currentTheme }}
-          </button>
-        </div>
       </div>
     </section>
 
@@ -461,15 +435,6 @@ onMounted(() => {
   margin-bottom: var(--spacing-lg);
 }
 
-.hero-actions {
-  display: flex;
-  justify-content: center;
-  gap: var(--spacing-md);
-}
-
-.theme-icon {
-  margin-right: var(--spacing-xs);
-}
 
 /* Filter Section */
 .filter-section {
@@ -635,10 +600,6 @@ onMounted(() => {
     gap: var(--spacing-md);
   }
   
-  .hero-actions {
-    flex-direction: column;
-    align-items: center;
-  }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
@@ -723,10 +684,6 @@ onMounted(() => {
 .course-card:nth-child(11) { --index: 11; }
 .course-card:nth-child(12) { --index: 12; }
 
-/* 主题切换动画 */
-.home-container {
-  transition: background 0.5s ease;
-}
 
 /* 加载动画优化 */
 .loader {
