@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程管理系统 - 管理员面板</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .main-header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            margin: 0 0.25rem;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            border-top: none;
+        }
+        .badge-status {
+            font-size: 0.75em;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" onclick="showSection('courses')">
+                                <i class="bi bi-book me-2"></i>
+                                课程管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('users')">
+                                <i class="bi bi-people me-2"></i>
+                                用户管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('stats')">
+                                <i class="bi bi-graph-up me-2"></i>
+                                数据统计
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- 主要内容区域 -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">课程管理系统</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary">导出</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 课程管理区域 -->
+                <div id="courses-section">
+                    <!-- 操作栏 -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row align-items-end">
+                                <div class="col-md-3">
+                                    <label class="form-label">年级</label>
+                                    <input type="text" class="form-control" id="filter-grade" placeholder="输入年级...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">学期</label>
+                                    <input type="text" class="form-control" id="filter-semester" placeholder="输入学期...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">科目</label>
+                                    <input type="text" class="form-control" id="filter-subject" placeholder="输入科目...">
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-primary" onclick="showAddCourseModal()">
+                                        <i class="bi bi-plus-circle me-1"></i>添加课程
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 加载状态 -->
+                    <div class="loading" id="loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2">正在加载课程数据...</p>
+                    </div>
+
+                    <!-- 课程列表 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">课程列表</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>课程名称</th>
+                                            <th>教师</th>
+                                            <th>年级</th>
+                                            <th>学期</th>
+                                            <th>科目</th>
+                                            <th>学分</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="courses-tbody">
+                                        <!-- 课程数据将通过JavaScript动态加载 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="empty-state" id="empty-state" style="display: none;">
+                                <i class="bi bi-book fs-1 text-muted"></i>
+                                <h5>暂无课程数据</h5>
+                                <p>请调整筛选条件或添加新课程</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户管理区域 -->
+                <div id="users-section" style="display: none;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>用户管理功能</h5>
+                            <p>用户管理功能正在开发中...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据统计区域 -->
+                <div id="stats-section" style="display: none;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>数据统计功能</h5>
+                            <p>数据统计功能正在开发中...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 添加/编辑课程模态框 -->
+    <div class="modal fade" id="courseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="courseModalTitle">添加课程</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="courseForm">
+                        <input type="hidden" id="course-id">
+                        <div class="mb-3">
+                            <label class="form-label">课程名称 *</label>
+                            <input type="text" class="form-control" id="course-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">课程描述</label>
+                            <textarea class="form-control" id="course-description" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">教师</label>
+                                <input type="text" class="form-control" id="course-teacher">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">学分</label>
+                                <input type="number" class="form-control" id="course-credits" min="0" step="0.5">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">年级</label>
+                                <input type="text" class="form-control" id="course-grade">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">学期</label>
+                                <input type="text" class="form-control" id="course-semester">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">科目</label>
+                                <input type="text" class="form-control" id="course-subject">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCourse()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">确认删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除课程 "<span id="delete-course-name"></span>" 吗？此操作无法撤销。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功提示 -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                <strong class="me-auto">成功</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toast-message">
+                操作成功！
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const API_BASE = 'http://localhost:8080/api/v1';
+        let currentDeleteId = null;
+        let courseModal, deleteModal, successToast;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化Bootstrap模态框
+            courseModal = new bootstrap.Modal(document.getElementById('courseModal'));
+            deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            successToast = new bootstrap.Toast(document.getElementById('successToast'));
+            
+            // 加载课程数据
+            loadCourses();
+            
+            // 绑定筛选事件
+            bindFilterEvents();
+        });
+
+        function showSection(section) {
+            // 隐藏所有区域
+            document.querySelectorAll('[id$="-section"]').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // 显示选中区域
+            document.getElementById(section + '-section').style.display = 'block';
+            
+            // 更新导航状态
+            document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function bindFilterEvents() {
+            const filters = ['grade', 'semester', 'subject'];
+            filters.forEach(filter => {
+                document.getElementById(`filter-${filter}`).addEventListener('input', debounce(loadCourses, 300));
+            });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        async function loadCourses() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                
+                const grade = document.getElementById('filter-grade').value;
+                const semester = document.getElementById('filter-semester').value;
+                const subject = document.getElementById('filter-subject').value;
+                
+                const params = new URLSearchParams();
+                if (grade) params.append('grade', grade);
+                if (semester) params.append('semester', semester);
+                if (subject) params.append('subject', subject);
+                
+                const response = await fetch(`${API_BASE}/admin/courses?${params}`);
+                const result = await response.json();
+                
+                if (result.data) {
+                    renderCourses(result.data);
+                } else {
+                    renderCourses([]);
+                }
+            } catch (error) {
+                console.error('加载课程失败:', error);
+                alert('加载课程数据失败，请检查网络连接');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function renderCourses(courses) {
+            const tbody = document.getElementById('courses-tbody');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (courses.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            tbody.innerHTML = courses.map(course => `
+                <tr>
+                    <td>${course.ID}</td>
+                    <td><strong>${course.Name}</strong></td>
+                    <td>${course.Teacher || '-'}</td>
+                    <td><span class="badge bg-primary badge-status">${course.Grade || '-'}</span></td>
+                    <td><span class="badge bg-secondary badge-status">${course.Semester || '-'}</span></td>
+                    <td><span class="badge bg-info badge-status">${course.Subject || '-'}</span></td>
+                    <td><span class="badge bg-warning text-dark badge-status">${course.Credits} 学分</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary btn-action" onclick="editCourse(${course.ID})" title="编辑">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteCourse(${course.ID}, '${course.Name}')" title="删除">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showAddCourseModal() {
+            document.getElementById('courseModalTitle').textContent = '添加课程';
+            document.getElementById('courseForm').reset();
+            document.getElementById('course-id').value = '';
+            courseModal.show();
+        }
+
+        async function editCourse(id) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/courses/${id}`);
+                const result = await response.json();
+                
+                if (result.data) {
+                    const course = result.data;
+                    document.getElementById('courseModalTitle').textContent = '编辑课程';
+                    document.getElementById('course-id').value = course.ID;
+                    document.getElementById('course-name').value = course.Name;
+                    document.getElementById('course-description').value = course.Description || '';
+                    document.getElementById('course-teacher').value = course.Teacher || '';
+                    document.getElementById('course-credits').value = course.Credits;
+                    document.getElementById('course-grade').value = course.Grade || '';
+                    document.getElementById('course-semester').value = course.Semester || '';
+                    document.getElementById('course-subject').value = course.Subject || '';
+                    
+                    courseModal.show();
+                }
+            } catch (error) {
+                console.error('加载课程详情失败:', error);
+                alert('加载课程详情失败');
+            }
+        }
+
+        async function saveCourse() {
+            const courseId = document.getElementById('course-id').value;
+            const courseData = {
+                Name: document.getElementById('course-name').value,
+                Description: document.getElementById('course-description').value,
+                Teacher: document.getElementById('course-teacher').value,
+                Credits: parseInt(document.getElementById('course-credits').value) || 0,
+                Grade: document.getElementById('course-grade').value,
+                Semester: document.getElementById('course-semester').value,
+                Subject: document.getElementById('course-subject').value,
+                ImageURL: ''
+            };
+
+            try {
+                let response;
+                if (courseId) {
+                    response = await fetch(`${API_BASE}/admin/courses/${courseId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(courseData)
+                    });
+                } else {
+                    response = await fetch(`${API_BASE}/admin/courses`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(courseData)
+                    });
+                }
+
+                if (response.ok) {
+                    courseModal.hide();
+                    loadCourses();
+                    showToast(courseId ? '课程更新成功' : '课程添加成功');
+                } else {
+                    const error = await response.json();
+                    alert('操作失败: ' + (error.error || '未知错误'));
+                }
+            } catch (error) {
+                console.error('保存课程失败:', error);
+                alert('保存课程失败，请检查网络连接');
+            }
+        }
+
+        function deleteCourse(id, name) {
+            currentDeleteId = id;
+            document.getElementById('delete-course-name').textContent = name;
+            deleteModal.show();
+        }
+
+        async function confirmDelete() {
+            if (!currentDeleteId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/courses/${currentDeleteId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    deleteModal.hide();
+                    loadCourses();
+                    showToast('课程删除成功');
+                } else {
+                    const error = await response.json();
+                    alert('删除失败: ' + (error.error || '未知错误'));
+                }
+            } catch (error) {
+                console.error('删除课程失败:', error);
+                alert('删除课程失败，请检查网络连接');
+            }
+        }
+
+        function showToast(message) {
+            document.getElementById('toast-message').textContent = message;
+            successToast.show();
+        }
+    </script>
+</body>
+</html>
