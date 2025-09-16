@@ -4,15 +4,60 @@ import { useRoute, RouterLink } from 'vue-router'
 import axios from 'axios'
 
 interface Course {
-  ID: number;
-  Name: string;
-  Description: string;
-  Grade: string;
-  Semester: string;
-  Subject: string;
-  Teacher: string;
-  Credits: number;
-  ImageURL: string;
+  // 后端原始字段（小写）
+  id: number;
+  name: string;
+  description: string;
+  grade: string;
+  semester: string;
+  subject: string;
+  teacher: string;
+  credits: number;
+  imageURL: string;
+  createdAt: string;
+  updatedAt: string;
+  // 兼容字段（大写）
+  ID?: number;
+  Name?: string;
+  Description?: string;
+  Grade?: string;
+  Semester?: string;
+  Subject?: string;
+  Teacher?: string;
+  Credits?: number;
+  ImageURL?: string;
+  CreatedAt?: string;
+  UpdatedAt?: string;
+}
+
+// 数据映射函数
+const mapCourseData = (course: any): Course => {
+  return {
+    // 原始后端字段
+    id: course.id,
+    name: course.name,
+    description: course.description,
+    grade: course.grade,
+    semester: course.semester,
+    subject: course.subject,
+    teacher: course.teacher,
+    credits: course.credits,
+    imageURL: course.imageURL || `https://picsum.photos/seed/course-${course.id}/800/400.jpg`,
+    createdAt: course.createdAt,
+    updatedAt: course.updatedAt,
+    // 兼容字段映射
+    ID: course.id,
+    Name: course.name,
+    Description: course.description,
+    Grade: course.grade,
+    Semester: course.semester,
+    Subject: course.subject,
+    Teacher: course.teacher,
+    Credits: course.credits,
+    ImageURL: course.imageURL || `https://picsum.photos/seed/course-${course.id}/800/400.jpg`,
+    CreatedAt: course.createdAt,
+    UpdatedAt: course.updatedAt
+  }
 }
 
 interface Rating {
@@ -122,7 +167,7 @@ onMounted(async () => {
       axios.get(`http://localhost:8080/api/v1/courses/${courseId}/ratings`),
       axios.get(`http://localhost:8080/api/v1/courses/${courseId}/comments`)
     ])
-    course.value = courseResponse.data.data
+    course.value = mapCourseData(courseResponse.data.data)
     ratings.value = ratingsResponse.data.data.map((rating: Rating) => ({
       ...rating,
       Username: `用户${rating.UserID}`
@@ -163,9 +208,14 @@ onMounted(async () => {
         <div class="course-header-content">
           <div class="course-image-container">
             <img
-              :src="course.ImageURL || `https://picsum.photos/seed/course-${course.ID}/800/400.jpg`"
-              :alt="course.Name"
+              :src="course.ImageURL || course.imageURL || `https://picsum.photos/seed/course-${course?.ID || course?.id || 'default'}/800/400.jpg`"
+              :alt="course.Name || course.name || '课程图片'"
               class="course-image"
+              @error="(e) => {
+                const img = e.target as HTMLImageElement;
+                const courseId = course?.ID || course?.id || 'default';
+                img.src = `https://picsum.photos/seed/course-${courseId}/800/400.jpg`;
+              }"
             />
             <div class="course-credits-badge">
               {{ course.Credits }} 学分

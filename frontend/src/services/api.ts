@@ -40,17 +40,19 @@ api.interceptors.response.use(
 )
 
 export interface Course {
-  ID: number
-  Name: string
-  Description: string
-  Teacher: string
-  Credits: number
-  ImageURL: string
-  Grade: string
-  Semester: string
-  Subject: string
-  CreatedAt: string
-  UpdatedAt: string
+  id: number
+  name: string
+  description: string
+  teacher: string
+  credits: number
+  imageURL: string
+  grade: string
+  semester: string
+  subject: string
+  createdAt: string
+  updatedAt: string
+  averageRating?: number
+  totalRatings?: number
 }
 
 export interface Rating {
@@ -65,6 +67,18 @@ export interface Rating {
 export interface CourseWithRating extends Course {
   AverageRating?: number
   TotalRatings?: number
+  // 兼容字段映射
+  ID?: number
+  Name?: string
+  Description?: string
+  Teacher?: string
+  Credits?: number
+  ImageURL?: string
+  Grade?: string
+  Semester?: string
+  Subject?: string
+  CreatedAt?: string
+  UpdatedAt?: string
 }
 
 export interface CourseFilters {

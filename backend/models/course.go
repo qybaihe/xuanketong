@@ -1,15 +1,21 @@
 package models
 
-import "gorm.io/gorm"
+import "time"
 
 type Course struct {
-	gorm.Model
-	Name        string
-	Description string
-	Grade       string
-	Semester    string
-	Subject     string
-	Teacher     string
-	Credits     int
-	ImageURL    string
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Grade       string    `json:"grade"`
+	Semester    string    `json:"semester"`
+	Subject     string    `json:"subject"`
+	Teacher     string    `json:"teacher"`
+	Credits     int       `json:"credits"`
+	ImageURL    string    `json:"imageURL"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+}
+
+func (Course) TableName() string {
+	return "courses"
 }

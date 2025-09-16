@@ -1,10 +1,16 @@
 package models
 
-import "gorm.io/gorm"
+import "time"
 
 type Comment struct {
-	gorm.Model
-	UserID   uint
-	CourseID uint
-	Content  string
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	UserID    uint      `json:"userId"`
+	CourseID  uint      `json:"courseId"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (Comment) TableName() string {
+	return "comments"
 }

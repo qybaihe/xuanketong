@@ -20,7 +20,22 @@ func main() {
 	r.Use(cors.New(corsConfig))
 
 	config.ConnectDatabase()
-	config.DB.AutoMigrate(&models.User{}, &models.Course{}, &models.Rating{}, &models.Comment{})
+
+	// 首先检查表是否存在，如果不存在则创建
+	if err := ensureTablesExist(); err != nil {
+		panic("数据库初始化失败: " + err.Error())
+	}
+	fmt.Println("数据库初始化成功")
+
+	// GORM自动迁移（可选，确保模型同步）
+	if err := config.DB.AutoMigrate(&models.User{}, &models.Course{}, &models.Rating{}, &models.Comment{}); err != nil {
+		fmt.Printf("GORM自动迁移失败: %v\n", err)
+	} else {
+		fmt.Println("GORM数据库迁移成功")
+	}
+
+	// 添加种子数据
+	seedData()
 
 	routes.AuthRoutes(r)
 	routes.CourseRoutes(r)
@@ -61,6 +76,76 @@ func main() {
 	})
 
 	r.Run(":8080") // listen and serve on 0.0.0:8080
+}
+
+// ensureTablesExist 确保数据库表存在
+func ensureTablesExist() error {
+	// 尝试手动创建表结构
+	err := config.DB.Exec(`
+		CREATE TABLE IF NOT EXISTS courses (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			description TEXT,
+			grade TEXT,
+			semester TEXT,
+			subject TEXT,
+			teacher TEXT,
+			credits INTEGER,
+			image_url TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)
+	`).Error
+	if err != nil {
+		return fmt.Errorf("failed to create courses table: %v", err)
+	}
+
+	err = config.DB.Exec(`
+		CREATE TABLE IF NOT EXISTS users (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			username TEXT NOT NULL UNIQUE,
+			password TEXT NOT NULL,
+			email TEXT NOT NULL UNIQUE,
+			nickname TEXT,
+			avatar TEXT,
+			role TEXT DEFAULT 'user',
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)
+	`).Error
+	if err != nil {
+		return fmt.Errorf("failed to create users table: %v", err)
+	}
+
+	err = config.DB.Exec(`
+		CREATE TABLE IF NOT EXISTS ratings (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER,
+			course_id INTEGER,
+			score REAL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)
+	`).Error
+	if err != nil {
+		return fmt.Errorf("failed to create ratings table: %v", err)
+	}
+
+	err = config.DB.Exec(`
+		CREATE TABLE IF NOT EXISTS comments (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER,
+			course_id INTEGER,
+			content TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)
+	`).Error
+	if err != nil {
+		return fmt.Errorf("failed to create comments table: %v", err)
+	}
+
+	return nil
 }
 
 func seedData() {

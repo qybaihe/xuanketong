@@ -58,7 +58,7 @@ func GetCourses(c *gin.Context) {
 		query = query.Where("subject = ?", subject)
 	}
 
-	if err := query.Find(&courses).Error; err != nil {
+	if err := query.Unscoped().Find(&courses).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get courses"})
 		return
 	}

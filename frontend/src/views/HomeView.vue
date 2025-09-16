@@ -46,9 +46,11 @@ const showNewOnly = () => {
 }
 
 // 跳转到课程评价页面
-const goToRateCourse = (courseId: number) => {
-  // 使用window.location.href进行导航，因为router未导入
-  window.location.href = `/courses/${courseId}/rate`
+const goToRateCourse = (courseId: number | undefined) => {
+  if (courseId) {
+    // 使用Vue Router进行导航
+    window.location.href = `#/courses/${courseId}/rate`
+  }
 }
 
 // 获取评分百分比（用于评分条）
@@ -83,8 +85,42 @@ const getCardClass = (course: Course, index: number) => {
   return `${baseClasses} ${themeClass}`
 }
 
+// 数据字段映射函数 - 将后端小写字段映射到前端大写字段
+const mapCourseData = (course: any): CourseWithDisplay => {
+  return {
+    // 原始后端字段
+    id: course.id,
+    name: course.name,
+    description: course.description,
+    teacher: course.teacher,
+    credits: course.credits,
+    imageURL: course.imageURL,
+    grade: course.grade,
+    semester: course.semester,
+    subject: course.subject,
+    createdAt: course.createdAt,
+    updatedAt: course.updatedAt,
+    averageRating: course.averageRating,
+    totalRatings: course.totalRatings,
+    // 兼容字段映射（大写）
+    ID: course.id,
+    Name: course.name,
+    Description: course.description,
+    Teacher: course.teacher,
+    Credits: course.credits,
+    ImageURL: course.imageURL || `https://picsum.photos/seed/course-${course.id}/400/200.jpg`,
+    Grade: course.grade,
+    Semester: course.semester,
+    Subject: course.subject,
+    CreatedAt: course.createdAt,
+    UpdatedAt: course.updatedAt,
+    AverageRating: course.averageRating,
+    TotalRatings: course.totalRatings
+  }
+}
+
 // 获取标签
-const getTags = (course: Course) => {
+const getTags = (course: CourseWithDisplay) => {
   const tags = []
   if (course.Grade) tags.push({ text: course.Grade, type: 'primary' })
   if (course.Semester) tags.push({ text: course.Semester, type: 'secondary' })
@@ -117,19 +153,20 @@ const fetchCourses = async () => {
     // 获取课程列表
     const coursesData = await courseService.getCourses(filters)
     console.log('fetchCourses: 获取到课程数据，数量:', coursesData.length)
-    
-    // 获取所有课程的评分信息
-    const coursesWithRatings = await courseService.getCoursesWithRatings(coursesData)
+    console.log('fetchCourses: 第一个课程数据:', coursesData[0])
     
     // 添加显示用的额外属性
-    courses.value = coursesWithRatings.map((course, index) => ({
-      ...course,
-      Students: Math.floor(Math.random() * 200) + 10, // 暂时模拟学生数，后续可以从后端获取
-      // 添加热门标记（评分大于4.0的课程为热门）
-      isPopular: (course.AverageRating || 0) > 4.0,
-      // 添加新课程标记（基于创建时间，30天内为新课程）
-      isNew: new Date().getTime() - new Date(course.CreatedAt).getTime() < 30 * 24 * 60 * 60 * 1000
-    }))
+    courses.value = coursesData.map((course: any, index) => {
+      const mappedCourse = mapCourseData(course)
+      return {
+        ...mappedCourse,
+        Students: Math.floor(Math.random() * 200) + 10, // 暂时模拟学生数，后续可以从后端获取
+        // 添加热门标记（评分大于4.0的课程为热门）
+        isPopular: (mappedCourse.AverageRating || 0) > 4.0,
+        // 添加新课程标记（基于创建时间，30天内为新课程）
+        isNew: mappedCourse.CreatedAt ? new Date().getTime() - new Date(mappedCourse.CreatedAt).getTime() < 30 * 24 * 60 * 60 * 1000 : false
+      }
+    })
     
     // 添加滚动显示动画，确保DOM完全渲染
     nextTick(() => {
@@ -201,6 +238,15 @@ const addMagneticEffect = (element: HTMLElement) => {
 const handleImageLoad = (event: Event) => {
   const img = event.target as HTMLImageElement
   img.classList.add('loaded')
+  console.log('图片加载成功:', img.src)
+}
+
+// 图片加载错误处理
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  console.log('图片加载失败，使用备用URL:', img.src)
+  // 使用备用图片URL
+  img.src = `https://picsum.photos/seed/course-${img.alt || 'default'}/400/200.jpg`
 }
 
 // 添加性能监控
@@ -424,10 +470,11 @@ onMounted(() => {
           <div class="course-card-image hardware-accelerated">
             <img
               :src="course.ImageURL || `https://picsum.photos/seed/course-${course.ID}/400/200.jpg`"
-              :alt="course.Name"
+              :alt="course.Name || course.name || '课程'"
               loading="lazy"
               class="hardware-accelerated"
               @load="handleImageLoad"
+              @error="handleImageError"
             />
             <!-- 热门/新课程标记 -->
             <div v-if="course.isPopular" class="course-badge course-badge-popular">

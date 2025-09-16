@@ -1,6 +1,9 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -8,7 +11,14 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	database, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	// Create data directory if it doesn't exist
+	dataDir := "data"
+	if err := os.MkdirAll(dataDir, 0755); err != nil {
+		panic("Failed to create data directory!")
+	}
+
+	dbPath := filepath.Join(dataDir, "test.db")
+	database, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		panic("Failed to connect to database!")
 	}

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import HomeView from '../views/HomeView.vue'
 import CourseDetailView from '../views/CourseDetailView.vue'
 import CourseRateView from '../views/CourseRateView.vue'
@@ -8,6 +9,7 @@ import AdminView from '../views/AdminView.vue'
 import CourseManagement from '../views/CourseManagement.vue'
 import CourseDetailsAdminView from '../views/CourseDetailsAdminView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import { requireAuth, requireAdmin, redirectIfAuthenticated } from './guards'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,16 +32,25 @@ const router = createRouter({
     {
       path: '/profile',
       name: 'profile',
-      component: ProfileView
+      component: ProfileView,
+      beforeEnter: requireAuth
+    },
+    {
+      path: '/courses/:id/rate',
+      name: 'course-rate',
+      component: CourseRateView,
+      beforeEnter: requireAuth
     },
     {
       path: '/auth',
       name: 'auth',
-      component: AuthView
+      component: AuthView,
+      beforeEnter: redirectIfAuthenticated
     },
     {
       path: '/admin',
       component: AdminView,
+      beforeEnter: requireAdmin,
       children: [
         {
           path: '',
