@@ -1,31 +1,75 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, watch, computed, nextTick } from 'vue'
-import axios from 'axios'
 import { RouterLink } from 'vue-router'
+import { courseService, type Course, type CourseWithRating } from '@/services/api'
 
-interface Course {
-  ID: number;
-  Name: string;
-  Description: string;
-  Teacher: string;
-  Credits: number;
-  ImageURL: string;
-  Grade: string;
-  Semester: string;
-  Subject: string;
-  Rating?: number;
+interface CourseWithDisplay extends CourseWithRating {
   Students?: number;
   isPopular?: boolean;
   isNew?: boolean;
 }
 
-const courses = ref<Course[]>([])
+const courses = ref<CourseWithDisplay[]>([])
 const loading = ref(true)
+const courseSection = ref<HTMLElement>()
 const filters = reactive({
   grade: '',
   semester: '',
   subject: ''
 })
+
+// 滚动到课程区域
+const scrollToCourses = () => {
+  if (courseSection.value) {
+    courseSection.value.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
+// 清空筛选
+const clearFilters = () => {
+  filters.grade = ''
+  filters.semester = ''
+  filters.subject = ''
+  fetchCourses()
+}
+
+// 显示热门课程
+const showPopularOnly = () => {
+  // 这里可以添加筛选逻辑
+  console.log('显示热门课程')
+}
+
+// 显示新课程
+const showNewOnly = () => {
+  // 这里可以添加筛选逻辑
+  console.log('显示新课程')
+}
+
+// 跳转到课程评价页面
+const goToRateCourse = (courseId: number) => {
+  // 使用window.location.href进行导航，因为router未导入
+  window.location.href = `/courses/${courseId}/rate`
+}
+
+// 获取评分百分比（用于评分条）
+const getRatingPercentage = (rating: number, starLevel: number) => {
+  // 根据评分级别计算百分比，模拟真实数据分布
+  const baseDistribution = [0.05, 0.15, 0.35, 0.30, 0.15] // 1-5星的基准分布
+  const ratingIndex = Math.max(0, Math.min(4, Math.floor(rating) - 1))
+  const basePercent = baseDistribution[4 - (starLevel - 1)] * 100
+  
+  // 根据实际评分调整分布
+  const adjustment = (rating % 1) * (starLevel <= rating ? 10 : -10)
+  
+  return Math.max(5, Math.min(95, basePercent + adjustment))
+}
+
+// 获取评分数量（用于评分条）
+const getRatingCount = (rating: number, starLevel: number) => {
+  const totalReviews = Math.floor((rating || 0) * 20) // 假设每0.1分对应2条评价
+  const percentage = getRatingPercentage(rating, starLevel)
+  return Math.floor(totalReviews * percentage / 100)
+}
 
 // 只使用natural主题
 const themeClass = computed(() => 'theme-natural')
@@ -61,20 +105,30 @@ const getRatingStars = (rating: number) => {
   }
 }
 
+// 将AverageRating映射到Rating字段（兼容现有模板）
+const getDisplayRating = (course: CourseWithDisplay): number => {
+  return course.AverageRating || 0
+}
+
 const fetchCourses = async () => {
   console.log('fetchCourses: 开始获取课程数据，loading状态:', loading.value)
   loading.value = true
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/courses', { params: filters })
-    console.log('fetchCourses: 获取到课程数据，数量:', response.data.data.length)
-    courses.value = response.data.data.map((course: Course, index: number) => ({
+    // 获取课程列表
+    const coursesData = await courseService.getCourses(filters)
+    console.log('fetchCourses: 获取到课程数据，数量:', coursesData.length)
+    
+    // 获取所有课程的评分信息
+    const coursesWithRatings = await courseService.getCoursesWithRatings(coursesData)
+    
+    // 添加显示用的额外属性
+    courses.value = coursesWithRatings.map((course, index) => ({
       ...course,
-      Rating: Math.random() * 5, // 模拟评分数据
-      Students: Math.floor(Math.random() * 200) + 10, // 模拟学生数
-      // 添加热门标记
-      isPopular: Math.random() > 0.7,
-      // 添加新课程标记
-      isNew: Math.random() > 0.8
+      Students: Math.floor(Math.random() * 200) + 10, // 暂时模拟学生数，后续可以从后端获取
+      // 添加热门标记（评分大于4.0的课程为热门）
+      isPopular: (course.AverageRating || 0) > 4.0,
+      // 添加新课程标记（基于创建时间，30天内为新课程）
+      isNew: new Date().getTime() - new Date(course.CreatedAt).getTime() < 30 * 24 * 60 * 60 * 1000
     }))
     
     // 添加滚动显示动画，确保DOM完全渲染
@@ -245,19 +299,41 @@ onMounted(() => {
 
 <template>
   <main class="home-container" :class="themeClass">
-    <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="hero-content">
-        <h1 class="hero-title">课程浏览</h1>
-        <p class="hero-subtitle">发现优质课程，提升学习体验</p>
+    <!-- Header Section -->
+    <header class="home-header">
+      <div class="header-content">
+        <div class="page-badge">课程评价平台</div>
+        <h1 class="page-title">发现精品课程</h1>
+        <p class="page-subtitle">查看真实评价，分享学习体验，帮助同学做出明智选择</p>
+        <div class="header-stats">
+          <div class="stat-item">
+            <div class="stat-number">5000+</div>
+            <div class="stat-label">课程评价</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">98%</div>
+            <div class="stat-label">学生满意度</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">1000+</div>
+            <div class="stat-label">优质课程</div>
+          </div>
+        </div>
       </div>
-    </section>
+    </header>
 
     <!-- Filter Section -->
     <section class="filter-section card-glass">
+      <div class="filter-header">
+        <h2 class="filter-title">筛选课程</h2>
+        <p class="filter-subtitle">按年级、学期、科目快速找到您感兴趣的课程</p>
+      </div>
       <form @submit.prevent="fetchCourses" class="filter-form">
         <div class="form-group">
-          <label for="grade" class="form-label">年级</label>
+          <label for="grade" class="form-label">
+            <span class="label-icon">📚</span>
+            年级
+          </label>
           <input
             type="text"
             id="grade"
@@ -267,7 +343,10 @@ onMounted(() => {
           />
         </div>
         <div class="form-group">
-          <label for="semester" class="form-label">学期</label>
+          <label for="semester" class="form-label">
+            <span class="label-icon">📅</span>
+            学期
+          </label>
           <input
             type="text"
             id="semester"
@@ -277,7 +356,10 @@ onMounted(() => {
           />
         </div>
         <div class="form-group">
-          <label for="subject" class="form-label">科目</label>
+          <label for="subject" class="form-label">
+            <span class="label-icon">🔬</span>
+            科目
+          </label>
           <input
             type="text"
             id="subject"
@@ -302,11 +384,32 @@ onMounted(() => {
     </div>
 
     <!-- Course Grid -->
-    <section v-else class="course-section">
+    <section ref="courseSection" v-else class="course-section">
+      <div class="course-header">
+        <div class="course-header-content">
+          <h2 class="course-title">热门课程评价</h2>
+          <p class="course-description">查看真实学生评价，找到最适合您的课程</p>
+        </div>
+        <div class="course-filters">
+          <button class="filter-chip" :class="{ active: !filters.grade && !filters.semester && !filters.subject }" @click="clearFilters">
+            全部课程
+          </button>
+          <button class="filter-chip" @click="showPopularOnly">
+            🔥 高分课程
+          </button>
+          <button class="filter-chip" @click="showNewOnly">
+            ✨ 最新评价
+          </button>
+        </div>
+      </div>
+      
       <div v-if="courses.length === 0" class="empty-state">
         <div class="empty-icon">📚</div>
         <h3 class="empty-title">暂无课程</h3>
         <p class="empty-description">请调整筛选条件或稍后再试</p>
+        <button @click="clearFilters" class="btn btn-primary mt-lg">
+          重置筛选
+        </button>
       </div>
       
       <div v-else class="course-grid">
@@ -339,10 +442,10 @@ onMounted(() => {
             <div class="course-card-rating">
               <div class="rating-stars">
                 <span v-for="i in 5" :key="i" class="star">
-                  {{ i <= Math.floor(course.Rating || 0) ? '⭐' : (i - 0.5 <= (course.Rating || 0) ? '🌟' : '☆') }}
+                  {{ i <= Math.floor(getDisplayRating(course)) ? '⭐' : (i - 0.5 <= getDisplayRating(course) ? '🌟' : '☆') }}
                 </span>
               </div>
-              <span class="rating-value">{{ course.Rating?.toFixed(1) || '0.0' }}</span>
+              <span class="rating-value">{{ getDisplayRating(course).toFixed(1) }}</span>
             </div>
           </div>
 
@@ -359,31 +462,64 @@ onMounted(() => {
               </span>
             </div>
 
-            <!-- 课程标题 -->
-            <h3 class="course-card-title text-shine">{{ course.Name }}</h3>
+            <!-- 课程标题和基本信息 -->
+            <div class="course-card-header">
+              <h3 class="course-card-title text-shine">{{ course.Name }}</h3>
+              <div class="course-basic-info">
+                <div class="info-item">
+                  <span class="info-icon">👨‍🏫</span>
+                  <span class="info-text">{{ course.Teacher }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-icon">📚</span>
+                  <span class="info-text">{{ course.Credits }} 学分</span>
+                </div>
+              </div>
+            </div>
             
             <!-- 课程描述 -->
             <p class="course-card-description">{{ course.Description }}</p>
             
-            <!-- 课程元信息 -->
-            <div class="course-card-meta">
-              <div class="meta-info">
-                <div class="meta-item">
-                  <span class="meta-icon">👨‍🏫</span>
-                  <span class="meta-text">{{ course.Teacher }}</span>
+            <!-- 评价统计区域 -->
+            <div class="course-rating-section">
+              <div class="rating-overview">
+                <div class="rating-average">
+                  <span class="rating-number">{{ getDisplayRating(course).toFixed(1) }}</span>
+                  <div class="rating-stars">
+                    <span v-for="i in 5" :key="i" class="star">
+                      {{ i <= Math.floor(getDisplayRating(course)) ? '⭐' : (i - 0.5 <= getDisplayRating(course) ? '🌟' : '☆') }}
+                    </span>
+                  </div>
+                  <span class="rating-count">{{ (course.TotalRatings || 0) }} 人评价</span>
                 </div>
-                <div class="meta-item">
-                  <span class="meta-icon">👥</span>
-                  <span class="meta-text">{{ course.Students }} 人</span>
-                </div>
-                <div v-if="course.Students && course.Students > 100" class="meta-item">
-                  <span class="meta-icon">📈</span>
-                  <span class="meta-text">热门</span>
+                <div class="rating-breakdown">
+                  <div class="rating-bar" v-for="i in 5" :key="i">
+                    <span class="bar-label">{{ 6-i }}星</span>
+                    <div class="bar-container">
+                      <div class="bar-fill" :style="{ width: getRatingPercentage(getDisplayRating(course), 6-i) + '%' }"></div>
+                    </div>
+                    <span class="bar-count">{{ getRatingCount(getDisplayRating(course), 6-i) }}</span>
+                  </div>
                 </div>
               </div>
-              <div class="course-card-credits magnetic">
-                {{ course.Credits }} 学分
+            </div>
+            
+            <!-- 课程操作区域 -->
+            <div class="course-card-actions">
+              <div class="engagement-stats">
+                <div class="stat-item">
+                  <span class="stat-number">{{ course.Students || 0 }}</span>
+                  <span class="stat-label">学习人数</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ Math.floor((course.Students || 0) * 0.8) }}</span>
+                  <span class="stat-label">评价数</span>
+                </div>
               </div>
+              <button class="btn btn-rate-course" @click.prevent="goToRateCourse(course.ID)">
+                <span class="btn-icon">⭐</span>
+                评价课程
+              </button>
             </div>
           </div>
         </router-link>
@@ -392,132 +528,402 @@ onMounted(() => {
 
     <!-- Footer -->
     <footer class="home-footer">
-      <p class="footer-text">© 2024 选课通 - 让学习更简单</p>
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="footer-logo">选课通</div>
+          <p class="footer-tagline">让学习更简单，让选择更明智</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-section">
+            <h4 class="footer-section-title">产品</h4>
+            <router-link to="/" class="footer-link">首页</router-link>
+            <router-link to="/about" class="footer-link">关于我们</router-link>
+            <router-link to="/profile" class="footer-link">个人中心</router-link>
+          </div>
+          <div class="footer-section">
+            <h4 class="footer-section-title">支持</h4>
+            <a href="#" class="footer-link">帮助中心</a>
+            <a href="#" class="footer-link">联系我们</a>
+            <a href="#" class="footer-link">意见反馈</a>
+          </div>
+          <div class="footer-section">
+            <h4 class="footer-section-title">关注我们</h4>
+            <div class="social-links">
+              <a href="#" class="social-link">📧</a>
+              <a href="#" class="social-link">💬</a>
+              <a href="#" class="social-link">📱</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-text">© 2024 选课通 - 让学习更简单</p>
+      </div>
     </footer>
   </main>
 </template>
 
 <style scoped>
-/* 主容器 */
-.home-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, var(--background-secondary) 0%, var(--natural-background) 100%);
-  padding: var(--spacing-lg) 0;
-}
+/* ===== 简洁优雅样式 ===== */
 
-/* Hero Section */
-.hero-section {
-  text-align: center;
-  margin-bottom: var(--spacing-2xl);
-  padding: var(--spacing-lg);
+/* Header Section 样式 */
+.home-header {
+  background: var(--background-primary);
+  border-bottom: 1px solid var(--separator-color);
+  padding: var(--spacing-2xl) 0;
   position: relative;
+  overflow: hidden;
 }
 
-.hero-content {
-  max-width: 800px;
+.home-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--primary-color) 50%, 
+    transparent 100%);
+  animation: headerShine 3s ease-in-out infinite;
+}
+
+@keyframes headerShine {
+  0%, 100% { opacity: 0; transform: translateX(-100%); }
+  50% { opacity: 1; transform: translateX(100%); }
+}
+
+.header-content {
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+  text-align: center;
 }
 
-.hero-title {
-  font-size: var(--font-size-title1);
+.page-title {
+  font-size: clamp(32px, 4vw, 40px);
+  font-weight: var(--font-weight-light);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: -0.5px;
+  position: relative;
+  display: inline-block;
+}
+
+.page-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: var(--gradient-primary);
+  border-radius: 1px;
+  transition: width 0.3s ease;
+}
+
+.page-title:hover::after {
+  width: 60px;
+}
+
+.page-subtitle {
+  font-size: clamp(16px, 1.5vw, 18px);
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+.page-badge {
+  display: inline-block;
+  background: var(--gradient-primary);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: 20px;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-lg);
+  animation: badgeFloat 3s ease-in-out infinite;
+}
+
+@keyframes badgeFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.header-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-2xl);
+  margin-top: var(--spacing-xl);
+  flex-wrap: wrap;
+}
+
+.header-stats .stat-item {
+  text-align: center;
+  min-width: 80px;
+}
+
+.header-stats .stat-number {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-xs);
+  display: block;
+}
+
+.header-stats .stat-label {
+  font-size: var(--font-size-body2);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Filter Section 增强样式 */
+.filter-section {
+  max-width: 1200px;
+  margin: var(--spacing-3xl) auto;
+  padding: var(--spacing-xl);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.filter-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.filter-title {
+  font-size: 32px;
   font-weight: var(--font-weight-bold);
   color: var(--text-primary);
   margin-bottom: var(--spacing-sm);
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
-.hero-subtitle {
+.filter-subtitle {
   font-size: var(--font-size-body);
   color: var(--text-secondary);
-  margin-bottom: var(--spacing-lg);
-}
-
-
-/* Filter Section */
-.filter-section {
-  max-width: 1000px;
-  margin: 0 auto var(--spacing-xl);
-  padding: var(--spacing-lg);
+  margin: 0;
 }
 
 .filter-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-md);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
   align-items: end;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
 .form-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   font-size: var(--font-size-body2);
   font-weight: var(--font-weight-medium);
   color: var(--text-secondary);
-  margin-bottom: var(--spacing-xs);
-}
-
-.form-group--button {
-  align-self: end;
-}
-
-.btn-icon {
-  margin-right: var(--spacing-xs);
-}
-
-/* Loading State */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-3xl);
-  gap: var(--spacing-md);
-}
-
-.loading-text {
-  font-size: var(--font-size-body);
-  color: var(--text-secondary);
-}
-
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: var(--spacing-3xl);
-  color: var(--text-tertiary);
-}
-
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: var(--spacing-md);
-}
-
-.empty-title {
-  font-size: var(--font-size-title2);
-  font-weight: var(--font-weight-semibold);
   margin-bottom: var(--spacing-sm);
 }
 
-.empty-description {
-  font-size: var(--font-size-body);
+.label-icon {
+  font-size: 16px;
 }
 
-/* Course Section */
+.input-glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 14px 16px;
+  font-size: var(--font-size-body);
+  border-radius: 12px;
+  transition: var(--transition-standard);
+}
+
+.input-glass:focus {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(47, 169, 20, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Course Section 增强样式 */
 .course-section {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 var(--spacing-md);
+  padding: var(--spacing-xl) var(--spacing-md);
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2xl);
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+}
+
+.course-header-content {
+  flex: 1;
+  min-width: 300px;
+}
+
+.course-title {
+  font-size: 36px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.course-description {
+  font-size: var(--font-size-body);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.course-filters {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--background-secondary);
+  color: var(--text-secondary);
+  border: 2px solid transparent;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-standard);
+}
+
+.filter-chip:hover {
+  background: var(--background-tertiary);
+  transform: translateY(-2px);
+}
+
+.filter-chip.active {
+  background: var(--gradient-primary);
+  color: white;
+  border-color: var(--primary-color);
 }
 
 .course-grid {
   display: grid;
-  gap: var(--spacing-lg);
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-xl);
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  margin-bottom: var(--spacing-3xl);
+}
+
+/* Footer 增强样式 */
+.home-footer {
+  background: var(--background-primary);
+  border-top: 1px solid var(--separator-color);
+  padding: var(--spacing-3xl) 0;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.footer-logo {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+}
+
+.footer-tagline {
+  font-size: var(--font-size-body2);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.footer-links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xl);
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.footer-section-title {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.footer-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-body2);
+  transition: var(--transition-standard);
+}
+
+.footer-link:hover {
+  color: var(--primary-color);
+  transform: translateX(4px);
+}
+
+.social-links {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--background-secondary);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: var(--transition-standard);
+}
+
+.social-link:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--separator-color);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-md);
+}
+
+.footer-text {
+  font-size: var(--font-size-body2);
+  color: var(--text-tertiary);
+  margin: 0;
 }
 
 /* Course Card Enhancements */
@@ -585,32 +991,308 @@ onMounted(() => {
   color: var(--text-tertiary);
 }
 
-/* 响应式设计 */
+/* ===== 响应式设计增强 ===== */
+
+/* ===== 响应式设计增强 ===== */
+
+/* 超大屏幕适配 (2K+ 分辨率) */
+@media (min-width: 1600px) {
+  .home-header {
+    padding: var(--spacing-3xl) 0;
+  }
+  
+  .page-title {
+    font-size: 44px;
+  }
+  
+  .page-subtitle {
+    font-size: 20px;
+  }
+  
+  .filter-section {
+    max-width: 1400px;
+  }
+  
+  .filter-form {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .course-section {
+    max-width: 1800px;
+  }
+  
+  .course-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-2xl);
+  }
+  
+  .course-header {
+    align-items: flex-start;
+  }
+  
+  .course-filters {
+    margin-top: var(--spacing-sm);
+  }
+}
+
+/* 大屏幕适配 (PC 端主要尺寸) */
+@media (min-width: 1200px) {
+  .home-header {
+    padding: var(--spacing-2xl) 0;
+  }
+  
+  .page-title {
+    font-size: 40px;
+  }
+  
+  .page-subtitle {
+    font-size: 18px;
+  }
+  
+  .filter-section {
+    max-width: 1200px;
+  }
+  
+  .filter-form {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-xl);
+  }
+  
+  .course-section {
+    max-width: 1400px;
+  }
+  
+  .course-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+  
+  .course-card {
+    max-width: none;
+  }
+  
+  .footer-content {
+    grid-template-columns: 3fr 4fr;
+    gap: var(--spacing-3xl);
+  }
+  
+  .footer-links {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-2xl);
+  }
+}
+
+/* 中等屏幕适配 (平板和小型桌面) */
+@media (min-width: 769px) and (max-width: 1199px) {
+  .home-header {
+    padding: var(--spacing-xl) 0;
+  }
+  
+  .page-title {
+    font-size: 36px;
+  }
+  
+  .page-subtitle {
+    font-size: 17px;
+  }
+  
+  .filter-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .course-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+  
+  .course-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .course-filters {
+    margin-top: var(--spacing-md);
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2xl);
+  }
+  
+  .footer-links {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 移动端适配 */
 @media (max-width: 768px) {
-  .hero-title {
+  .home-header {
+    padding: var(--spacing-lg) 0;
+  }
+  
+  .page-title {
+    font-size: 32px;
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .page-subtitle {
+    font-size: 16px;
+  }
+  
+  .filter-section {
+    margin: var(--spacing-xl) var(--spacing-md);
+    padding: var(--spacing-lg);
+  }
+  
+  .filter-header {
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .filter-title {
     font-size: 24px;
   }
   
   .filter-form {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .course-section {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+  
+  .course-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+  
+  .course-title {
+    font-size: 28px;
+  }
+  
+  .course-filters {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: var(--spacing-sm);
+  }
+  
+  .filter-chip {
+    flex-shrink: 0;
   }
   
   .course-grid {
     grid-template-columns: 1fr;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
   }
   
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .course-grid {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+  
+  .footer-links {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+  
+  .footer-brand {
+    text-align: center;
+  }
+  
+  .social-links {
+    justify-content: center;
   }
 }
 
-@media (min-width: 1025px) {
-  .course-grid {
-    grid-template-columns: repeat(3, 1fr);
+/* 小型移动端适配 */
+@media (max-width: 480px) {
+  .home-header {
+    padding: var(--spacing-md) 0;
+  }
+  
+  .page-title {
+    font-size: 28px;
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .page-subtitle {
+    font-size: 15px;
+  }
+  
+  .page-title::after {
+    width: 30px;
+  }
+  
+  .page-title:hover::after {
+    width: 40px;
+  }
+  
+  .filter-section {
+    margin: var(--spacing-lg) var(--spacing-sm);
+    padding: var(--spacing-md);
+  }
+  
+  .filter-title {
+    font-size: 20px;
+  }
+  
+  .course-header {
+    gap: var(--spacing-sm);
+  }
+  
+  .course-title {
+    font-size: 24px;
+  }
+  
+  .course-filters {
+    gap: var(--spacing-xs);
+  }
+  
+  .filter-chip {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .footer-content {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .footer-links {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+}
+
+/* 横屏模式优化 */
+@media (orientation: landscape) and (max-height: 600px) {
+  .home-header {
+    padding: var(--spacing-lg) 0;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .home-header {
+    border-bottom: 2px solid var(--text-primary);
+  }
+  
+  .page-title::after {
+    background: var(--text-primary);
+    height: 3px;
+  }
+  
+  .filter-section {
+    background: var(--background-primary);
+    border: 2px solid var(--text-primary);
+  }
+  
+  .course-card {
+    border: 2px solid var(--text-primary);
+  }
+  
+  .footer {
+    border-top: 2px solid var(--text-primary);
   }
 }
 
@@ -852,5 +1534,171 @@ onMounted(() => {
   .course-card-description {
     color: rgba(255, 255, 255, 0.8);
   }
+}
+
+/* ===== 课程评价功能样式 ===== */
+.course-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-sm);
+}
+
+.course-basic-info {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-caption);
+  color: var(--text-secondary);
+}
+
+.info-icon {
+  font-size: 14px;
+}
+
+.info-text {
+  font-weight: var(--font-weight-medium);
+}
+
+.course-rating-section {
+  margin: var(--spacing-lg) 0;
+  padding: var(--spacing-md);
+  background: var(--background-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--separator-color);
+}
+
+.rating-overview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.rating-average {
+  text-align: center;
+}
+
+.rating-number {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+  line-height: 1;
+  display: block;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 2px;
+  margin: var(--spacing-xs) 0;
+}
+
+.rating-count {
+  font-size: var(--font-size-caption);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.rating-breakdown {
+  width: 100%;
+}
+
+.rating-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.bar-label {
+  font-size: var(--font-size-caption);
+  color: var(--text-secondary);
+  min-width: 30px;
+  text-align: right;
+}
+
+.bar-container {
+  flex: 1;
+  height: 6px;
+  background: var(--separator-color);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.bar-count {
+  font-size: var(--font-size-caption);
+  color: var(--text-tertiary);
+  min-width: 40px;
+  text-align: left;
+}
+
+.course-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--separator-color);
+}
+
+.engagement-stats {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  line-height: 1;
+  display: block;
+}
+
+.stat-label {
+  font-size: var(--font-size-caption);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.btn-rate-course {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: var(--font-size-body2);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.btn-rate-course:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(47, 169, 20, 0.3);
+}
+
+.btn-rate-course .btn-icon {
+  font-size: 16px;
 }
 </style>

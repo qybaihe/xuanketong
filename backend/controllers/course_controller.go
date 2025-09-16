@@ -63,7 +63,38 @@ func GetCourses(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": courses})
+	// 获取每个课程的平均评分
+	type CourseWithRating struct {
+		models.Course
+		AverageRating float64 `json:"averageRating"`
+		TotalRatings  int     `json:"totalRatings"`
+	}
+
+	var coursesWithRatings []CourseWithRating
+
+	for _, course := range courses {
+		var avgRating float64
+		var totalRatings int64
+
+		// 计算平均评分
+		config.DB.Model(&models.Rating{}).
+			Where("course_id = ?", course.ID).
+			Select("AVG(score) as avg_rating, COUNT(*) as total").
+			Row().
+			Scan(&avgRating, &totalRatings)
+
+		if avgRating == 0 {
+			avgRating = 0
+		}
+
+		coursesWithRatings = append(coursesWithRatings, CourseWithRating{
+			Course:        course,
+			AverageRating: avgRating,
+			TotalRatings:  int(totalRatings),
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": coursesWithRatings})
 }
 
 func GetCourse(c *gin.Context) {
