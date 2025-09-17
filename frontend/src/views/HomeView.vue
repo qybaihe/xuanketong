@@ -78,11 +78,8 @@ const themeClass = computed(() => 'theme-natural')
 
 // 获取卡片类名
 const getCardClass = (course: Course, index: number) => {
-  const baseClasses = 'course-card course-card-glass card-float shine-effect hardware-accelerated'
-  const themeClass = 'course-card-natural'
-  // 移除slide-in-up和slide-in-left动画，避免与scroll-reveal冲突
-  // const animationClass = index % 2 === 0 ? 'slide-in-up' : 'slide-in-left'
-  return `${baseClasses} ${themeClass}`
+  // 简化类名以应用新设计
+  return 'course-card'
 }
 
 // 数据字段映射函数 - 将后端小写字段映射到前端大写字段
@@ -469,22 +466,13 @@ onMounted(() => {
           <!-- 课程图片 -->
           <div class="course-card-image hardware-accelerated">
             <img
-              :src="course.ImageURL || `https://picsum.photos/seed/course-${course.ID}/400/200.jpg`"
+              :src="course.ImageURL || `https://picsum.photos/seed/course-${course.ID}/400/300.jpg`"
               :alt="course.Name || course.name || '课程'"
               loading="lazy"
               class="hardware-accelerated"
               @load="handleImageLoad"
               @error="handleImageError"
             />
-            <!-- 热门/新课程标记 -->
-            <div v-if="course.isPopular" class="course-badge course-badge-popular">
-              <span class="badge-icon">🔥</span>
-              <span class="badge-text">热门</span>
-            </div>
-            <div v-if="course.isNew" class="course-badge course-badge-new">
-              <span class="badge-icon">✨</span>
-              <span class="badge-text">新课</span>
-            </div>
             <!-- 评分显示 -->
             <div class="course-card-rating">
               <div class="rating-stars">
@@ -523,9 +511,6 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-            
-            <!-- 课程描述 -->
-            <p class="course-card-description">{{ course.Description }}</p>
             
             <!-- 评价统计区域 -->
             <div class="course-rating-section">
@@ -864,8 +849,74 @@ onMounted(() => {
 .course-grid {
   display: grid;
   gap: var(--spacing-xl);
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   margin-bottom: var(--spacing-3xl);
+}
+
+/* ===== 新卡片设计 ===== */
+.course-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.course-card-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.course-card-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.course-card-tag {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.course-card-tag.primary {
+  background-color: #eef4ff;
+  color: #4d8dff;
+}
+
+.course-card-tag.secondary {
+  background-color: #f0f9f4;
+  color: #28a745;
+}
+
+.course-card-tag.accent {
+  background-color: #fff8e1;
+  color: #f59e0b;
+}
+
+.course-card-title {
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.course-card-description,
+.rating-count {
+  color: var(--text-secondary); /* 将描述和评价数量文字颜色设置为次要文字颜色 */
 }
 
 /* Footer 增强样式 */
@@ -976,11 +1027,15 @@ onMounted(() => {
 /* Course Card Enhancements */
 .course-card-image {
   position: relative;
-  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  width: 100%;
 }
 
 .course-card-image img {
-  transition: transform 0.3s ease;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
 }
 
 .course-card:hover .course-card-image img {
@@ -989,19 +1044,20 @@ onMounted(() => {
 
 .course-card-rating {
   position: absolute;
-  top: var(--spacing-sm);
-  right: var(--spacing-sm);
-  background: rgba(0, 0, 0, 0.7);
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.6);
   color: white;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 16px;
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  gap: 6px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .rating-stars {
@@ -1615,10 +1671,10 @@ onMounted(() => {
 
 .course-rating-section {
   margin: var(--spacing-lg) 0;
-  padding: var(--spacing-md);
-  background: var(--background-secondary);
+  padding: 16px;
+  background: #f7f8fa;
   border-radius: 12px;
-  border: 1px solid var(--separator-color);
+  border: 1px solid #e9eaee;
 }
 
 .rating-overview {
@@ -1697,7 +1753,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: var(--spacing-lg);
+  margin-top: auto; /* Push to bottom */
   padding-top: var(--spacing-md);
   border-top: 1px solid var(--separator-color);
 }
@@ -1727,7 +1783,7 @@ onMounted(() => {
 
 .btn-rate-course {
   padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--gradient-primary);
+  background: #28a745;
   color: white;
   border: none;
   border-radius: 20px;
@@ -1738,11 +1794,13 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
 }
 
 .btn-rate-course:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(47, 169, 20, 0.3);
+  background: #218838;
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
 }
 
 .btn-rate-course .btn-icon {
