@@ -249,46 +249,38 @@ func seedData() {
 		fmt.Printf("创建课程: %s\n", courses[i].Name)
 	}
 
-	// 为课程添加评分
-	ratings := []models.Rating{
-		{UserID: 1, CourseID: 1, Score: 4.5},
-		{UserID: 2, CourseID: 1, Score: 4.0},
-		{UserID: 3, CourseID: 1, Score: 4.8},
-		{UserID: 4, CourseID: 1, Score: 3.5},
-		{UserID: 5, CourseID: 1, Score: 4.2},
-
-		{UserID: 1, CourseID: 2, Score: 3.8},
-		{UserID: 2, CourseID: 2, Score: 4.1},
-		{UserID: 3, CourseID: 2, Score: 3.9},
-		{UserID: 4, CourseID: 2, Score: 4.3},
-
-		{UserID: 1, CourseID: 3, Score: 4.9},
-		{UserID: 2, CourseID: 3, Score: 4.7},
-		{UserID: 3, CourseID: 3, Score: 4.8},
-		{UserID: 4, CourseID: 3, Score: 4.6},
-		{UserID: 5, CourseID: 3, Score: 4.5},
-
-		{UserID: 1, CourseID: 4, Score: 4.2},
-		{UserID: 2, CourseID: 4, Score: 4.4},
-		{UserID: 3, CourseID: 4, Score: 4.1},
-
-		{UserID: 1, CourseID: 5, Score: 3.5},
-		{UserID: 2, CourseID: 5, Score: 3.8},
-		{UserID: 3, CourseID: 5, Score: 3.2},
-		{UserID: 4, CourseID: 5, Score: 3.6},
-
-		{UserID: 1, CourseID: 6, Score: 4.0},
-		{UserID: 2, CourseID: 6, Score: 4.3},
-		{UserID: 3, CourseID: 6, Score: 3.9},
-	}
-
-	// 插入评分
-	for i := range ratings {
-		if err := config.DB.Create(&ratings[i]).Error; err != nil {
-			fmt.Printf("创建评分失败: %v\n", err)
-			continue
+	// 获取创建的课程ID并为每个课程添加评分
+	var createdCourses []models.Course
+	if err := config.DB.Find(&createdCourses).Error; err != nil {
+		fmt.Printf("获取课程失败: %v\n", err)
+	} else {
+		// 为每个课程创建评分
+		ratingData := map[int][]float64{
+			1: {4.5, 4.0, 4.8, 3.5, 4.2},  // 高等数学A的评分
+			2: {3.8, 4.1, 3.9, 4.3},       // 大学物理的评分
+			3: {4.9, 4.7, 4.8, 4.6, 4.5}, // 程序设计基础的评分
+			4: {4.2, 4.4, 4.1},             // 数据结构的评分
+			5: {3.5, 3.8, 3.2, 3.6},       // 英语听说的评分
+			6: {4.0, 4.3, 3.9},             // 线性代数的评分
 		}
-		fmt.Printf("为课程ID %d 创建评分: %.1f\n", ratings[i].CourseID, ratings[i].Score)
+
+		for _, course := range createdCourses {
+			courseIndex := int(course.ID - 42) // 减去偏移量，因为课程ID从43开始
+			if scores, exists := ratingData[courseIndex]; exists {
+				for i, score := range scores {
+					rating := models.Rating{
+						UserID:   uint(i + 1), // 用户ID从1开始
+						CourseID: course.ID,
+						Score:    score,
+					}
+					if err := config.DB.Create(&rating).Error; err != nil {
+						fmt.Printf("为课程%s创建评分失败: %v\n", course.Name, err)
+					} else {
+						fmt.Printf("为课程%s创建评分: %.1f\n", course.Name, score)
+					}
+				}
+			}
+		}
 	}
 
 	fmt.Println("测试数据添加完成！")

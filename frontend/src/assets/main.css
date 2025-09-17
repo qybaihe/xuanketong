@@ -1,23 +1,23 @@
 /* ===== CSS Variables from Design Specification ===== */
 :root {
-  /* Primary Colors - Based on AdminLTE brand #2fa914 */
-  --primary-color: #2fa914;
-  --primary-color-light: #4fc830;
-  --primary-color-dark: #1e7a0f;
+  /* Primary Colors - Updated to #05AA69 */
+  --primary-color: #05AA69;
+  --primary-color-light: #07d480;
+  --primary-color-dark: #048852;
   
   /* Color Palette Schemes */
-  --discreet-primary: #2fa914;
+  --discreet-primary: #05AA69;
   --discreet-secondary: #7d9871;
   --discreet-background: #f1fdeb;
   --discreet-accent: #9999cc;
-  
-  --match-primary: #2fa914;
+
+  --match-primary: #05AA69;
   --match-secondary: #404a3b;
   --match-tertiary: #a3ae9e;
   --match-accent: #00a8ff;
   --match-accent-dark: #0074e2;
   
-  --natural-primary: #2fa914;
+  --natural-primary: #05AA69;
   --natural-secondary: #7d9871;
   --natural-background: #f5fbf2;
   --natural-accent: #f6edd9;
@@ -46,13 +46,13 @@
   --separator-opaque: rgba(60, 60, 67, 0.36);
   
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #2fa914 0%, #4fc830 100%);
+  --gradient-primary: linear-gradient(135deg, #05AA69 0%, #07d480 100%);
   --gradient-secondary: linear-gradient(135deg, #007aff 0%, #5ac8fa 100%);
   --gradient-accent: linear-gradient(135deg, #ff3b30 0%, #ff9500 100%);
-  --gradient-match: linear-gradient(135deg, #2fa914 0%, #00a350 0%, #00997e 33%, #008da5 66%, #007fbf 100%);
-  --gradient-match-simplified: linear-gradient(135deg, #2fa914 0%, #006ec8 100%);
-  --gradient-natural: linear-gradient(135deg, #2fa914 0%, #7d9871 50%, #f5fbf2 100%);
-  --gradient-natural-warm: linear-gradient(135deg, #2fa914 0%, #f5fbf2 50%, #f6edd9 100%);
+  --gradient-match: linear-gradient(135deg, #05AA69 0%, #048852 25%, #067b73 50%, #056667 75%, #04555b 100%);
+  --gradient-match-simplified: linear-gradient(135deg, #05AA69 0%, #067b73 100%);
+  --gradient-natural: linear-gradient(135deg, #05AA69 0%, #66a375 50%, #c5e0c0 100%);
+  --gradient-natural-warm: linear-gradient(135deg, #05AA69 0%, #a8d5ba 50%, #f6edd9 100%);
   
   /* Glassmorphism Gradients */
   --glass-gradient: linear-gradient(135deg,
@@ -214,18 +214,18 @@ body {
 .btn-primary {
   background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 2px 8px rgba(47, 169, 20, 0.2);
+  box-shadow: 0 2px 8px rgba(5, 170, 105, 0.2);
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(47, 169, 20, 0.3);
-  background: linear-gradient(135deg, #2fa914 0%, #009a52 100%);
+  box-shadow: 0 4px 12px rgba(5, 170, 105, 0.3);
+  background: linear-gradient(135deg, #05AA69 0%, #048852 100%);
 }
 
 .btn-primary:active {
   transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(47, 169, 20, 0.2);
+  box-shadow: 0 1px 4px rgba(5, 170, 105, 0.2);
 }
 
 /* Matching Theme Button */
@@ -279,7 +279,7 @@ body {
 }
 
 .card-primary {
-  border: 1px solid rgba(47, 169, 20, 0.1);
+  border: 1px solid rgba(5, 170, 105, 0.1);
   box-shadow: 0 2px 8px rgba(47, 169, 20, 0.1);
 }
 
@@ -332,7 +332,7 @@ body {
 .form-input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(47, 169, 20, 0.1);
+  box-shadow: 0 0 0 3px rgba(5, 170, 105, 0.1);
 }
 
 .form-input::placeholder {

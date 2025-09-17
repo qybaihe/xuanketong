@@ -177,10 +177,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import * as bootstrap from 'bootstrap';
+import api from '@/services/api';
+import { useAuthStore } from '@/stores/auth';
 
 const API_BASE = 'http://localhost:8080/api/v1';
 const courses = ref<any[]>([]);
 const currentDeleteId = ref<number | null>(null);
+const authStore = useAuthStore();
 let courseModal: bootstrap.Modal | null = null;
 let deleteModal: bootstrap.Modal | null = null;
 let successToast: bootstrap.Toast | null = null;
@@ -230,15 +233,14 @@ async function loadCourses() {
     if (semester) params.append('semester', semester);
     if (subject) params.append('subject', subject);
     
-    const response = await fetch(`${API_BASE}/admin/courses?${params}`);
-    const result = await response.json();
+    const response = await api.get(`/admin/courses?${params}`);
     
-    if (result.data) {
-      courses.value = result.data;
+    if (response.data.data) {
+      courses.value = response.data.data;
     } else {
       courses.value = [];
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('加载课程失败:', error);
     alert('加载课程数据失败，请检查网络连接');
   } finally {
@@ -256,11 +258,10 @@ function showAddCourseModal() {
 
 async function editCourse(id: number) {
   try {
-    const response = await fetch(`${API_BASE}/admin/courses/${id}`);
-    const result = await response.json();
+    const response = await api.get(`/admin/courses/${id}`);
     
-    if (result.data) {
-      const course = result.data;
+    if (response.data.data) {
+      const course = response.data.data;
       (document.getElementById('courseModalTitle') as HTMLElement).textContent = '编辑课程';
       (document.getElementById('course-id') as HTMLInputElement).value = course.id;
       (document.getElementById('course-name') as HTMLInputElement).value = course.name;
@@ -273,7 +274,7 @@ async function editCourse(id: number) {
       
       courseModal?.show();
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('加载课程详情失败:', error);
     alert('加载课程详情失败');
   }
@@ -295,30 +296,20 @@ async function saveCourse() {
   try {
     let response;
     if (courseId) {
-      response = await fetch(`${API_BASE}/admin/courses/${courseId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(courseData)
-      });
+      response = await api.put(`/admin/courses/${courseId}`, courseData);
     } else {
-      response = await fetch(`${API_BASE}/admin/courses`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(courseData)
-      });
+      response = await api.post(`/admin/courses`, courseData);
     }
 
-    if (response.ok) {
+    if (response.status === 200 || response.status === 201) {
       courseModal?.hide();
       loadCourses();
       showToast(courseId ? '课程更新成功' : '课程添加成功');
-    } else {
-      const error = await response.json();
-      alert('操作失败: ' + (error.error || '未知错误'));
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('保存课程失败:', error);
-    alert('保存课程失败，请检查网络连接');
+    const errorMessage = error.response?.data?.error || '未知错误';
+    alert('操作失败: ' + errorMessage);
   }
 }
 
@@ -332,21 +323,17 @@ async function confirmDelete() {
   if (!currentDeleteId.value) return;
 
   try {
-    const response = await fetch(`${API_BASE}/admin/courses/${currentDeleteId.value}`, {
-      method: 'DELETE'
-    });
+    const response = await api.delete(`/admin/courses/${currentDeleteId.value}`);
 
-    if (response.ok) {
+    if (response.status === 200) {
       deleteModal?.hide();
       loadCourses();
       showToast('课程删除成功');
-    } else {
-      const error = await response.json();
-      alert('删除失败: ' + (error.error || '未知错误'));
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('删除课程失败:', error);
-    alert('删除课程失败，请检查网络连接');
+    const errorMessage = error.response?.data?.error || '未知错误';
+    alert('删除失败: ' + errorMessage);
   }
 }
 

@@ -374,7 +374,6 @@ onMounted(() => {
       <form @submit.prevent="fetchCourses" class="filter-form">
         <div class="form-group">
           <label for="grade" class="form-label">
-            <span class="label-icon">📚</span>
             年级
           </label>
           <input
@@ -387,7 +386,6 @@ onMounted(() => {
         </div>
         <div class="form-group">
           <label for="semester" class="form-label">
-            <span class="label-icon">📅</span>
             学期
           </label>
           <input
@@ -400,7 +398,6 @@ onMounted(() => {
         </div>
         <div class="form-group">
           <label for="subject" class="form-label">
-            <span class="label-icon">🔬</span>
             科目
           </label>
           <input
@@ -413,7 +410,6 @@ onMounted(() => {
         </div>
         <div class="form-group form-group--button">
           <button type="submit" class="btn btn-primary">
-            <span class="btn-icon">🔍</span>
             搜索课程
           </button>
         </div>
@@ -438,16 +434,15 @@ onMounted(() => {
             全部课程
           </button>
           <button class="filter-chip" @click="showPopularOnly">
-            🔥 高分课程
+            高分课程
           </button>
           <button class="filter-chip" @click="showNewOnly">
-            ✨ 最新评价
+            最新评价
           </button>
         </div>
       </div>
       
       <div v-if="courses.length === 0" class="empty-state">
-        <div class="empty-icon">📚</div>
         <h3 class="empty-title">暂无课程</h3>
         <p class="empty-description">请调整筛选条件或稍后再试</p>
         <button @click="clearFilters" class="btn btn-primary mt-lg">
@@ -501,14 +496,13 @@ onMounted(() => {
             <!-- 课程标题和基本信息 -->
             <div class="course-card-header">
               <h3 class="course-card-title text-shine">{{ course.Name }}</h3>
-              <div class="course-basic-info">
-                <div class="info-item">
-                  <span class="info-icon">👨‍🏫</span>
-                  <span class="info-text">{{ course.Teacher }}</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-icon">📚</span>
-                  <span class="info-text">{{ course.Credits }} 学分</span>
+              <div class="course-teacher-section">
+                <div class="teacher-label">授课老师</div>
+                <div class="teacher-name">{{ course.Teacher }}</div>
+              </div>
+              <div class="course-meta-info">
+                <div class="meta-item">
+                  <span class="meta-text">{{ course.Credits }} 学分</span>
                 </div>
               </div>
             </div>
@@ -519,9 +513,13 @@ onMounted(() => {
                 <div class="rating-average">
                   <span class="rating-number">{{ getDisplayRating(course).toFixed(1) }}</span>
                   <div class="rating-stars">
-                    <span v-for="i in 5" :key="i" class="star">
-                      {{ i <= Math.floor(getDisplayRating(course)) ? '⭐' : (i - 0.5 <= getDisplayRating(course) ? '🌟' : '☆') }}
-                    </span>
+                    <span
+                      v-for="i in 5"
+                      :key="i"
+                      :class="['star',
+                        i <= Math.floor(getDisplayRating(course)) ? 'star-filled' :
+                        (i - 0.5 <= getDisplayRating(course) ? 'star-half' : 'star-empty')]"
+                    ></span>
                   </div>
                   <span class="rating-count">{{ (course.TotalRatings || 0) }} 人评价</span>
                 </div>
@@ -550,7 +548,6 @@ onMounted(() => {
                 </div>
               </div>
               <button class="btn btn-rate-course" @click.prevent="goToRateCourse(course.ID)">
-                <span class="btn-icon">⭐</span>
                 评价课程
               </button>
             </div>
@@ -582,9 +579,9 @@ onMounted(() => {
           <div class="footer-section">
             <h4 class="footer-section-title">关注我们</h4>
             <div class="social-links">
-              <a href="#" class="social-link">📧</a>
-              <a href="#" class="social-link">💬</a>
-              <a href="#" class="social-link">📱</a>
+              <a href="#" class="social-link">邮箱</a>
+              <a href="#" class="social-link">微信</a>
+              <a href="#" class="social-link">电话</a>
             </div>
           </div>
         </div>
@@ -849,31 +846,58 @@ onMounted(() => {
 
 .course-grid {
   display: grid;
-  gap: var(--spacing-xl);
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-2xl);
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   margin-bottom: var(--spacing-3xl);
 }
 
 /* ===== 新卡片设计 ===== */
 .course-card {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
   text-decoration: none;
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  min-height: 500px;
+  position: relative;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.course-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+  padding: 2px;
+  background: var(--gradient-primary);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .course-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.18);
+  border-color: var(--primary-color);
+}
+
+.course-card:hover::before {
+  opacity: 1;
 }
 
 .course-card-content {
-  padding: 20px;
+  padding: 28px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -881,14 +905,14 @@ onMounted(() => {
 
 .course-card-tags {
   display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .course-card-tag {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 14px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -909,10 +933,32 @@ onMounted(() => {
 
 .course-card-title {
   color: var(--text-primary);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   line-height: 1.3;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.course-card-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.course-card:hover .course-card-title {
+  color: var(--primary-color);
+}
+
+.course-card:hover .course-card-title::after {
+  width: 40px;
 }
 
 .course-card-description,
@@ -1128,8 +1174,8 @@ onMounted(() => {
   }
   
   .course-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--spacing-2xl);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-3xl);
   }
   
   .course-header {
@@ -1446,8 +1492,31 @@ onMounted(() => {
 }
 
 .star {
-  font-size: 12px;
+  font-size: 18px;
   transition: transform 0.2s ease;
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+}
+
+.star-filled::before {
+  content: "★";
+  color: #ffc107;
+}
+
+.star-half::before {
+  content: "★";
+  color: #ffc107;
+  background: linear-gradient(90deg, #ffc107 50%, #ccc 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.star-empty::before {
+  content: "★";
+  color: #ccc;
 }
 
 .course-card:hover .star {
@@ -1457,6 +1526,22 @@ onMounted(() => {
 /* 动画优化 */
 .course-card {
   animation-delay: calc(var(--index, 0) * 0.1s);
+  animation: cardEntry 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes cardEntry {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-5px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .course-card:nth-child(1) { --index: 1; }
@@ -1645,38 +1730,88 @@ onMounted(() => {
 /* ===== 课程评价功能样式 ===== */
 .course-card-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-sm);
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.course-basic-info {
+/* 授课老师部分 */
+.course-teacher-section {
   display: flex;
-  gap: var(--spacing-md);
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(5, 170, 105, 0.08) 0%, rgba(5, 170, 105, 0.04) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(5, 170, 105, 0.15);
+  transition: all 0.3s ease;
+}
+
+.course-teacher-section:hover {
+  background: linear-gradient(135deg, rgba(5, 170, 105, 0.12) 0%, rgba(5, 170, 105, 0.06) 100%);
+  border-color: rgba(5, 170, 105, 0.25);
+  transform: translateY(-1px);
+}
+
+.teacher-label {
+  font-size: 12px;
+  color: var(--primary-color);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+.teacher-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.teacher-name::before {
+  content: "👨‍🏫";
+  font-size: 20px;
+}
+
+/* 课程元信息 */
+.course-meta-info {
+  display: flex;
+  gap: var(--spacing-lg);
   flex-wrap: wrap;
 }
 
-.info-item {
+.meta-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  font-size: var(--font-size-caption);
-  color: var(--text-secondary);
-}
-
-.info-icon {
+  gap: 8px;
   font-size: 14px;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
-.info-text {
+.meta-item:hover {
+  background: var(--background-tertiary);
+  transform: translateY(-1px);
+}
+
+.meta-text {
   font-weight: var(--font-weight-medium);
 }
 
 .course-rating-section {
-  padding: 16px;
+  padding: 20px;
   background: #f7f8fa;
-  border-radius: 12px;
+  border-radius: 16px;
   border: 1px solid #e9eaee;
+  margin-bottom: 20px;
 }
 
 .rating-overview {
@@ -1690,7 +1825,7 @@ onMounted(() => {
 }
 
 .rating-number {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: var(--font-weight-bold);
   color: var(--primary-color);
   line-height: 1;
@@ -1699,8 +1834,8 @@ onMounted(() => {
 
 .rating-stars {
   display: flex;
-  gap: 2px;
-  margin: var(--spacing-xs) 0;
+  gap: 4px;
+  margin: var(--spacing-sm) 0;
 }
 
 .rating-count {
@@ -1716,8 +1851,8 @@ onMounted(() => {
 .rating-bar {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xs);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
 .bar-label {
@@ -1729,9 +1864,9 @@ onMounted(() => {
 
 .bar-container {
   flex: 1;
-  height: 6px;
+  height: 8px;
   background: var(--separator-color);
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
   position: relative;
 }
@@ -1754,7 +1889,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-top: auto; /* Push to bottom */
-  padding-top: var(--spacing-md);
+  padding-top: var(--spacing-lg);
 }
 
 .engagement-stats {
@@ -1781,25 +1916,48 @@ onMounted(() => {
 }
 
 .btn-rate-course {
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: #28a745;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
   border: none;
-  border-radius: 20px;
-  font-size: var(--font-size-body2);
+  border-radius: 22px;
+  font-size: 15px;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+  justify-content: center;
+  gap: var(--spacing-sm);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-rate-course::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-rate-course:hover::before {
+  left: 100%;
 }
 
 .btn-rate-course:hover {
-  transform: translateY(-2px);
-  background: #218838;
-  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
+  transform: translateY(-3px) scale(1.05);
+  background: linear-gradient(135deg, #218838 0%, #1ebd8d 100%);
+  box-shadow: 0 8px 24px rgba(40, 167, 69, 0.35);
+}
+
+.btn-rate-course:active {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
 .btn-rate-course .btn-icon {

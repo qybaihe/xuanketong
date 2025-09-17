@@ -232,3 +232,4 @@ func GetAllComments(c *gin.Context) {
 	config.DB.Find(&comments)
 	c.JSON(http.StatusOK, gin.H{"data": comments})
 }
+
