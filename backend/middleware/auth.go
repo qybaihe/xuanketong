@@ -3,6 +3,8 @@ package middleware
 import (
 	"net/http"
 	"strings"
+	"xuan-ke-tong/config"
+	"xuan-ke-tong/models"
 	"xuan-ke-tong/utils"
 
 	"github.com/gin-gonic/gin"
@@ -38,6 +40,32 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Set("userId", claims.UserID)
 		c.Set("username", claims.Username)
 		c.Set("email", claims.Email)
+
+		c.Next()
+	}
+}
+
+func RequireAdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userId, exists := c.Get("userId")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+			c.Abort()
+			return
+		}
+
+		var user models.User
+		if err := config.DB.First(&user, userId).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			c.Abort()
+			return
+		}
+
+		if user.Role != "admin" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions"})
+			c.Abort()
+			return
+		}
 
 		c.Next()
 	}

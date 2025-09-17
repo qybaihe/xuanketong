@@ -2,12 +2,15 @@ package routes
 
 import (
 	"xuan-ke-tong/controllers"
+	"xuan-ke-tong/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func AdminRoutes(router *gin.Engine) {
 	admin := router.Group("/api/v1/admin")
+	admin.Use(middleware.AuthMiddleware())
+	admin.Use(middleware.RequireAdminMiddleware())
 	{
 		admin.GET("/stats", controllers.GetStats)
 		admin.GET("/users", controllers.GetAllUsers)

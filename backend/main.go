@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func main() {
@@ -149,6 +150,27 @@ func ensureTablesExist() error {
 }
 
 func seedData() {
+	// 创建管理员账号
+	adminPassword := "123456"
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Printf("Failed to hash admin password: %v\n", err)
+	} else {
+		adminUser := models.User{
+			Username: "admin",
+			Password: string(hashedPassword),
+			Email:    "admin@example.com",
+			Nickname: "Administrator",
+			Role:     "admin",
+		}
+		// 使用 GORM 的 FirstOrCreate 来避免重复创建
+		if err := config.DB.Where(models.User{Username: "admin"}).FirstOrCreate(&adminUser).Error; err != nil {
+			fmt.Printf("Failed to create admin user: %v\n", err)
+		} else {
+			fmt.Println("Admin user created or already exists")
+		}
+	}
+
 	// 清除现有数据
 	config.DB.Exec("DELETE FROM ratings")
 	config.DB.Exec("DELETE FROM comments")
