@@ -24,6 +24,7 @@ const handleLogout = async () => {
     <div class="header-content">
       <nav class="main-nav">
         <RouterLink to="/" class="nav-link">首页</RouterLink>
+        <RouterLink to="/stats" class="nav-link">数据统计</RouterLink>
         <RouterLink to="/about" class="nav-link">关于</RouterLink>
         <RouterLink to="/profile" class="nav-link">个人中心</RouterLink>
         <RouterLink to="/admin" v-if="authStore.isAdmin" class="nav-link">管理后台</RouterLink>

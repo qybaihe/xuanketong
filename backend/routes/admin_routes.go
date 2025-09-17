@@ -13,7 +13,15 @@ func AdminRoutes(router *gin.Engine) {
 	admin.Use(middleware.RequireAdminMiddleware())
 	{
 		admin.GET("/stats", controllers.GetStats)
+		admin.GET("/stats/enhanced", controllers.GetEnhancedHomeStats) // 增强版首页统计
+		admin.GET("/user-stats", controllers.GetUserStats)
+
+		// 用户管理路由
 		admin.GET("/users", controllers.GetAllUsers)
+		admin.GET("/users/:id", controllers.GetUserByID)
+		admin.PUT("/users/:id", controllers.UpdateUser)
+		admin.DELETE("/users/:id", controllers.DeleteUser)
+
 		admin.GET("/ratings", controllers.GetAllRatings)
 		admin.GET("/comments", controllers.GetAllComments)
 
