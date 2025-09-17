@@ -464,6 +464,7 @@ onMounted(() => {
           class="scroll-reveal"
         >
           <!-- 课程图片 -->
+          <!--
           <div class="course-card-image hardware-accelerated">
             <img
               :src="course.ImageURL || `https://picsum.photos/seed/course-${course.ID}/400/300.jpg`"
@@ -473,7 +474,6 @@ onMounted(() => {
               @load="handleImageLoad"
               @error="handleImageError"
             />
-            <!-- 评分显示 -->
             <div class="course-card-rating">
               <div class="rating-stars">
                 <span v-for="i in 5" :key="i" class="star">
@@ -483,6 +483,7 @@ onMounted(() => {
               <span class="rating-value">{{ getDisplayRating(course).toFixed(1) }}</span>
             </div>
           </div>
+          -->
 
           <!-- 课程内容 -->
           <div class="course-card-content">
@@ -1025,6 +1026,7 @@ onMounted(() => {
 }
 
 /* Course Card Enhancements */
+/*
 .course-card-image {
   position: relative;
   aspect-ratio: 16 / 10;
@@ -1081,6 +1083,7 @@ onMounted(() => {
 .meta-icon {
   font-size: 14px;
 }
+*/
 
 /* Footer */
 .home-footer {
@@ -1670,7 +1673,6 @@ onMounted(() => {
 }
 
 .course-rating-section {
-  margin: var(--spacing-lg) 0;
   padding: 16px;
   background: #f7f8fa;
   border-radius: 12px;
@@ -1681,7 +1683,6 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-md);
 }
 
 .rating-average {
@@ -1745,7 +1746,6 @@ onMounted(() => {
 .bar-count {
   font-size: var(--font-size-caption);
   color: var(--text-tertiary);
-  min-width: 40px;
   text-align: left;
 }
 
@@ -1755,7 +1755,6 @@ onMounted(() => {
   align-items: center;
   margin-top: auto; /* Push to bottom */
   padding-top: var(--spacing-md);
-  border-top: 1px solid var(--separator-color);
 }
 
 .engagement-stats {
