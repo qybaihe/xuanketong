@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { commentService } from '@/services/api'
+import api from '@/services/api'
 import axios from 'axios'
 
 interface Course {
@@ -66,6 +69,9 @@ interface Rating {
   CourseID: number;
   Score: number;
   Username?: string;
+  // 后端API返回的字段
+  username?: string;
+  nickname?: string;
 }
 
 interface Comment {
@@ -75,18 +81,56 @@ interface Comment {
   Content: string;
   Username?: string;
   CreatedAt?: string;
+  // 后端API返回的字段
+  createdAt?: string;
 }
 
 const route = useRoute()
+const authStore = useAuthStore()
 const course = ref<Course | null>(null)
 const ratings = ref<Rating[]>([])
 const comments = ref<Comment[]>([])
 const newScore = ref(5)
 const newComment = ref('')
 const loading = ref(true)
+const submitLoading = ref(false)
 
 // 只使用natural主题
 const themeClass = computed(() => 'theme-natural')
+
+// 检查用户是否登录
+const canSubmit = computed(() => authStore.isAuthenticated)
+
+// 获取当前用户信息
+const currentUser = computed(() => authStore.user)
+
+// 添加数据刷新函数
+const fetchRatings = async (courseId: number) => {
+  try {
+    const response = await api.get(`/courses/${courseId}/ratings`)
+    // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
+    ratings.value = response.data.data.map((rating: any) => ({
+      ...rating,
+      Username: rating.username || rating.nickname || `用户${rating.UserID}`,
+      Score: rating.score || rating.Score || 0
+    }))
+  } catch (error) {
+    console.error('获取评分失败:', error)
+  }
+}
+
+const fetchComments = async (courseId: number) => {
+  try {
+    const response = await api.get(`/courses/${courseId}/comments`)
+    comments.value = (response.data.data || []).map((comment: any) => ({
+      ...comment,
+      Username: comment.username || comment.nickname || `用户${comment.UserID}`,
+      CreatedAt: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : new Date().toLocaleDateString()
+    }))
+  } catch (error) {
+    console.error('获取评论失败:', error)
+  }
+}
 
 // 计算平均评分
 const averageRating = computed(() => {
@@ -118,43 +162,79 @@ const getTags = (course: Course) => {
 }
 
 const submitRating = async () => {
+  if (!authStore.isAuthenticated) {
+    alert('请先登录后再评分！')
+    return
+  }
+  
+  if (!currentUser.value) {
+    alert('无法获取用户信息，请重新登录！')
+    return
+  }
+  
+  submitLoading.value = true
   try {
-    const courseId = route.params.id
-    await axios.post('http://localhost:8080/api/v1/ratings', {
-      courseId: Number(courseId),
-      userId: 1, // Hardcoded for now
-      score: newScore.value
+    const courseId = Number(route.params.id)
+    
+    // 直接调用API创建评分
+    await api.post('/ratings', {
+      UserID: currentUser.value.id,
+      CourseID: courseId,
+      Score: newScore.value
     })
+    
     newScore.value = 5
-    // Refresh ratings
-    const response = await axios.get(`http://localhost:8080/api/v1/courses/${courseId}/ratings`)
-    ratings.value = response.data.data.map((rating: Rating) => ({
-      ...rating,
-      Username: `用户${rating.UserID}`
-    }))
-  } catch (error) {
-    console.error(error)
+    alert('评分提交成功！')
+    
+    // 刷新评分列表
+    await fetchRatings(courseId)
+  } catch (error: any) {
+    console.error('评分提交失败:', error)
+    const errorMessage = error.response?.data?.error || '评分提交失败，请重试！'
+    alert(errorMessage)
+  } finally {
+    submitLoading.value = false
   }
 }
 
 const submitComment = async () => {
+  if (!authStore.isAuthenticated) {
+    alert('请先登录后再评论！')
+    return
+  }
+  
+  if (!currentUser.value) {
+    alert('无法获取用户信息，请重新登录！')
+    return
+  }
+  
+  if (!newComment.value.trim()) {
+    alert('请输入评论内容！')
+    return
+  }
+  
+  submitLoading.value = true
   try {
-    const courseId = route.params.id
-    await axios.post('http://localhost:8080/api/v1/comments', {
-      courseId: Number(courseId),
-      userId: 1, // Hardcoded for now
-      content: newComment.value
-    })
+    const courseId = Number(route.params.id)
+    
+    // 使用评论服务创建评论
+    await commentService.createComment(
+      currentUser.value.id,
+      courseId,
+      newComment.value.trim()
+    )
+    
     newComment.value = ''
-    // Refresh comments
-    const response = await axios.get(`http://localhost:8080/api/v1/courses/${courseId}/comments`)
-    comments.value = response.data.data.map((comment: Comment) => ({
-      ...comment,
-      Username: `用户${comment.UserID}`,
-      CreatedAt: new Date().toLocaleDateString()
-    }))
-  } catch (error) {
-    console.error(error)
+    alert('评论提交成功！')
+    
+    // 刷新评论列表
+    await fetchComments(courseId)
+  } catch (error: any) {
+    console.error('评论提交失败:', error)
+    const errorMessage = error.response?.data?.error || '评论提交失败，请重试！'
+    alert(errorMessage)
+  } finally {
+    submitLoading.value = false
   }
 }
 
@@ -168,14 +248,16 @@ onMounted(async () => {
       axios.get(`http://localhost:8080/api/v1/courses/${courseId}/comments`)
     ])
     course.value = mapCourseData(courseResponse.data.data)
+    // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
     ratings.value = ratingsResponse.data.data.map((rating: Rating) => ({
       ...rating,
-      Username: `用户${rating.UserID}`
+      Username: (rating as any).username || (rating as any).nickname || `用户${rating.UserID}`
     }))
-    comments.value = commentsResponse.data.data.map((comment: Comment) => ({
+    // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
+    comments.value = (commentsResponse.data.data || []).map((comment: Comment) => ({
       ...comment,
-      Username: `用户${comment.UserID}`,
-      CreatedAt: new Date().toLocaleDateString()
+      Username: (comment as any).username || (comment as any).nickname || `用户${comment.UserID}`,
+      CreatedAt: (comment as any).createdAt ? new Date((comment as any).createdAt).toLocaleDateString() : new Date().toLocaleDateString()
     }))
   } catch (error) {
     console.error(error)
@@ -286,10 +368,19 @@ onMounted(async () => {
             />
             <div class="score-display">{{ newScore }}</div>
           </div>
-          <button @click="submitRating" class="btn btn-primary">
+          <button
+            @click="submitRating"
+            class="btn btn-primary"
+            :disabled="submitLoading || !canSubmit"
+          >
             <span class="btn-icon">⭐</span>
-            提交评分
+            {{ submitLoading ? '提交中...' : '提交评分' }}
           </button>
+          <div v-if="!canSubmit" class="login-prompt">
+            <span class="prompt-icon">🔒</span>
+            <span>请先登录后进行评分</span>
+            <RouterLink to="/auth" class="login-link">立即登录</RouterLink>
+          </div>
         </div>
         
         <div class="ratings-list">
@@ -328,10 +419,19 @@ onMounted(async () => {
             class="comment-input"
             rows="4"
           ></textarea>
-          <button @click="submitComment" class="btn btn-primary">
+          <button
+            @click="submitComment"
+            class="btn btn-primary"
+            :disabled="submitLoading || !canSubmit"
+          >
             <span class="btn-icon">💬</span>
-            提交评论
+            {{ submitLoading ? '提交中...' : '提交评论' }}
           </button>
+          <div v-if="!canSubmit" class="login-prompt">
+            <span class="prompt-icon">🔒</span>
+            <span>请先登录后发表评论</span>
+            <RouterLink to="/auth" class="login-link">立即登录</RouterLink>
+          </div>
         </div>
         
         <div class="comments-list">
@@ -851,6 +951,43 @@ onMounted(async () => {
   }
 }
 
+/* 登录提示样式 */
+.login-prompt {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--background-secondary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-caption);
+  color: var(--text-tertiary);
+}
+
+.prompt-icon {
+  font-size: 14px;
+}
+
+.login-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  margin-left: auto;
+  transition: var(--transition-standard);
+}
+
+.login-link:hover {
+  color: var(--primary-color-dark);
+  text-decoration: underline;
+}
+
+/* 按钮禁用状态 */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 /* 暗色主题支持 */
 @media (prefers-color-scheme: dark) {
   .course-detail-container {
@@ -873,6 +1010,19 @@ onMounted(async () => {
     background: rgba(0, 0, 0, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
+  }
+
+  .login-prompt {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .login-link {
+    color: #4fc830;
+  }
+
+  .login-link:hover {
+    color: #2fa914;
   }
 }
 </style>

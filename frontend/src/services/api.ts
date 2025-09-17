@@ -64,6 +64,15 @@ export interface Rating {
   UpdatedAt: string
 }
 
+export interface Comment {
+  ID: number
+  UserID: number
+  CourseID: number
+  Content: string
+  CreatedAt: string
+  UpdatedAt: string
+}
+
 export interface CourseWithRating extends Course {
   AverageRating?: number
   TotalRatings?: number
@@ -150,5 +159,28 @@ const ratingService = {
   }
 }
 
-export { courseService, ratingService }
+const commentService = {
+  // 创建评论
+  async createComment(userId: number, courseId: number, content: string): Promise<void> {
+    await api.post('/comments', {
+      UserID: userId,
+      CourseID: courseId,
+      Content: content
+    })
+  },
+
+  // 获取课程的评论
+  async getCourseComments(courseId: number): Promise<Comment[]> {
+    const response = await api.get(`/courses/${courseId}/comments`)
+    return response.data.data
+  },
+
+  // 获取用户的评论
+  async getUserComments(userId: number): Promise<Comment[]> {
+    const response = await api.get(`/users/${userId}/comments`)
+    return response.data.data
+  }
+}
+
+export { courseService, ratingService, commentService }
 export default api

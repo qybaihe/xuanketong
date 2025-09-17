@@ -32,5 +32,32 @@ func CreateComment(c *gin.Context) {
 func GetCommentsByCourse(c *gin.Context) {
 	var comments []models.Comment
 	config.DB.Where("course_id = ?", c.Param("id")).Find(&comments)
-	c.JSON(http.StatusOK, gin.H{"data": comments})
+
+	// 获取用户信息
+	type CommentWithUser struct {
+		models.Comment
+		Username string `json:"username"`
+		Nickname string `json:"nickname"`
+	}
+
+	var result []CommentWithUser
+	for _, comment := range comments {
+		var user models.User
+		if err := config.DB.Where("id = ?", comment.UserID).First(&user).Error; err == nil {
+			result = append(result, CommentWithUser{
+				Comment:  comment,
+				Username: user.Username,
+				Nickname: user.Nickname,
+			})
+		} else {
+			// 如果用户不存在，使用默认值
+			result = append(result, CommentWithUser{
+				Comment:  comment,
+				Username: "用户" + string(comment.UserID),
+				Nickname: "用户" + string(comment.UserID),
+			})
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
 }
