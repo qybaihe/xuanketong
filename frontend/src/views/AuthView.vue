@@ -2,9 +2,11 @@
 import { ref, reactive } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { useOAuth2 } from '@/composables/useOAuth2'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const { startLogin: startOAuth2Login, loading: oauth2Loading, error: oauth2Error } = useOAuth2()
 
 const isRegister = ref(false)
 const loading = ref(false)
@@ -101,6 +103,18 @@ const toggleMode = () => {
     formErrors[key as keyof typeof formErrors] = ''
   })
 }
+
+// OAuth2一键登录
+const handleSSELogin = async () => {
+  formErrors.general = ''
+  
+  try {
+    await startOAuth2Login()
+  } catch (error) {
+    console.error('OAuth2登录失败:', error)
+    formErrors.general = oauth2Error.value || 'OAuth2登录失败，请重试'
+  }
+}
 </script>
 
 <template>
@@ -183,6 +197,23 @@ const toggleMode = () => {
           {{ loading ? '处理中...' : (isRegister ? '注册' : '登录') }}
         </button>
       </form>
+
+      <!-- OAuth2一键登录 -->
+      <div class="oauth2-section">
+        <div class="divider">
+          <span class="divider-text">或</span>
+        </div>
+        
+        <button
+          type="button"
+          class="sse-login-btn btn-secondary"
+          @click="handleSSELogin"
+          :disabled="loading || oauth2Loading"
+        >
+          <span v-if="oauth2Loading" class="loading-spinner"></span>
+          {{ oauth2Loading ? '跳转中...' : '使用集市账户一键登录' }}
+        </button>
+      </div>
 
       <div class="auth-footer">
         <p class="toggle-text">
@@ -396,6 +427,68 @@ const toggleMode = () => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+/* OAuth2 Section */
+.oauth2-section {
+  margin-top: 24px;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 24px 0;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.divider-text {
+  background: var(--background-blur);
+  padding: 0 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.sse-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 48px;
+}
+
+.sse-login-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sse-login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Decorative Elements */
