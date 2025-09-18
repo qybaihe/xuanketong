@@ -852,7 +852,7 @@ onMounted(() => {
   flex-direction: column;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  min-height: 500px;
+  min-height: 580px;
   position: relative;
   border: 2px solid transparent;
   background-clip: padding-box;
@@ -887,7 +887,7 @@ onMounted(() => {
 }
 
 .course-card-content {
-  padding: 28px;
+  padding: 32px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -923,9 +923,9 @@ onMounted(() => {
 
 .course-card-title {
   color: var(--text-primary);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   line-height: 1.3;
   position: relative;
   transition: all 0.3s ease;
@@ -1722,8 +1722,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -1732,7 +1732,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 16px 20px;
   background: linear-gradient(135deg, rgba(5, 170, 105, 0.08) 0%, rgba(5, 170, 105, 0.04) 100%);
   border-radius: 12px;
   border: 1px solid rgba(5, 170, 105, 0.15);
@@ -1790,11 +1790,11 @@ onMounted(() => {
 
 
 .course-rating-section {
-  padding: 20px;
+  padding: 24px;
   background: #f7f8fa;
   border-radius: 16px;
   border: 1px solid #e9eaee;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .rating-overview {
