@@ -538,13 +538,11 @@ onMounted(() => {
             <!-- 课程操作区域 -->
             <div class="course-card-actions">
               <div class="engagement-stats">
-                <div class="stat-item">
-                  <span class="stat-number">{{ course.Students || 0 }}</span>
-                  <span class="stat-label">学习人数</span>
+                <div class="meta-item">
+                  <span class="meta-text">{{ course.Credits }} 学分</span>
                 </div>
-                <div class="stat-item">
-                  <span class="stat-number">{{ Math.floor((course.Students || 0) * 0.8) }}</span>
-                  <span class="stat-label">评价数</span>
+                <div class="meta-item">
+                  <span class="meta-text">{{ (course.TotalRatings || 0) }} 人评价</span>
                 </div>
               </div>
               <button class="btn btn-rate-course" @click.prevent="goToRateCourse(course.ID)">
@@ -1773,10 +1771,6 @@ onMounted(() => {
   gap: 8px;
 }
 
-.teacher-name::before {
-  content: "👨‍🏫";
-  font-size: 20px;
-}
 
 /* 课程元信息 */
 .course-meta-info {
@@ -1889,31 +1883,9 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-top: auto; /* Push to bottom */
-  padding-top: var(--spacing-lg);
+  padding-top: 16px;
 }
 
-.engagement-stats {
-  display: flex;
-  gap: var(--spacing-md);
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-number {
-  font-size: 18px;
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  line-height: 1;
-  display: block;
-}
-
-.stat-label {
-  font-size: var(--font-size-caption);
-  color: var(--text-tertiary);
-  white-space: nowrap;
-}
 
 .btn-rate-course {
   padding: 14px 24px;
