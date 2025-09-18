@@ -101,6 +101,12 @@ const router = createRouter({
       path: '/stats',
       name: 'stats',
       component: () => import('../views/StatsView.vue')
+    },
+    {
+      path: '/evaluation-requests',
+      name: 'evaluation-requests',
+      component: () => import('../views/EvaluationRequestListView.vue'),
+      meta: { title: '求评价中心' }
     }
   ]
 })

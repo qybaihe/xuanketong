@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { commentService } from '@/services/api'
+import { commentService, evaluationRequestService } from '@/services/api'
 import api from '@/services/api'
 import axios from 'axios'
 
@@ -94,6 +94,8 @@ const newScore = ref(5)
 const newComment = ref('')
 const loading = ref(true)
 const submitLoading = ref(false)
+const evaluationRequestLoading = ref(false)
+const hasEvaluationRequested = ref(false)
 
 // 只使用natural主题
 const themeClass = computed(() => 'theme-natural')
@@ -238,6 +240,38 @@ const submitComment = async () => {
   }
 }
 
+// 发起求评价
+const submitEvaluationRequest = async () => {
+  if (!authStore.isAuthenticated) {
+    alert('请先登录后再发起求评价！')
+    return
+  }
+  
+  if (!currentUser.value) {
+    alert('无法获取用户信息，请重新登录！')
+    return
+  }
+  
+  const courseId = Number(route.params.id)
+  if (!courseId) {
+    alert('课程ID无效')
+    return
+  }
+  
+  evaluationRequestLoading.value = true
+  try {
+    await evaluationRequestService.createEvaluationRequest(courseId)
+    hasEvaluationRequested.value = true
+    alert('求评价请求发送成功！')
+  } catch (error: any) {
+    console.error('求评价请求失败:', error)
+    const errorMessage = error.response?.data?.error || '求评价请求失败，请重试！'
+    alert(errorMessage)
+  } finally {
+    evaluationRequestLoading.value = false
+  }
+}
+
 onMounted(async () => {
   try {
     loading.value = true
@@ -340,6 +374,21 @@ onMounted(async () => {
               </div>
               <span class="rating-value">{{ averageRating }}</span>
               <span class="rating-count">({{ ratings.length }} 人评分)</span>
+            </div>
+            
+            <!-- 求评价按钮 -->
+            <div v-if="canSubmit" class="evaluation-request-section">
+              <button
+                @click="submitEvaluationRequest"
+                class="btn btn-evaluation"
+                :disabled="evaluationRequestLoading || hasEvaluationRequested"
+              >
+                <span class="btn-icon">📢</span>
+                {{ evaluationRequestLoading ? '发送中...' : (hasEvaluationRequested ? '已求评价' : '求评价') }}
+              </button>
+              <p v-if="hasEvaluationRequested" class="evaluation-request-success">
+                已成功发起求评价请求，请耐心等待其他同学的评价！
+              </p>
             </div>
           </div>
         </div>
@@ -949,6 +998,54 @@ onMounted(async () => {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* 求评价功能样式 */
+.evaluation-request-section {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(47, 169, 20, 0.2);
+}
+
+.btn-evaluation {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.btn-evaluation:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff5252 0%, #ff7575 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.btn-evaluation:active {
+  transform: translateY(0);
+}
+
+.btn-evaluation:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.evaluation-request-success {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-caption);
+  color: var(--success-base);
+  font-weight: var(--font-weight-medium);
 }
 
 /* 登录提示样式 */

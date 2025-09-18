@@ -73,9 +73,6 @@ const getRatingCount = (rating: number, starLevel: number) => {
   return Math.floor(totalReviews * percentage / 100)
 }
 
-// 只使用natural主题
-const themeClass = computed(() => 'theme-natural')
-
 // 获取卡片类名
 const getCardClass = (course: Course, index: number) => {
   // 简化类名以应用新设计
@@ -341,77 +338,78 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="home-container" :class="themeClass">
+  <main class="home-container">
     <!-- Header Section -->
     <header class="home-header">
       <div class="header-content">
-        <div class="page-badge">课程评价平台</div>
-        <h1 class="page-title">发现精品课程</h1>
-        <p class="page-subtitle">查看真实评价，分享学习体验，帮助同学做出明智选择</p>
-        <div class="header-stats">
-          <div class="stat-item">
-            <div class="stat-number">5000+</div>
-            <div class="stat-label">课程评价</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">98%</div>
-            <div class="stat-label">学生满意度</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">1000+</div>
-            <div class="stat-label">优质课程</div>
-          </div>
-        </div>
+        <h1 class="page-title">选课通——为软工人打造的评价选课平台</h1>
       </div>
     </header>
 
-    <!-- Filter Section -->
-    <section class="filter-section card-glass">
-      <div class="filter-header">
-        <h2 class="filter-title">筛选课程</h2>
-        <p class="filter-subtitle">按年级、学期、科目快速找到您感兴趣的课程</p>
+    <!-- 求评价中心入口 -->
+    <section class="evaluation-request-entry-section">
+      <div class="entry-content">
+        <div class="entry-icon">📢</div>
+        <div class="entry-text">
+          <h3 class="entry-title">发现需要评价的课程</h3>
+          <p class="entry-description">帮助同学们找到优质课程，分享你的学习体验</p>
+        </div>
+        <RouterLink to="/evaluation-requests" class="entry-button">
+          <span class="btn-icon">🔍</span>
+          求评价中心
+        </RouterLink>
       </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section">
       <form @submit.prevent="fetchCourses" class="filter-form">
-        <div class="form-group">
-          <label for="grade" class="form-label">
-            年级
-          </label>
-          <input
-            type="text"
-            id="grade"
-            v-model="filters.grade"
-            class="input input-glass"
-            placeholder="输入年级..."
-          />
+        <div class="filter-header">
+          <h2 class="filter-title">筛选课程</h2>
+          <p class="filter-subtitle">按年级、学期、科目快速找到您感兴趣的课程</p>
         </div>
-        <div class="form-group">
-          <label for="semester" class="form-label">
-            学期
-          </label>
-          <input
-            type="text"
-            id="semester"
-            v-model="filters.semester"
-            class="input input-glass"
-            placeholder="输入学期..."
-          />
-        </div>
-        <div class="form-group">
-          <label for="subject" class="form-label">
-            科目
-          </label>
-          <input
-            type="text"
-            id="subject"
-            v-model="filters.subject"
-            class="input input-glass"
-            placeholder="输入科目..."
-          />
-        </div>
-        <div class="form-group form-group--button">
-          <button type="submit" class="btn btn-primary">
-            搜索课程
-          </button>
+        <div class="filter-inputs">
+          <div class="form-group">
+            <label for="grade" class="form-label">
+              年级
+            </label>
+            <input
+              type="text"
+              id="grade"
+              v-model="filters.grade"
+              class="input-glass"
+              placeholder="输入年级..."
+            />
+          </div>
+          <div class="form-group">
+            <label for="semester" class="form-label">
+              学期
+            </label>
+            <input
+              type="text"
+              id="semester"
+              v-model="filters.semester"
+              class="input-glass"
+              placeholder="输入学期..."
+            />
+          </div>
+          <div class="form-group">
+            <label for="subject" class="form-label">
+              科目
+            </label>
+            <input
+              type="text"
+              id="subject"
+              v-model="filters.subject"
+              class="input-glass"
+              placeholder="输入科目..."
+            />
+          </div>
+          <div class="form-group form-group--button">
+            <button type="submit" class="btn btn-primary">
+              搜索课程
+            </button>
+          </div>
         </div>
       </form>
     </section>
@@ -455,31 +453,8 @@ onMounted(() => {
           v-for="(course, index) in courses"
           :key="course.ID"
           :to="`/courses/${course.ID}`"
-          :class="getCardClass(course, index)"
-          class="scroll-reveal"
+          class="course-card"
         >
-          <!-- 课程图片 -->
-          <!--
-          <div class="course-card-image hardware-accelerated">
-            <img
-              :src="course.ImageURL || `https://picsum.photos/seed/course-${course.ID}/400/300.jpg`"
-              :alt="course.Name || course.name || '课程'"
-              loading="lazy"
-              class="hardware-accelerated"
-              @load="handleImageLoad"
-              @error="handleImageError"
-            />
-            <div class="course-card-rating">
-              <div class="rating-stars">
-                <span v-for="i in 5" :key="i" class="star">
-                  {{ i <= Math.floor(getDisplayRating(course)) ? '⭐' : (i - 0.5 <= getDisplayRating(course) ? '🌟' : '☆') }}
-                </span>
-              </div>
-              <span class="rating-value">{{ getDisplayRating(course).toFixed(1) }}</span>
-            </div>
-          </div>
-          -->
-
           <!-- 课程内容 -->
           <div class="course-card-content">
             <!-- 课程标签 -->
@@ -495,7 +470,7 @@ onMounted(() => {
 
             <!-- 课程标题和基本信息 -->
             <div class="course-card-header">
-              <h3 class="course-card-title text-shine">{{ course.Name }}</h3>
+              <h3 class="course-card-title">{{ course.Name }}</h3>
               <div class="course-teacher-section">
                 <div class="teacher-label">授课老师</div>
                 <div class="teacher-info">
@@ -537,7 +512,7 @@ onMounted(() => {
             
             <!-- 课程操作区域 -->
             <div class="course-card-actions">
-              <button class="btn btn-rate-course" @click.prevent="goToRateCourse(course.ID)">
+              <button class="btn-rate-course" @click.prevent="goToRateCourse(course.ID)">
                 评价课程
               </button>
             </div>
@@ -584,310 +559,355 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* ===== 简洁优雅样式 ===== */
+/* ===== 俏皮的新拟物风格 (Playful Neobrutalism) ===== */
+
+/* 全局样式 */
+.home-container {
+  font-family: sans-serif;
+  color: #1A1A1A;
+  padding: 20px;
+  max-width: 420px;
+  margin: 0 auto;
+  background-color: #FEF6F7;
+  min-height: 100vh;
+}
+
+/* 增大间距 */
+.course-grid {
+  display: grid;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.filter-form {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* 求评价中心入口 */
+.evaluation-request-entry-section {
+  margin-bottom: 24px;
+}
+
+.entry-content {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s ease;
+}
+
+.entry-content:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0px 0px #000000;
+}
+
+.entry-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.entry-text {
+  flex-grow: 1;
+}
+
+.entry-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1A1A1A;
+  margin-bottom: 4px;
+}
+
+.entry-description {
+  font-size: 16px;
+  color: #888888;
+  margin: 0;
+}
+
+.entry-button {
+  background-color: #F7D074;
+  border-radius: 8px;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #1A1A1A;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.entry-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
+}
 
 /* Header Section 样式 */
 .home-header {
-  background: var(--background-primary);
-  border-bottom: 1px solid var(--separator-color);
-  padding: var(--spacing-2xl) 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.home-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    var(--primary-color) 50%, 
-    transparent 100%);
-  animation: headerShine 3s ease-in-out infinite;
-}
-
-@keyframes headerShine {
-  0%, 100% { opacity: 0; transform: translateX(-100%); }
-  50% { opacity: 1; transform: translateX(100%); }
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-lg);
+  margin-bottom: 24px;
   text-align: center;
 }
 
+.header-content {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
+  padding: 24px;
+}
+
 .page-title {
-  font-size: clamp(32px, 4vw, 40px);
-  font-weight: var(--font-weight-light);
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-sm);
-  letter-spacing: -0.5px;
-  position: relative;
-  display: inline-block;
-}
-
-.page-title::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40px;
-  height: 2px;
-  background: var(--gradient-primary);
-  border-radius: 1px;
-  transition: width 0.3s ease;
-}
-
-.page-title:hover::after {
-  width: 60px;
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+  color: #1A1A1A;
+  margin-bottom: 8px;
 }
 
 .page-subtitle {
-  font-size: clamp(16px, 1.5vw, 18px);
-  color: var(--text-secondary);
-  margin: 0;
-  font-weight: var(--font-weight-regular);
-  letter-spacing: 0.5px;
-  opacity: 0.9;
+  font-size: 16px;
+  color: #888888;
+  margin: 0 0 16px 0;
 }
 
 .page-badge {
   display: inline-block;
-  background: var(--gradient-primary);
-  color: white;
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: 20px;
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
-  margin-bottom: var(--spacing-lg);
-  animation: badgeFloat 3s ease-in-out infinite;
-}
-
-@keyframes badgeFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
+  background-color: #F7D074;
+  color: #1A1A1A;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 2px solid #000000;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 16px;
 }
 
 .header-stats {
   display: flex;
-  justify-content: center;
-  gap: var(--spacing-2xl);
-  margin-top: var(--spacing-xl);
-  flex-wrap: wrap;
+  justify-content: space-around;
+  margin-top: 24px;
 }
 
 .header-stats .stat-item {
   text-align: center;
-  min-width: 80px;
 }
 
 .header-stats .stat-number {
-  font-size: 32px;
-  font-weight: var(--font-weight-bold);
-  color: var(--primary-color);
-  margin-bottom: var(--spacing-xs);
+  font-size: 24px;
+  font-weight: bold;
+  color: #F7D074;
   display: block;
 }
 
 .header-stats .stat-label {
-  font-size: var(--font-size-body2);
-  color: var(--text-secondary);
-  font-weight: var(--font-weight-medium);
+  font-size: 14px;
+  color: #888888;
 }
 
-/* Filter Section 增强样式 */
+/* Filter Section 样式 */
 .filter-section {
-  max-width: 1200px;
-  margin: var(--spacing-3xl) auto;
-  padding: var(--spacing-xl);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+  margin-bottom: 24px;
 }
 
 .filter-header {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
+  padding: 24px;
+  margin-bottom: 16px;
   text-align: center;
-  margin-bottom: var(--spacing-xl);
 }
 
 .filter-title {
-  font-size: 32px;
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-sm);
+  font-size: 20px;
+  font-weight: bold;
+  color: #1A1A1A;
+  margin-bottom: 8px;
 }
 
 .filter-subtitle {
-  font-size: var(--font-size-body);
-  color: var(--text-secondary);
+  font-size: 14px;
+  color: #888888;
   margin: 0;
 }
 
 .filter-form {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.filter-header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.filter-inputs {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-lg);
-  align-items: end;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .form-label {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  font-size: var(--font-size-body2);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-sm);
-}
-
-.label-icon {
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #1A1A1A;
 }
 
 .input-glass {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  padding: 14px 16px;
-  font-size: var(--font-size-body);
-  border-radius: 12px;
-  transition: var(--transition-standard);
+  background-color: #FFFFFF;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-family: sans-serif;
+  transition: transform 0.2s ease;
 }
 
 .input-glass:focus {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(47, 169, 20, 0.1);
-  transform: translateY(-2px);
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px 0px #000000;
+  outline: none;
 }
 
-/* Course Section 增强样式 */
+.form-group--button {
+  margin-top: 8px;
+}
+
+.btn {
+  background-color: #F7D074;
+  border-radius: 8px;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #1A1A1A;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
+}
+
+.btn-primary {
+  background-color: #F7D074;
+}
+
+/* Course Section 样式 */
 .course-section {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: var(--spacing-xl) var(--spacing-md);
+  margin-bottom: 24px;
 }
 
 .course-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-2xl);
-  flex-wrap: wrap;
-  gap: var(--spacing-lg);
+  margin-bottom: 16px;
 }
 
 .course-header-content {
-  flex: 1;
-  min-width: 300px;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
+  padding: 24px;
+  margin-bottom: 16px;
+  text-align: center;
 }
 
 .course-title {
-  font-size: 36px;
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-sm);
+  font-size: 20px;
+  font-weight: bold;
+  color: #1A1A1A;
+  margin-bottom: 8px;
 }
 
 .course-description {
-  font-size: var(--font-size-body);
-  color: var(--text-secondary);
+  font-size: 14px;
+  color: #888888;
   margin: 0;
 }
 
 .course-filters {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 8px;
   flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 16px;
 }
 
 .filter-chip {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
   padding: 8px 16px;
-  border-radius: 20px;
-  background: var(--background-secondary);
-  color: var(--text-secondary);
-  border: 2px solid transparent;
-  font-size: var(--font-size-body2);
-  font-weight: var(--font-weight-medium);
+  font-size: 14px;
+  font-weight: bold;
+  color: #1A1A1A;
   cursor: pointer;
-  transition: var(--transition-standard);
+  transition: transform 0.2s ease;
 }
 
 .filter-chip:hover {
-  background: var(--background-tertiary);
-  transform: translateY(-2px);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .filter-chip.active {
-  background: var(--gradient-primary);
-  color: white;
-  border-color: var(--primary-color);
+  background-color: #F7D074;
 }
 
 .course-grid {
   display: grid;
-  gap: var(--spacing-2xl);
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  margin-bottom: var(--spacing-3xl);
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 /* ===== 新卡片设计 ===== */
 .course-card {
-  background: #fff;
-  border-radius: 20px;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
   overflow: hidden;
   text-decoration: none;
-  color: var(--text-primary);
+  color: #1A1A1A;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  min-height: 580px;
-  position: relative;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-.course-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 20px;
-  padding: 2px;
-  background: var(--gradient-primary);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: transform 0.2s ease;
 }
 
 .course-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.18);
-  border-color: var(--primary-color);
-}
-
-.course-card:hover::before {
-  opacity: 1;
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0px 0px #000000;
 }
 
 .course-card-content {
-  padding: 32px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -895,826 +915,202 @@ onMounted(() => {
 
 .course-card-tags {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .course-card-tag {
-  padding: 6px 12px;
-  border-radius: 14px;
-  font-size: 13px;
-  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 2px solid #000000;
+  font-size: 12px;
+  font-weight: bold;
 }
 
 .course-card-tag.primary {
-  background-color: #eef4ff;
-  color: #4d8dff;
+  background-color: #F7D074;
+  color: #1A1A1A;
 }
 
 .course-card-tag.secondary {
-  background-color: #f0f9f4;
-  color: #28a745;
+  background-color: #76D7C4;
+  color: #1A1A1A;
 }
 
 .course-card-tag.accent {
-  background-color: #fff8e1;
-  color: #f59e0b;
+  background-color: #F7D074;
+  color: #1A1A1A;
 }
 
 .course-card-title {
-  color: var(--text-primary);
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: bold;
+  color: #1A1A1A;
   margin-bottom: 16px;
   line-height: 1.3;
-  position: relative;
-  transition: all 0.3s ease;
 }
 
-.course-card-title::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 0;
-  height: 3px;
-  background: var(--gradient-primary);
-  border-radius: 2px;
-  transition: width 0.3s ease;
+.course-card-description {
+  color: #888888;
+  margin-bottom: 16px;
 }
 
-.course-card:hover .course-card-title {
-  color: var(--primary-color);
-}
-
-.course-card:hover .course-card-title::after {
-  width: 40px;
-}
-
-.course-card-description,
 .rating-count {
-  color: var(--text-secondary); /* 将描述和评价数量文字颜色设置为次要文字颜色 */
+  color: #888888;
 }
 
-/* Footer 增强样式 */
+/* Footer 样式 */
 .home-footer {
-  background: var(--background-primary);
-  border-top: 1px solid var(--separator-color);
-  padding: var(--spacing-3xl) 0;
+  margin-top: 24px;
 }
 
 .footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-md);
-  display: grid;
-  grid-template-columns: 2fr 3fr;
-  gap: var(--spacing-2xl);
-  margin-bottom: var(--spacing-2xl);
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
+  padding: 24px;
+  margin-bottom: 16px;
 }
 
 .footer-brand {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
+  text-align: center;
+  margin-bottom: 16px;
 }
 
 .footer-logo {
-  font-size: 32px;
-  font-weight: var(--font-weight-bold);
-  color: var(--primary-color);
+  font-size: 24px;
+  font-weight: bold;
+  color: #F7D074;
 }
 
 .footer-tagline {
-  font-size: var(--font-size-body2);
-  color: var(--text-secondary);
-  margin: 0;
+  font-size: 14px;
+  color: #888888;
+  margin: 8px 0 0 0;
 }
 
 .footer-links {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-xl);
+  gap: 16px;
 }
 
 .footer-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
+  text-align: center;
 }
 
 .footer-section-title {
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #1A1A1A;
+  margin-bottom: 8px;
 }
 
 .footer-link {
-  color: var(--text-secondary);
+  display: block;
+  color: #888888;
   text-decoration: none;
-  font-size: var(--font-size-body2);
-  transition: var(--transition-standard);
+  font-size: 14px;
+  margin-bottom: 8px;
+  transition: color 0.2s ease;
 }
 
 .footer-link:hover {
-  color: var(--primary-color);
-  transform: translateX(4px);
+  color: #F7D074;
 }
 
 .social-links {
   display: flex;
-  gap: var(--spacing-sm);
+  justify-content: center;
+  gap: 8px;
 }
 
 .social-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: var(--background-secondary);
-  border-radius: 50%;
-  color: var(--text-secondary);
+  width: 36px;
+  height: 36px;
+  background-color: #F7D074;
+  border-radius: 8px;
+  border: 2px solid #000000;
+  color: #1A1A1A;
   text-decoration: none;
-  transition: var(--transition-standard);
+  font-size: 14px;
+  font-weight: bold;
+  transition: transform 0.2s ease;
 }
 
 .social-link:hover {
-  background: var(--primary-color);
-  color: white;
-  transform: translateY(-2px);
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 .footer-bottom {
   text-align: center;
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--separator-color);
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--spacing-lg) var(--spacing-md);
+  padding-top: 16px;
+  border-top: 3px solid #000000;
 }
 
 .footer-text {
-  font-size: var(--font-size-body2);
-  color: var(--text-tertiary);
+  font-size: 14px;
+  color: #888888;
   margin: 0;
 }
 
-/* Course Card Enhancements */
-/*
-.course-card-image {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  width: 100%;
-}
-
-.course-card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.course-card:hover .course-card-image img {
-  transform: scale(1.05);
-}
-
-.course-card-rating {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.rating-stars {
-  font-size: 12px;
-}
-
-.meta-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  font-size: var(--font-size-caption);
-  color: var(--text-tertiary);
-}
-
-.meta-icon {
-  font-size: 14px;
-}
-*/
-
-/* Footer */
-.home-footer {
+/* 加载状态样式 */
+.loading-container {
   text-align: center;
-  padding: var(--spacing-2xl) var(--spacing-lg);
-  margin-top: var(--spacing-3xl);
+  padding: 40px 0;
 }
 
-.footer-text {
-  font-size: var(--font-size-body2);
-  color: var(--text-tertiary);
-}
-
-/* ===== 响应式设计增强 ===== */
-
-/* ===== 响应式设计增强 ===== */
-
-/* 超大屏幕适配 (2K+ 分辨率) */
-@media (min-width: 1600px) {
-  .home-header {
-    padding: var(--spacing-3xl) 0;
-  }
-  
-  .page-title {
-    font-size: 44px;
-  }
-  
-  .page-subtitle {
-    font-size: 20px;
-  }
-  
-  .filter-section {
-    max-width: 1400px;
-  }
-  
-  .filter-form {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  
-  .course-section {
-    max-width: 1800px;
-  }
-  
-  .course-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-3xl);
-  }
-  
-  .course-header {
-    align-items: flex-start;
-  }
-  
-  .course-filters {
-    margin-top: var(--spacing-sm);
-  }
-}
-
-/* 大屏幕适配 (PC 端主要尺寸) */
-@media (min-width: 1200px) {
-  .home-header {
-    padding: var(--spacing-2xl) 0;
-  }
-  
-  .page-title {
-    font-size: 40px;
-  }
-  
-  .page-subtitle {
-    font-size: 18px;
-  }
-  
-  .filter-section {
-    max-width: 1200px;
-  }
-  
-  .filter-form {
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--spacing-xl);
-  }
-  
-  .course-section {
-    max-width: 1400px;
-  }
-  
-  .course-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
-  
-  .course-card {
-    max-width: none;
-  }
-  
-  .footer-content {
-    grid-template-columns: 3fr 4fr;
-    gap: var(--spacing-3xl);
-  }
-  
-  .footer-links {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-2xl);
-  }
-}
-
-/* 中等屏幕适配 (平板和小型桌面) */
-@media (min-width: 769px) and (max-width: 1199px) {
-  .home-header {
-    padding: var(--spacing-xl) 0;
-  }
-  
-  .page-title {
-    font-size: 36px;
-  }
-  
-  .page-subtitle {
-    font-size: 17px;
-  }
-  
-  .filter-form {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .course-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-lg);
-  }
-  
-  .course-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .course-filters {
-    margin-top: var(--spacing-md);
-  }
-  
-  .footer-content {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-2xl);
-  }
-  
-  .footer-links {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* 移动端适配 */
-@media (max-width: 768px) {
-  .home-header {
-    padding: var(--spacing-lg) 0;
-  }
-  
-  .page-title {
-    font-size: 32px;
-    margin-bottom: var(--spacing-xs);
-  }
-  
-  .page-subtitle {
-    font-size: 16px;
-  }
-  
-  .filter-section {
-    margin: var(--spacing-xl) var(--spacing-md);
-    padding: var(--spacing-lg);
-  }
-  
-  .filter-header {
-    margin-bottom: var(--spacing-lg);
-  }
-  
-  .filter-title {
-    font-size: 24px;
-  }
-  
-  .filter-form {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
-  }
-  
-  .course-section {
-    padding: var(--spacing-lg) var(--spacing-sm);
-  }
-  
-  .course-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-md);
-  }
-  
-  .course-title {
-    font-size: 28px;
-  }
-  
-  .course-filters {
-    width: 100%;
-    overflow-x: auto;
-    padding-bottom: var(--spacing-sm);
-  }
-  
-  .filter-chip {
-    flex-shrink: 0;
-  }
-  
-  .course-grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-lg);
-  }
-  
-  .footer-content {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-xl);
-  }
-  
-  .footer-links {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-lg);
-  }
-  
-  .footer-brand {
-    text-align: center;
-  }
-  
-  .social-links {
-    justify-content: center;
-  }
-}
-
-/* 小型移动端适配 */
-@media (max-width: 480px) {
-  .home-header {
-    padding: var(--spacing-md) 0;
-  }
-  
-  .page-title {
-    font-size: 28px;
-    margin-bottom: var(--spacing-xs);
-  }
-  
-  .page-subtitle {
-    font-size: 15px;
-  }
-  
-  .page-title::after {
-    width: 30px;
-  }
-  
-  .page-title:hover::after {
-    width: 40px;
-  }
-  
-  .filter-section {
-    margin: var(--spacing-lg) var(--spacing-sm);
-    padding: var(--spacing-md);
-  }
-  
-  .filter-title {
-    font-size: 20px;
-  }
-  
-  .course-header {
-    gap: var(--spacing-sm);
-  }
-  
-  .course-title {
-    font-size: 24px;
-  }
-  
-  .course-filters {
-    gap: var(--spacing-xs);
-  }
-  
-  .filter-chip {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-  
-  .footer-content {
-    padding: 0 var(--spacing-sm);
-  }
-  
-  .footer-links {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-lg);
-  }
-}
-
-/* 横屏模式优化 */
-@media (orientation: landscape) and (max-height: 600px) {
-  .home-header {
-    padding: var(--spacing-lg) 0;
-  }
-}
-
-/* 高对比度模式支持 */
-@media (prefers-contrast: high) {
-  .home-header {
-    border-bottom: 2px solid var(--text-primary);
-  }
-  
-  .page-title::after {
-    background: var(--text-primary);
-    height: 3px;
-  }
-  
-  .filter-section {
-    background: var(--background-primary);
-    border: 2px solid var(--text-primary);
-  }
-  
-  .course-card {
-    border: 2px solid var(--text-primary);
-  }
-  
-  .footer {
-    border-top: 2px solid var(--text-primary);
-  }
-}
-
-/* 课程徽章样式 */
-.course-badge {
-  position: absolute;
-  top: var(--spacing-sm);
-  left: var(--spacing-sm);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 16px;
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: 2;
-}
-
-.course-badge-popular {
-  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
-}
-
-.course-badge-new {
-  background: linear-gradient(135deg, #4ecdc4, #44a08d);
-  box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
-}
-
-.badge-icon {
-  font-size: 12px;
-}
-
-.badge-text {
-  font-weight: var(--font-weight-semibold);
-}
-
-/* 评分星级样式 */
-.rating-stars {
-  display: flex;
-  gap: 2px;
-}
-
-.star {
-  font-size: 18px;
-  transition: transform 0.2s ease;
-  position: relative;
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-}
-
-.star-filled::before {
-  content: "★";
-  color: #ffc107;
-}
-
-.star-half::before {
-  content: "★";
-  color: #ffc107;
-  background: linear-gradient(90deg, #ffc107 50%, #ccc 50%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.star-empty::before {
-  content: "★";
-  color: #ccc;
-}
-
-.course-card:hover .star {
-  transform: scale(1.1);
-}
-
-/* 动画优化 */
-.course-card {
-  animation-delay: calc(var(--index, 0) * 0.1s);
-  animation: cardEntry 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-}
-
-@keyframes cardEntry {
-  0% {
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-  }
-  50% {
-    opacity: 0.8;
-    transform: translateY(-5px) scale(1.02);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.course-card:nth-child(1) { --index: 1; }
-.course-card:nth-child(2) { --index: 2; }
-.course-card:nth-child(3) { --index: 3; }
-.course-card:nth-child(4) { --index: 4; }
-.course-card:nth-child(5) { --index: 5; }
-.course-card:nth-child(6) { --index: 6; }
-.course-card:nth-child(7) { --index: 7; }
-.course-card:nth-child(8) { --index: 8; }
-.course-card:nth-child(9) { --index: 9; }
-.course-card:nth-child(10) { --index: 10; }
-.course-card:nth-child(11) { --index: 11; }
-.course-card:nth-child(12) { --index: 12; }
-
-
-/* 加载动画优化 */
 .loader {
-  border: 3px solid var(--background-secondary);
-  border-top: 3px solid var(--primary-color);
+  border: 4px solid #000000;
+  border-top: 4px solid #F7D074;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .loading-text {
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: var(--font-weight-semibold);
+  font-size: 16px;
+  color: #1A1A1A;
 }
 
-/* 空状态动画 */
+/* 空状态样式 */
 .empty-state {
-  animation: fadeInUp 0.6s ease-out;
+  text-align: center;
+  padding: 40px 0;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
 }
 
-.empty-icon {
-  animation: float 3s ease-in-out infinite;
+.empty-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1A1A1A;
+  margin-bottom: 8px;
 }
 
-/* 触摸优化 */
-@media (hover: none) {
-  .course-card:hover {
-    transform: none;
-  }
-  
-  .course-card:active {
-    transform: scale(0.98);
-  }
-  
-  .btn:hover {
-    transform: none;
-  }
-  
-  .magnetic {
-    transform: none !important;
-  }
+.empty-description {
+  font-size: 14px;
+  color: #888888;
+  margin: 0 0 16px 0;
 }
 
-/* 高对比度模式支持 */
-@media (prefers-contrast: high) {
-  .course-card-glass {
-    background: var(--background-primary);
-    border: 2px solid var(--text-primary);
-  }
-  
-  .glass-enhanced {
-    background: var(--background-primary);
-    border: 2px solid var(--text-primary);
-  }
-}
-
-/* 减少动画支持 */
-@media (prefers-reduced-motion: reduce) {
-  .course-card,
-  .hero-title,
-  .hero-subtitle,
-  .empty-state {
-    animation: none;
-    transition: none;
-  }
-  
-  .float,
-  .breathe,
-  .sway {
-    animation: none;
-  }
-}
-
-/* 打印样式 */
-@media print {
-  .home-container {
-    background: white;
-  }
-  
-  .hero-section,
-  .filter-section,
-  .home-footer {
-    display: none;
-  }
-  
-  .course-card {
-    break-inside: avoid;
-    box-shadow: none;
-    border: 1px solid #ccc;
-  }
-  
-  .course-badge {
-    background: black !important;
-    color: white !important;
-  }
-}
-
-/* 性能优化 */
-.course-card {
-  /* 移除contain属性，因为它可能影响动画渲染 */
-  /* contain: layout style paint; */
-}
-
-.course-card-image img {
-  content-visibility: auto;
-}
-
-/* 自定义滚动条 */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--background-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-color-dark);
-}
-
-/* 焦点样式优化 */
-.btn:focus,
-.input:focus {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
-}
-
-/* 键盘导航支持 */
-.btn:focus-visible,
-.input:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
-}
-
-/* 暗色主题支持 */
-@media (prefers-color-scheme: dark) {
-  .home-container {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  }
-  
-  .hero-title {
-    background: linear-gradient(135deg, #4fc830 0%, #2fa914 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .course-card-glass {
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .course-card-content {
-    color: white;
-  }
-  
-  .course-card-title {
-    color: white;
-  }
-  
-  .course-card-description {
-    color: rgba(255, 255, 255, 0.8);
-  }
+.mt-lg {
+  margin-top: 16px;
 }
 
 /* ===== 课程评价功能样式 ===== */
@@ -1723,8 +1119,8 @@ onMounted(() => {
   flex-direction: column;
   gap: 16px;
   margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding-bottom: 16px;
+  border-bottom: 3px solid #000000;
 }
 
 /* 授课老师部分 */
@@ -1732,26 +1128,25 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, rgba(5, 170, 105, 0.08) 0%, rgba(5, 170, 105, 0.04) 100%);
-  border-radius: 12px;
-  border: 1px solid rgba(5, 170, 105, 0.15);
-  transition: all 0.3s ease;
+  padding: 16px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
+  transition: transform 0.2s ease;
 }
 
 .course-teacher-section:hover {
-  background: linear-gradient(135deg, rgba(5, 170, 105, 0.12) 0%, rgba(5, 170, 105, 0.06) 100%);
-  border-color: rgba(5, 170, 105, 0.25);
-  transform: translateY(-1px);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .teacher-label {
   font-size: 12px;
-  color: var(--primary-color);
-  font-weight: 600;
+  color: #1A1A1A;
+  font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  opacity: 0.8;
 }
 
 .teacher-info {
@@ -1769,31 +1164,30 @@ onMounted(() => {
 }
 
 .teacher-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: bold;
+  color: #1A1A1A;
   flex-shrink: 0;
 }
 
 .teacher-credits {
   font-size: 14px;
-  color: var(--text-secondary);
-  font-weight: 500;
-  background: var(--background-secondary);
+  color: #888888;
+  font-weight: bold;
+  background-color: #FFFFFF;
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: 8px;
+  border: 2px solid #000000;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-
-
-
 .course-rating-section {
   padding: 24px;
-  background: #f7f8fa;
-  border-radius: 16px;
-  border: 1px solid #e9eaee;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
   margin-bottom: 24px;
 }
 
@@ -1801,6 +1195,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .rating-average {
@@ -1809,8 +1205,8 @@ onMounted(() => {
 
 .rating-number {
   font-size: 36px;
-  font-weight: var(--font-weight-bold);
-  color: var(--primary-color);
+  font-weight: bold;
+  color: #F7D074;
   line-height: 1;
   display: block;
 }
@@ -1818,12 +1214,12 @@ onMounted(() => {
 .rating-stars {
   display: flex;
   gap: 4px;
-  margin: var(--spacing-sm) 0;
+  margin: 8px 0;
 }
 
 .rating-count {
-  font-size: var(--font-size-caption);
-  color: var(--text-tertiary);
+  font-size: 14px;
+  color: #888888;
   white-space: nowrap;
 }
 
@@ -1834,13 +1230,13 @@ onMounted(() => {
 .rating-bar {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-sm);
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .bar-label {
-  font-size: var(--font-size-caption);
-  color: var(--text-secondary);
+  font-size: 14px;
+  color: #888888;
   min-width: 30px;
   text-align: right;
 }
@@ -1848,7 +1244,8 @@ onMounted(() => {
 .bar-container {
   flex: 1;
   height: 8px;
-  background: var(--separator-color);
+  background-color: #FFFFFF;
+  border: 2px solid #000000;
   border-radius: 4px;
   overflow: hidden;
   position: relative;
@@ -1856,14 +1253,13 @@ onMounted(() => {
 
 .bar-fill {
   height: 100%;
-  background: var(--gradient-primary);
-  border-radius: 3px;
+  background-color: #F7D074;
   transition: width 0.3s ease;
 }
 
 .bar-count {
-  font-size: var(--font-size-caption);
-  color: var(--text-tertiary);
+  font-size: 14px;
+  color: #888888;
   text-align: left;
 }
 
@@ -1871,57 +1267,154 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: auto; /* Push to bottom */
-  padding-top: 20px;
+  margin-top: auto;
+  padding-top: 16px;
 }
-
 
 .btn-rate-course {
-  padding: 14px 24px;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
-  border: none;
-  border-radius: 22px;
+  background-color: #76D7C4;
+  border-radius: 8px;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
+  padding: 12px 24px;
   font-size: 15px;
-  font-weight: var(--font-weight-semibold);
+  font-weight: bold;
+  color: #1A1A1A;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.25);
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-rate-course::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s ease;
-}
-
-.btn-rate-course:hover::before {
-  left: 100%;
+  transition: transform 0.2s ease;
 }
 
 .btn-rate-course:hover {
-  transform: translateY(-3px) scale(1.05);
-  background: linear-gradient(135deg, #218838 0%, #1ebd8d 100%);
-  box-shadow: 0 8px 24px rgba(40, 167, 69, 0.35);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .btn-rate-course:active {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px 0px #000000;
 }
 
 .btn-rate-course .btn-icon {
   font-size: 16px;
 }
+
+/* 评分星级样式 */
+.star {
+  font-size: 18px;
+  transition: transform 0.2s ease;
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+}
+
+.star-filled::before {
+  content: "★";
+  color: #F7D074;
+}
+
+.star-half::before {
+  content: "★";
+  color: #F7D074;
+  background: linear-gradient(90deg, #F7D074 50%, #888888 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.star-empty::before {
+  content: "★";
+  color: #888888;
+}
+
+.course-card:hover .star {
+  transform: scale(1.1);
+}
+
+/* 响应式设计 */
+@media (min-width: 768px) {
+  .home-container {
+    max-width: 768px;
+    background-color: #FEF6F7;
+  }
+  
+  .filter-inputs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .course-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-container {
+    max-width: 1400px;
+    padding: 40px;
+    background-color: #FEF6F7;
+  }
+  
+  .filter-form {
+    gap: 32px;
+  }
+  
+  .filter-inputs {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  
+  .course-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  
+  .header-stats {
+    justify-content: center;
+    gap: 40px;
+  }
+  
+  .footer-links {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  
+  .course-filters {
+    justify-content: flex-start;
+  }
+}
+
+@media (min-width: 1440px) {
+  .home-container {
+    max-width: 1600px;
+    background-color: #FEF6F7;
+  }
+  
+  .course-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1600px) {
+  .home-container {
+    max-width: 1800px;
+    background-color: #FEF6F7;
+  }
+  
+  .course-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (min-width: 1920px) {
+  .home-container {
+    max-width: 2200px;
+    background-color: #FEF6F7;
+  }
+  
+  .course-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+
 </style>

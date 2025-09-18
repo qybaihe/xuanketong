@@ -107,7 +107,7 @@ const toggleMode = () => {
   <div class="auth-container">
     <div class="auth-backdrop"></div>
     
-    <div class="auth-card card-glass">
+    <div class="auth-card">
       <div class="auth-header">
         <h1 class="auth-title">{{ isRegister ? '创建账户' : '欢迎回来' }}</h1>
         <p class="auth-subtitle">
@@ -122,7 +122,7 @@ const toggleMode = () => {
             id="username"
             v-model="formData.username"
             type="text"
-            class="form-input input-glass"
+            class="input-glass"
             placeholder="请输入用户名"
             required
           />
@@ -135,7 +135,7 @@ const toggleMode = () => {
             id="password"
             v-model="formData.password"
             type="password"
-            class="form-input input-glass"
+            class="input-glass"
             placeholder="请输入密码"
             required
           />
@@ -149,7 +149,7 @@ const toggleMode = () => {
               id="email"
               v-model="formData.email"
               type="email"
-              class="form-input input-glass"
+              class="input-glass"
               placeholder="请输入邮箱地址"
               required
             />
@@ -162,7 +162,7 @@ const toggleMode = () => {
               id="nickname"
               v-model="formData.nickname"
               type="text"
-              class="form-input input-glass"
+              class="input-glass"
               placeholder="请输入显示昵称"
               required
             />
@@ -176,7 +176,7 @@ const toggleMode = () => {
 
         <button
           type="submit"
-          class="submit-btn btn-primary"
+          class="submit-btn"
           :disabled="loading"
         >
           <span v-if="loading" class="loading-spinner"></span>
@@ -189,7 +189,7 @@ const toggleMode = () => {
           {{ isRegister ? '已有账户？' : '还没有账户？' }}
           <button
             type="button"
-            class="toggle-btn btn-link"
+            class="toggle-btn"
             @click="toggleMode"
           >
             {{ isRegister ? '立即登录' : '立即注册' }}
@@ -206,6 +206,8 @@ const toggleMode = () => {
 </template>
 
 <style scoped>
+/* ===== 俏皮的新拟物风格 (Playful Neobrutalism) ===== */
+
 /* Auth Container */
 .auth-container {
   min-height: 100vh;
@@ -213,7 +215,10 @@ const toggleMode = () => {
   align-items: center;
   justify-content: center;
   position: relative;
-  background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e8 100%);
+  background-color: #FEF6F7;
+  font-family: sans-serif;
+  color: #1A1A1A;
+  padding: 20px;
   overflow: hidden;
 }
 
@@ -223,8 +228,8 @@ const toggleMode = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #2fa914 0%, #00a350 50%, #f5fbf2 100%);
-  opacity: 0.8;
+  background-color: #F7D074;
+  opacity: 0.2;
 }
 
 /* Auth Card */
@@ -233,31 +238,30 @@ const toggleMode = () => {
   z-index: 1;
   width: 90%;
   max-width: 420px;
-  padding: 48px 32px;
-  background: var(--background-blur);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
+  padding: 32px 24px;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
 }
 
 /* Auth Header */
 .auth-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .auth-title {
   font-size: 28px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: bold;
+  color: #1A1A1A;
   margin-bottom: 8px;
 }
 
 .auth-subtitle {
-  font-size: 15px;
-  color: var(--text-secondary);
+  font-size: 16px;
+  color: #888888;
+  margin: 0;
 }
 
 /* Form */
@@ -269,50 +273,49 @@ const toggleMode = () => {
 
 .form-group {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .form-label {
-  display: block;
   font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-bottom: 8px;
+  font-weight: bold;
+  color: #1A1A1A;
 }
 
-.form-input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+.input-glass {
+  background-color: #FFFFFF;
+  border: 3px solid #000000;
   border-radius: 8px;
+  padding: 12px;
   font-size: 16px;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: all 0.2s ease;
+  font-family: sans-serif;
+  transition: transform 0.2s ease;
 }
 
-.form-input:focus {
+.input-glass:focus {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px 0px #000000;
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(47, 169, 20, 0.1);
-  background: rgba(255, 255, 255, 0.95);
 }
 
 .error-text {
   display: block;
   font-size: 12px;
-  color: #ff3b30;
+  color: #FF3B30;
   margin-top: 4px;
 }
 
 .general-error {
   font-size: 14px;
-  color: #ff3b30;
+  color: #FF3B30;
   text-align: center;
   padding: 8px;
-  background: rgba(255, 59, 48, 0.1);
-  border-radius: 6px;
-  border: 1px solid rgba(255, 59, 48, 0.2);
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  border: 3px solid #FF3B30;
+  box-shadow: 4px 4px 0px 0px rgba(255, 59, 48, 0.2);
 }
 
 /* Submit Button */
@@ -324,24 +327,33 @@ const toggleMode = () => {
   padding: 14px 24px;
   border-radius: 8px;
   font-size: 16px;
-  font-weight: 500;
-  border: none;
+  font-weight: bold;
+  background-color: #F7D074;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
+  color: #1A1A1A;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  position: relative;
+  transition: transform 0.2s ease;
   min-height: 48px;
+}
+
+.submit-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 .loading-spinner {
   width: 16px;
   height: 16px;
   border: 2px solid transparent;
-  border-top: 2px solid currentColor;
+  border-top: 2px solid #1A1A1A;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -360,20 +372,23 @@ const toggleMode = () => {
 
 .toggle-text {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: #888888;
 }
 
 .toggle-btn {
   background: none;
   border: none;
-  color: var(--primary-color);
-  font-weight: 500;
+  color: #F7D074;
+  font-weight: bold;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: transform 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 8px;
 }
 
 .toggle-btn:hover {
-  opacity: 0.8;
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 /* Register Fields */
@@ -387,8 +402,8 @@ const toggleMode = () => {
 .floating-element {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
+  background-color: #F7D074;
+  opacity: 0.2;
   animation: float 6s ease-in-out infinite;
 }
 
@@ -426,24 +441,38 @@ const toggleMode = () => {
 }
 
 /* Responsive Design */
+@media (min-width: 768px) {
+  .auth-container {
+    max-width: 768px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .auth-container {
+    max-width: 1024px;
+    margin: 0 auto;
+  }
+}
+
 @media (max-width: 768px) {
   .auth-card {
     width: 95%;
-    padding: 32px 24px;
+    padding: 24px 16px;
   }
   
   .auth-title {
     font-size: 24px;
   }
   
-  .form-input {
+  .input-glass {
     font-size: 16px; /* Prevent zoom on iOS */
   }
 }
 
 @media (max-width: 480px) {
   .auth-card {
-    padding: 24px 16px;
+    padding: 20px 16px;
   }
   
   .submit-btn {

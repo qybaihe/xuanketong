@@ -1,0 +1,114 @@
+{
+    "theme": "俏皮的新拟物风格 (Playful Neobrutalism)",
+    "description": "这份UI设计规范基于一个具有粗黑边框、圆角、硬阴影和友好色板的设计。其美学风格干净、大胆、略带卡通感，适用于现代且需要吸引用户的应用程序。",
+    "globalStyles": {
+      "backgroundColor": "#FEF6F7",
+      "fontFamily": "无衬线字体 (sans-serif)",
+      "textColor": "#1A1A1A"
+    },
+    "palette": {
+      "primary": "#F7D074",
+      "success": "#76D7C4",
+      "background": {
+        "main": "#FEF6F7",
+        "card": "#FFFFFF"
+      },
+      "text": {
+        "primary": "#1A1A1A",
+        "secondary": "#888888"
+      },
+      "border": "#000000"
+    },
+    "typography": {
+      "h1": {
+        "fontSize": "28px",
+        "fontWeight": "bold",
+        "textAlign": "center",
+        "description": "用于页面的主标题"
+      },
+      "h2": {
+        "fontSize": "20px",
+        "fontWeight": "bold",
+        "description": "用于卡片或区域的标题"
+      },
+      "body": {
+        "fontSize": "16px",
+        "fontWeight": "normal",
+        "description": "用于正文和列表项"
+      },
+      "caption": {
+        "fontSize": "14px",
+        "fontWeight": "normal",
+        "color": "palette.text.secondary",
+        "description": "用于辅助性描述文字"
+      },
+      "button": {
+        "fontSize": "16px",
+        "fontWeight": "bold",
+        "color": "palette.text.primary",
+        "description": "用于按钮文本"
+      }
+    },
+    "components": {
+      "card": {
+        "description": "所有内容的核心容器样式",
+        "backgroundColor": "palette.background.card",
+        "borderRadius": "12px",
+        "border": "3px solid palette.border",
+        "boxShadow": "5px 5px 0px 0px #000000",
+        "padding": "24px",
+        "margin-bottom": "24px"
+      },
+      "button": {
+        "description": "主要的交互按钮样式",
+        "backgroundColor": "palette.primary",
+        "borderRadius": "8px",
+        "border": "3px solid palette.border",
+        "boxShadow": "4px 4px 0px 0px #000000",
+        "padding": "12px 24px",
+        "typography": "typography.button",
+        "cursor": "pointer",
+        "hoverEffect": "轻微向上移动或改变阴影"
+      },
+      "checklistItem": {
+        "description": "用于特性列表的样式",
+        "display": "flex",
+        "alignItems": "center",
+        "gap": "12px",
+        "icon": {
+          "shape": "circle",
+          "backgroundColor": "palette.success",
+          "checkmarkColor": "#FFFFFF",
+          "size": "24px",
+          "border": "2px solid palette.border"
+        },
+        "text": {
+          "typography": "typography.body"
+        }
+      },
+      "icon": {
+         "description": "独立的装饰性图标样式，如星星",
+         "style": "风格化、卡通感",
+         "border": "2px solid palette.border",
+         "fill": "palette.primary"
+      }
+    },
+    "layout": {
+      "container": {
+        "maxWidth": "420px",
+        "margin": "0 auto",
+        "padding": "20px"
+      },
+      "spacing": {
+        "small": "8px",
+        "medium": "16px",
+        "large": "24px"
+      },
+      "grid": {
+        "description": "用于并排元素的布局，例如价格卡片",
+        "columns": 2,
+        "gap": "16px"
+      }
+    }
+  }
+  

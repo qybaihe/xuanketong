@@ -1,11 +1,39 @@
 /* ===== CSS Variables from Design Specification ===== */
 :root {
-  /* Primary Colors - Updated to #05AA69 */
-  --primary-color: #05AA69;
-  --primary-color-light: #07d480;
-  --primary-color-dark: #048852;
+  /* ===== 俏皮的新拟物风格 (Playful Neobrutalism) Variables ===== */
+  /* Primary Colors - Updated to #F7D074 */
+  --primary-color: #F7D074;
+  --primary-color-light: #f9dc8f;
+  --primary-color-dark: #f5c459;
   
-  /* Color Palette Schemes */
+  /* Secondary Colors */
+  --secondary-color: #76D7C4;
+  --secondary-color-light: #8ee0d0;
+  --secondary-color-dark: #5eceb8;
+  
+  /* Background Colors */
+  --background-primary: #FFFFFF;
+  --background-secondary: #FEF6F7;
+  --background-tertiary: #f9e9ea;
+  --background-blur: rgba(255, 255, 255, 0.72);
+  
+  /* Text Colors */
+  --text-primary: #1A1A1A;
+  --text-secondary: #888888;
+  --text-tertiary: #AAAAAA;
+  --text-quaternary: #CCCCCC;
+  
+  /* Border/Separator Colors */
+  --separator-color: #000000;
+  --separator-opaque: rgba(0, 0, 0, 0.36);
+  
+  /* Support Colors */
+  --accent-color: #FF3B30;
+  --success-color: #76D7C4;
+  --warning-color: #F7D074;
+  --info-color: #76D7C4;
+  
+  /* Legacy Color Palette Schemes */
   --discreet-primary: #05AA69;
   --discreet-secondary: #7d9871;
   --discreet-background: #f1fdeb;
@@ -22,33 +50,10 @@
   --natural-background: #f5fbf2;
   --natural-accent: #f6edd9;
   
-  /* Support Colors */
-  --secondary-color: #007aff;
-  --accent-color: #ff3b30;
-  --success-color: #34c759;
-  --warning-color: #ff9500;
-  --info-color: #5ac8fa;
-  
-  /* Text Colors */
-  --text-primary: #1d1d1f;
-  --text-secondary: #6e6e73;
-  --text-tertiary: #8e8e93;
-  --text-quaternary: #c7c7cc;
-  
-  /* Background Colors */
-  --background-primary: #ffffff;
-  --background-secondary: #f2f2f7;
-  --background-tertiary: #e5e5ea;
-  --background-blur: rgba(255, 255, 255, 0.72);
-  
-  /* Border/Separator Colors */
-  --separator-color: #c6c6c8;
-  --separator-opaque: rgba(60, 60, 67, 0.36);
-  
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #05AA69 0%, #07d480 100%);
-  --gradient-secondary: linear-gradient(135deg, #007aff 0%, #5ac8fa 100%);
-  --gradient-accent: linear-gradient(135deg, #ff3b30 0%, #ff9500 100%);
+  --gradient-primary: linear-gradient(135deg, #F7D074 0%, #f9dc8f 100%);
+  --gradient-secondary: linear-gradient(135deg, #76D7C4 0%, #8ee0d0 100%);
+  --gradient-accent: linear-gradient(135deg, #FF3B30 0%, #ff9500 100%);
   --gradient-match: linear-gradient(135deg, #05AA69 0%, #048852 25%, #067b73 50%, #056667 75%, #04555b 100%);
   --gradient-match-simplified: linear-gradient(135deg, #05AA69 0%, #067b73 100%);
   --gradient-natural: linear-gradient(135deg, #05AA69 0%, #66a375 50%, #c5e0c0 100%);
@@ -135,7 +140,7 @@
 
 body {
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: sans-serif;
   color: var(--text-primary);
   background: var(--background-secondary);
   line-height: 1.5;
@@ -189,7 +194,7 @@ body {
   background: rgba(255, 255, 255, 0.95);
 }
 
-/* ===== Modern Button Styles ===== */
+/* ===== 俏皮的新拟物风格 (Playful Neobrutalism) Button Styles ===== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -197,115 +202,136 @@ body {
   padding: 12px 24px;
   border-radius: var(--border-radius-base);
   font-size: var(--font-size-body);
-  font-weight: var(--font-weight-medium);
-  border: none;
+  font-weight: bold;
+  border: 3px solid #000000;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.2s ease;
   min-height: 44px;
   position: relative;
   overflow: hidden;
+  color: var(--text-primary);
 }
 
 .btn:active {
-  transform: scale(0.95);
+  transform: translate(1px, 1px);
 }
 
 /* Primary Button */
 .btn-primary {
-  background: var(--gradient-primary);
-  color: white;
-  box-shadow: 0 2px 8px rgba(5, 170, 105, 0.2);
+  background-color: var(--primary-color);
+  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(5, 170, 105, 0.3);
-  background: linear-gradient(135deg, #05AA69 0%, #048852 100%);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .btn-primary:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(5, 170, 105, 0.2);
-}
-
-/* Matching Theme Button */
-.btn-matching {
-  background: var(--gradient-match);
-  color: white;
-  box-shadow: 0 2px 8px rgba(0, 168, 255, 0.2);
-}
-
-.btn-matching:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 168, 255, 0.3);
-}
-
-/* Natural Theme Button */
-.btn-natural {
-  background: var(--gradient-natural);
-  color: var(--text-primary);
-  box-shadow: 0 2px 8px rgba(125, 152, 113, 0.2);
-}
-
-.btn-natural:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(125, 152, 113, 0.3);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px 0px #000000;
 }
 
 /* Secondary Button */
 .btn-secondary {
-  background: var(--background-secondary);
-  color: var(--text-secondary);
-  border: 1px solid var(--separator-color);
+  background-color: var(--secondary-color);
+  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 .btn-secondary:hover {
-  background: var(--background-tertiary);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
-/* ===== Card Components ===== */
+.btn-secondary:active {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px 0px #000000;
+}
+
+/* Success Button */
+.btn-success {
+  background-color: var(--success-color);
+  box-shadow: 4px 4px 0px 0px #000000;
+}
+
+.btn-success:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
+}
+
+.btn-success:active {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px 0px #000000;
+}
+
+/* Legacy Button Styles for Compatibility */
+.btn-matching {
+  background-color: var(--match-primary);
+  box-shadow: 4px 4px 0px 0px #000000;
+  color: white;
+}
+
+.btn-matching:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
+}
+
+.btn-natural {
+  background-color: var(--natural-primary);
+  box-shadow: 4px 4px 0px 0px #000000;
+  color: white;
+}
+
+.btn-natural:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
+}
+
+/* ===== 俏皮的新拟物风格 (Playful Neobrutalism) Card Components ===== */
 .card {
   background: var(--background-primary);
   border-radius: var(--card-radius);
   padding: var(--card-padding);
   margin: var(--card-margin);
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
+  transition: transform 0.2s ease;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0px 0px #000000;
 }
 
+/* Legacy Card Styles for Compatibility */
 .card-primary {
-  border: 1px solid rgba(5, 170, 105, 0.1);
-  box-shadow: 0 2px 8px rgba(47, 169, 20, 0.1);
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
 }
 
 .card-primary:hover {
-  box-shadow: 0 8px 24px rgba(47, 169, 20, 0.2);
+  box-shadow: 7px 7px 0px 0px #000000;
 }
 
 .card-matching {
-  border: 1px solid rgba(0, 168, 255, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 168, 255, 0.1);
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
 }
 
 .card-matching:hover {
-  box-shadow: 0 8px 24px rgba(0, 168, 255, 0.2);
+  box-shadow: 7px 7px 0px 0px #000000;
 }
 
 .card-natural {
-  border: 1px solid rgba(125, 152, 113, 0.1);
-  box-shadow: 0 2px 8px rgba(125, 152, 113, 0.1);
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
 }
 
 .card-natural:hover {
-  box-shadow: 0 8px 24px rgba(125, 152, 113, 0.2);
+  box-shadow: 7px 7px 0px 0px #000000;
 }
 
-/* ===== Form Components ===== */
+/* ===== 俏皮的新拟物风格 (Playful Neobrutalism) Form Components ===== */
 .form-group {
   margin-bottom: var(--spacing-md);
 }
@@ -313,7 +339,7 @@ body {
 .form-label {
   display: block;
   font-size: var(--font-size-body2);
-  font-weight: var(--font-weight-medium);
+  font-weight: bold;
   color: var(--text-primary);
   margin-bottom: var(--spacing-sm);
 }
@@ -321,22 +347,38 @@ body {
 .form-input {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid var(--separator-color);
+  border: 3px solid #000000;
   border-radius: var(--border-radius-base);
   font-size: var(--font-size-body);
   background: var(--background-primary);
-  transition: all 0.2s ease;
-  font-family: inherit;
+  transition: transform 0.2s ease;
+  font-family: sans-serif;
+  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(5, 170, 105, 0.1);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .form-input::placeholder {
   color: var(--text-quaternary);
+}
+
+/* Update Glass Input to match Neobrutalism Style */
+.input-glass {
+  background: var(--background-primary);
+  border: 3px solid #000000;
+  border-radius: var(--border-radius-base);
+  box-shadow: 4px 4px 0px 0px #000000;
+  transition: transform 0.2s ease;
+}
+
+.input-glass:focus {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
+  background: var(--background-primary);
 }
 
 /* ===== Responsive Grid System ===== */

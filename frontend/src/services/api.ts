@@ -73,6 +73,36 @@ export interface Comment {
   UpdatedAt: string
 }
 
+export interface EvaluationRequest {
+  id: number
+  userId: number
+  courseId: number
+  status: string
+  createdAt: string
+  updatedAt: string
+  user: {
+    id: number
+    nickname: string
+  }
+  course: {
+    id: number
+    name: string
+    teacher: string
+    imageURL: string
+  }
+}
+
+export interface EvaluationRequestListResponse {
+  total: number
+  page: number
+  pageSize: number
+  items: EvaluationRequest[]
+}
+
+export interface CreateEvaluationRequestRequest {
+  courseId: number
+}
+
 export interface CourseWithRating extends Course {
   AverageRating?: number
   TotalRatings?: number
@@ -182,5 +212,21 @@ const commentService = {
   }
 }
 
-export { courseService, ratingService, commentService }
+const evaluationRequestService = {
+  // 获取求评价列表
+  async getEvaluationRequests(page: number = 1, pageSize: number = 10): Promise<EvaluationRequestListResponse> {
+    const response = await api.get('/evaluation-requests', {
+      params: { page, pageSize }
+    })
+    return response.data
+  },
+
+  // 创建新的求评价请求
+  async createEvaluationRequest(courseId: number): Promise<EvaluationRequest> {
+    const response = await api.post('/evaluation-requests', { courseId })
+    return response.data
+  }
+}
+
+export { courseService, ratingService, commentService, evaluationRequestService }
 export default api

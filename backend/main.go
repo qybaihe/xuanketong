@@ -29,7 +29,7 @@ func main() {
 	fmt.Println("数据库初始化成功")
 
 	// GORM自动迁移（可选，确保模型同步）
-	if err := config.DB.AutoMigrate(&models.User{}, &models.Course{}, &models.Rating{}, &models.Comment{}); err != nil {
+	if err := config.DB.AutoMigrate(&models.User{}, &models.Course{}, &models.Rating{}, &models.Comment{}, &models.EvaluationRequest{}); err != nil {
 		fmt.Printf("GORM自动迁移失败: %v\n", err)
 	} else {
 		fmt.Println("GORM数据库迁移成功")
@@ -44,6 +44,7 @@ func main() {
 	routes.CommentRoutes(r)
 	routes.AdminRoutes(r)
 	routes.UserRoutes(r)
+	routes.EvaluationRequestRoutes(r)
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -144,6 +145,22 @@ func ensureTablesExist() error {
 	`).Error
 	if err != nil {
 		return fmt.Errorf("failed to create comments table: %v", err)
+	}
+
+	err = config.DB.Exec(`
+		CREATE TABLE IF NOT EXISTS evaluation_requests (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER NOT NULL,
+			course_id INTEGER NOT NULL,
+			status VARCHAR(20) DEFAULT 'pending',
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (user_id) REFERENCES users(id),
+			FOREIGN KEY (course_id) REFERENCES courses(id)
+		)
+	`).Error
+	if err != nil {
+		return fmt.Errorf("failed to create evaluation_requests table: %v", err)
 	}
 
 	return nil
@@ -256,12 +273,12 @@ func seedData() {
 	} else {
 		// 为每个课程创建评分
 		ratingData := map[int][]float64{
-			1: {4.5, 4.0, 4.8, 3.5, 4.2},  // 高等数学A的评分
-			2: {3.8, 4.1, 3.9, 4.3},       // 大学物理的评分
+			1: {4.5, 4.0, 4.8, 3.5, 4.2}, // 高等数学A的评分
+			2: {3.8, 4.1, 3.9, 4.3},      // 大学物理的评分
 			3: {4.9, 4.7, 4.8, 4.6, 4.5}, // 程序设计基础的评分
-			4: {4.2, 4.4, 4.1},             // 数据结构的评分
-			5: {3.5, 3.8, 3.2, 3.6},       // 英语听说的评分
-			6: {4.0, 4.3, 3.9},             // 线性代数的评分
+			4: {4.2, 4.4, 4.1},           // 数据结构的评分
+			5: {3.5, 3.8, 3.2, 3.6},      // 英语听说的评分
+			6: {4.0, 4.3, 3.9},           // 线性代数的评分
 		}
 
 		for _, course := range createdCourses {
