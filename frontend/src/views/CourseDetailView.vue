@@ -16,7 +16,6 @@ interface Course {
   subject: string;
   teacher: string;
   credits: number;
-  imageURL: string;
   createdAt: string;
   updatedAt: string;
   // 兼容字段（大写）
@@ -28,7 +27,6 @@ interface Course {
   Subject?: string;
   Teacher?: string;
   Credits?: number;
-  ImageURL?: string;
   CreatedAt?: string;
   UpdatedAt?: string;
 }
@@ -45,7 +43,6 @@ const mapCourseData = (course: any): Course => {
     subject: course.subject,
     teacher: course.teacher,
     credits: course.credits,
-    imageURL: course.imageURL || `https://picsum.photos/seed/course-${course.id}/800/400.jpg`,
     createdAt: course.createdAt,
     updatedAt: course.updatedAt,
     // 兼容字段映射
@@ -57,7 +54,6 @@ const mapCourseData = (course: any): Course => {
     Subject: course.subject,
     Teacher: course.teacher,
     Credits: course.credits,
-    ImageURL: course.imageURL || `https://picsum.photos/seed/course-${course.id}/800/400.jpg`,
     CreatedAt: course.createdAt,
     UpdatedAt: course.updatedAt
   }
@@ -90,10 +86,7 @@ const authStore = useAuthStore()
 const course = ref<Course | null>(null)
 const ratings = ref<Rating[]>([])
 const comments = ref<Comment[]>([])
-const newScore = ref(5)
-const newComment = ref('')
 const loading = ref(true)
-const submitLoading = ref(false)
 const evaluationRequestLoading = ref(false)
 const hasEvaluationRequested = ref(false)
 
@@ -114,7 +107,7 @@ const fetchRatings = async (courseId: number) => {
     ratings.value = response.data.data.map((rating: any) => ({
       ...rating,
       Username: rating.username || rating.nickname || `用户${rating.UserID}`,
-      Score: rating.score || rating.Score || 0
+      Score: !isNaN(rating.score) && isFinite(rating.score) ? rating.score : (!isNaN(rating.Score) && isFinite(rating.Score) ? rating.Score : 0)
     }))
   } catch (error) {
     console.error('获取评分失败:', error)
@@ -137,8 +130,10 @@ const fetchComments = async (courseId: number) => {
 // 计算平均评分
 const averageRating = computed(() => {
   if (ratings.value.length === 0) return 0
-  const sum = ratings.value.reduce((acc, rating) => acc + rating.Score, 0)
-  return Number((sum / ratings.value.length).toFixed(1))
+  const validRatings = ratings.value.filter(rating => !isNaN(rating.Score) && isFinite(rating.Score))
+  if (validRatings.length === 0) return 0
+  const sum = validRatings.reduce((acc, rating) => acc + rating.Score, 0)
+  return Number((sum / validRatings.length).toFixed(1))
 })
 
 // 获取评分星级
@@ -163,82 +158,6 @@ const getTags = (course: Course) => {
   return tags
 }
 
-const submitRating = async () => {
-  if (!authStore.isAuthenticated) {
-    alert('请先登录后再评分！')
-    return
-  }
-  
-  if (!currentUser.value) {
-    alert('无法获取用户信息，请重新登录！')
-    return
-  }
-  
-  submitLoading.value = true
-  try {
-    const courseId = Number(route.params.id)
-    
-    // 直接调用API创建评分
-    await api.post('/ratings', {
-      UserID: currentUser.value.id,
-      CourseID: courseId,
-      Score: newScore.value
-    })
-    
-    newScore.value = 5
-    alert('评分提交成功！')
-    
-    // 刷新评分列表
-    await fetchRatings(courseId)
-  } catch (error: any) {
-    console.error('评分提交失败:', error)
-    const errorMessage = error.response?.data?.error || '评分提交失败，请重试！'
-    alert(errorMessage)
-  } finally {
-    submitLoading.value = false
-  }
-}
-
-const submitComment = async () => {
-  if (!authStore.isAuthenticated) {
-    alert('请先登录后再评论！')
-    return
-  }
-  
-  if (!currentUser.value) {
-    alert('无法获取用户信息，请重新登录！')
-    return
-  }
-  
-  if (!newComment.value.trim()) {
-    alert('请输入评论内容！')
-    return
-  }
-  
-  submitLoading.value = true
-  try {
-    const courseId = Number(route.params.id)
-    
-    // 使用评论服务创建评论
-    await commentService.createComment(
-      currentUser.value.id,
-      courseId,
-      newComment.value.trim()
-    )
-    
-    newComment.value = ''
-    alert('评论提交成功！')
-    
-    // 刷新评论列表
-    await fetchComments(courseId)
-  } catch (error: any) {
-    console.error('评论提交失败:', error)
-    const errorMessage = error.response?.data?.error || '评论提交失败，请重试！'
-    alert(errorMessage)
-  } finally {
-    submitLoading.value = false
-  }
-}
 
 // 发起求评价
 const submitEvaluationRequest = async () => {
@@ -285,7 +204,8 @@ onMounted(async () => {
     // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
     ratings.value = ratingsResponse.data.data.map((rating: Rating) => ({
       ...rating,
-      Username: (rating as any).username || (rating as any).nickname || `用户${rating.UserID}`
+      Username: (rating as any).username || (rating as any).nickname || `用户${rating.UserID}`,
+      Score: !isNaN((rating as any).score) && isFinite((rating as any).score) ? (rating as any).score : (!isNaN(rating.Score) && isFinite(rating.Score) ? rating.Score : 0)
     }))
     // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
     comments.value = (commentsResponse.data.data || []).map((comment: Comment) => ({
@@ -302,10 +222,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="course-detail-container" :class="themeClass">
+  <div class="course-detail-container">
     <!-- 返回按钮 -->
     <div class="back-button-container">
-      <RouterLink to="/" class="btn btn-glass back-button">
+      <RouterLink to="/" class="btn back-button">
         <span class="btn-icon">←</span>
         返回课程列表
       </RouterLink>
@@ -319,121 +239,86 @@ onMounted(async () => {
 
     <!-- Course Content -->
     <div v-else-if="course" class="course-content">
-      <!-- Course Header -->
-      <div class="course-header card-glass">
-        <div class="course-header-content">
-          <div class="course-image-container">
-            <img
-              :src="course.ImageURL || course.imageURL || `https://picsum.photos/seed/course-${course?.ID || course?.id || 'default'}/800/400.jpg`"
-              :alt="course.Name || course.name || '课程图片'"
-              class="course-image"
-              @error="(e) => {
-                const img = e.target as HTMLImageElement;
-                const courseId = course?.ID || course?.id || 'default';
-                img.src = `https://picsum.photos/seed/course-${courseId}/800/400.jpg`;
-              }"
-            />
-            <div class="course-credits-badge">
-              {{ course.Credits }} 学分
+      <div class="main-content">
+        <!-- Course Header Card -->
+        <div class="card course-header">
+          <div class="course-credits-badge">
+            {{ course.Credits }} 学分
+          </div>
+          
+          <h1 class="course-title">{{ course.Name }}</h1>
+          
+          <div class="course-meta">
+            <div class="meta-item">
+              <span class="meta-icon">👨‍🏫</span>
+              <span class="meta-text">{{ course.Teacher }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon">📚</span>
+              <span class="meta-text">{{ course.Grade }} · {{ course.Semester }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon">📖</span>
+              <span class="meta-text">{{ course.Subject }}</span>
             </div>
           </div>
           
-          <div class="course-info">
-            <div class="course-tags">
-              <span
-                v-for="(tag, index) in getTags(course)"
-                :key="index"
-                :class="['course-tag', tag.type]"
-              >
-                {{ tag.text }}
+          <div class="course-tags">
+            <span
+              v-for="(tag, index) in getTags(course)"
+              :key="index"
+              :class="['course-tag', tag.type]"
+            >
+              {{ tag.text }}
+            </span>
+          </div>
+          
+          <div class="course-rating-summary">
+            <div class="rating-stars">
+              <span v-for="i in 5" :key="i" class="star">
+                {{ i <= Math.floor(averageRating) ? '⭐' : (i - 0.5 <= averageRating ? '🌟' : '☆') }}
               </span>
             </div>
-            
-            <h1 class="course-title text-shine">{{ course.Name }}</h1>
-            
-            <div class="course-meta">
-              <div class="meta-item">
-                <span class="meta-icon">👨‍🏫</span>
-                <span class="meta-text">{{ course.Teacher }}</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-icon">📚</span>
-                <span class="meta-text">{{ course.Grade }} · {{ course.Semester }}</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-icon">📖</span>
-                <span class="meta-text">{{ course.Subject }}</span>
-              </div>
-            </div>
-            
-            <div class="course-rating-summary">
-              <div class="rating-stars">
-                <span v-for="i in 5" :key="i" class="star">
-                  {{ i <= Math.floor(averageRating) ? '⭐' : (i - 0.5 <= averageRating ? '🌟' : '☆') }}
-                </span>
-              </div>
-              <span class="rating-value">{{ averageRating }}</span>
-              <span class="rating-count">({{ ratings.length }} 人评分)</span>
-            </div>
-            
-            <!-- 求评价按钮 -->
-            <div v-if="canSubmit" class="evaluation-request-section">
-              <button
-                @click="submitEvaluationRequest"
-                class="btn btn-evaluation"
-                :disabled="evaluationRequestLoading || hasEvaluationRequested"
-              >
-                <span class="btn-icon">📢</span>
-                {{ evaluationRequestLoading ? '发送中...' : (hasEvaluationRequested ? '已求评价' : '求评价') }}
-              </button>
-              <p v-if="hasEvaluationRequested" class="evaluation-request-success">
-                已成功发起求评价请求，请耐心等待其他同学的评价！
-              </p>
-            </div>
+            <span class="rating-value">{{ averageRating }}</span>
+            <span class="rating-count">({{ ratings.length }} 人评分)</span>
           </div>
+          
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <RouterLink
+              :to="`/courses/${course.ID}/rate`"
+              class="btn btn-primary"
+            >
+              <span class="btn-icon">⭐</span>
+              去评价课程
+            </RouterLink>
+            
+            <button
+              v-if="canSubmit"
+              @click="submitEvaluationRequest"
+              class="btn btn-secondary"
+              :disabled="evaluationRequestLoading || hasEvaluationRequested"
+            >
+              <span class="btn-icon">📢</span>
+              {{ evaluationRequestLoading ? '发送中...' : (hasEvaluationRequested ? '已求评价' : '求评价') }}
+            </button>
+          </div>
+          
+          <p v-if="hasEvaluationRequested" class="evaluation-request-success">
+            已成功发起求评价请求，请耐心等待其他同学的评价！
+          </p>
         </div>
-      </div>
 
-      <!-- Course Description -->
-      <div class="course-description card-glass">
-        <h2 class="section-title">课程介绍</h2>
-        <p class="description-text">{{ course.Description }}</p>
-      </div>
-
-      <!-- Rating Section -->
-      <div class="rating-section card-glass">
-        <h2 class="section-title">课程评分</h2>
-        
-        <div class="rating-form">
-          <h3>为这门课程评分</h3>
-          <div class="score-input-container">
-            <input
-              type="range"
-              v-model.number="newScore"
-              min="1"
-              max="5"
-              step="0.5"
-              class="score-slider"
-            />
-            <div class="score-display">{{ newScore }}</div>
-          </div>
-          <button
-            @click="submitRating"
-            class="btn btn-primary"
-            :disabled="submitLoading || !canSubmit"
-          >
-            <span class="btn-icon">⭐</span>
-            {{ submitLoading ? '提交中...' : '提交评分' }}
-          </button>
-          <div v-if="!canSubmit" class="login-prompt">
-            <span class="prompt-icon">🔒</span>
-            <span>请先登录后进行评分</span>
-            <RouterLink to="/auth" class="login-link">立即登录</RouterLink>
-          </div>
+        <!-- Course Description Card -->
+        <div class="card course-description">
+          <h2 class="card-title">课程介绍</h2>
+          <p class="description-text">{{ course.Description }}</p>
         </div>
-        
-        <div class="ratings-list">
-          <h3>用户评分</h3>
+
+        <!-- Rating Section Card -->
+        <div class="card rating-section">
+          <h2 class="card-title">课程评分</h2>
+          
           <div v-if="ratings.length === 0" class="empty-state">
             <p>暂无评分</p>
           </div>
@@ -454,37 +339,11 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Comment Section -->
-      <div class="comment-section card-glass">
-        <h2 class="section-title">课程评论</h2>
-        
-        <div class="comment-form">
-          <h3>发表评论</h3>
-          <textarea
-            v-model="newComment"
-            placeholder="分享你对这门课程的看法..."
-            class="comment-input"
-            rows="4"
-          ></textarea>
-          <button
-            @click="submitComment"
-            class="btn btn-primary"
-            :disabled="submitLoading || !canSubmit"
-          >
-            <span class="btn-icon">💬</span>
-            {{ submitLoading ? '提交中...' : '提交评论' }}
-          </button>
-          <div v-if="!canSubmit" class="login-prompt">
-            <span class="prompt-icon">🔒</span>
-            <span>请先登录后发表评论</span>
-            <RouterLink to="/auth" class="login-link">立即登录</RouterLink>
-          </div>
-        </div>
-        
-        <div class="comments-list">
-          <h3>用户评论</h3>
+        <!-- Comment Section Card -->
+        <div class="card comment-section">
+          <h2 class="card-title">课程评论</h2>
+          
           <div v-if="comments.length === 0" class="empty-state">
             <p>暂无评论</p>
           </div>
@@ -506,6 +365,17 @@ onMounted(async () => {
           </div>
         </div>
       </div>
+
+      <!-- Notes Section (Placeholder) -->
+      <div class="notes-section">
+        <div class="card notes-card">
+          <h2 class="card-title">课程笔记</h2>
+          <div class="notes-placeholder">
+            <p>笔记功能即将上线...</p>
+            <div class="notes-icon">📝</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -514,24 +384,15 @@ onMounted(async () => {
 /* 主容器 */
 .course-detail-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--background-secondary) 0%, var(--natural-background) 100%);
-  padding: var(--spacing-lg) 0;
+  background-color: #FEF6F7;
+  font-family: sans-serif;
+  color: #1A1A1A;
+  padding: 20px;
 }
 
 /* 返回按钮容器 */
 .back-button-container {
-  max-width: 1200px;
-  margin: 0 auto var(--spacing-lg);
-  padding: 0 var(--spacing-md);
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-
-.back-button {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
+  margin-bottom: 24px;
 }
 
 /* 加载状态 */
@@ -540,139 +401,129 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-3xl);
-  gap: var(--spacing-md);
+  padding: 60px;
+  gap: 16px;
 }
 
 .loading-text {
-  font-size: var(--font-size-body);
-  color: var(--text-secondary);
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: var(--font-weight-semibold);
+  font-size: 16px;
+  color: #888888;
+  font-weight: bold;
 }
 
 /* 课程内容 */
 .course-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-md);
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: 24px;
+}
+
+.main-content {
+  flex: 2;
+}
+
+.notes-section {
+  flex: 1;
+}
+
+/* 卡片通用样式 */
+.card {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+/* 卡片标题 */
+.card-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+  text-align: center;
 }
 
 /* 课程头部 */
 .course-header {
-  padding: var(--spacing-xl);
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.course-header-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-xl);
-  align-items: center;
-}
-
-.course-image-container {
   position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-}
-
-.course-image {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.course-image-container:hover .course-image {
-  transform: scale(1.05);
 }
 
 .course-credits-badge {
-  position: absolute;
-  top: var(--spacing-md);
-  right: var(--spacing-md);
-  background: var(--gradient-primary);
-  color: white;
-  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: #F7D074;
+  color: #1A1A1A;
+  padding: 8px 16px;
   border-radius: 20px;
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
-  box-shadow: var(--shadow-primary);
-}
-
-.course-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.course-tags {
-  display: flex;
-  gap: var(--spacing-xs);
-  flex-wrap: wrap;
-}
-
-.course-tag {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 4px;
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
-}
-
-.course-tag.primary {
-  background: var(--success-light);
-  color: var(--success-base);
-}
-
-.course-tag.secondary {
-  background: var(--info-light);
-  color: var(--info-base);
-}
-
-.course-tag.accent {
-  background: var(--warning-light);
-  color: var(--warning-base);
+  font-size: 14px;
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 16px;
+  border: 2px solid #000000;
 }
 
 .course-title {
-  font-size: var(--font-size-title1);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin: 0;
-  line-height: 1.2;
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+  text-align: center;
 }
 
 .course-meta {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  font-size: var(--font-size-body);
-  color: var(--text-secondary);
+  gap: 8px;
+  font-size: 16px;
+  color: #1A1A1A;
 }
 
 .meta-icon {
   font-size: 18px;
 }
 
+.course-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.course-tag {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid #000000;
+}
+
+.course-tag.primary {
+  background-color: #76D7C4;
+  color: #1A1A1A;
+}
+
+.course-tag.secondary {
+  background-color: #F7D074;
+  color: #1A1A1A;
+}
+
+.course-tag.accent {
+  background-color: #F7D074;
+  color: #1A1A1A;
+}
+
 .course-rating-summary {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
 }
 
 .rating-stars {
@@ -681,232 +532,152 @@ onMounted(async () => {
 }
 
 .star {
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .rating-value {
-  font-size: var(--font-size-title3);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: bold;
+  color: #1A1A1A;
 }
 
 .rating-count {
-  font-size: var(--font-size-body2);
-  color: var(--text-tertiary);
+  font-size: 14px;
+  color: #888888;
 }
 
-/* 课程描述 */
-.course-description {
-  padding: var(--spacing-xl);
-  border-radius: 16px;
-}
-
-.section-title {
-  font-size: var(--font-size-title2);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-md) 0;
-}
-
-.description-text {
-  font-size: var(--font-size-body);
-  line-height: 1.6;
-  color: var(--text-secondary);
-  margin: 0;
-}
-
-/* 评分部分 */
-.rating-section {
-  padding: var(--spacing-xl);
-  border-radius: 16px;
-}
-
-.rating-form {
-  margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-lg);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-}
-
-.rating-form h3 {
-  font-size: var(--font-size-title3);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-md) 0;
-}
-
-.score-input-container {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-}
-
-.score-slider {
-  flex: 1;
-  height: 8px;
-  border-radius: 4px;
-  background: var(--background-tertiary);
-  outline: none;
-  -webkit-appearance: none;
-}
-
-.score-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--gradient-primary);
-  cursor: pointer;
-}
-
-.score-slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--gradient-primary);
-  cursor: pointer;
-  border: none;
-}
-
-.score-display {
-  font-size: var(--font-size-title2);
-  font-weight: var(--font-weight-bold);
-  color: var(--primary-color);
-  min-width: 40px;
-  text-align: center;
-}
-
-.ratings-list h3 {
-  font-size: var(--font-size-title3);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-md) 0;
-}
-
-.empty-state {
-  text-align: center;
-  padding: var(--spacing-lg);
-  color: var(--text-tertiary);
-}
-
-.rating-items {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.rating-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-md);
-  background: rgba(255, 255, 255, 0.05);
+/* 按钮通用样式 */
+.btn {
+  background-color: #F7D074;
   border-radius: 8px;
-}
-
-.rating-user {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--gradient-primary);
-  color: white;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #1A1A1A;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: var(--font-weight-semibold);
+  gap: 8px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #76D7C4;
+}
+
+/* 操作按钮区域 */
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.evaluation-request-success {
+  font-size: 14px;
+  color: #76D7C4;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* 课程描述 */
+.description-text {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #1A1A1A;
+  margin: 0;
+}
+
+/* 评分和评论部分 */
+.empty-state {
+  text-align: center;
+  padding: 24px;
+  color: #888888;
+  font-size: 16px;
+}
+
+.rating-items,
+.comment-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rating-item,
+.comment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #FEF6F7;
+  border-radius: 8px;
+  border: 2px solid #000000;
+}
+
+.comment-item {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.rating-user,
+.comment-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #F7D074;
+  color: #1A1A1A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+  border: 2px solid #000000;
 }
 
 .user-name {
-  font-size: var(--font-size-body);
-  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: bold;
+  color: #1A1A1A;
 }
 
 .rating-score {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 8px;
 }
 
 .score-value {
-  font-size: var(--font-size-body2);
-  font-weight: var(--font-weight-semibold);
-  color: var(--primary-color);
-}
-
-/* 评论部分 */
-.comment-section {
-  padding: var(--spacing-xl);
-  border-radius: 16px;
-}
-
-.comment-form {
-  margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-lg);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-}
-
-.comment-form h3 {
-  font-size: var(--font-size-title3);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-md) 0;
-}
-
-.comment-input {
-  width: 100%;
-  padding: var(--spacing-md);
-  border: 1px solid var(--separator-color);
-  border-radius: 8px;
-  font-size: var(--font-size-body);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  margin-bottom: var(--spacing-md);
-  resize: vertical;
-  min-height: 100px;
-}
-
-.comment-input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(47, 169, 20, 0.1);
-}
-
-.comments-list h3 {
-  font-size: var(--font-size-title3);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-md) 0;
-}
-
-.comment-items {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-.comment-item {
-  padding: var(--spacing-lg);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #1A1A1A;
 }
 
 .comment-header {
-  margin-bottom: var(--spacing-md);
-}
-
-.comment-user {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  width: 100%;
+  margin-bottom: 8px;
 }
 
 .user-info {
@@ -915,211 +686,55 @@ onMounted(async () => {
 }
 
 .comment-date {
-  font-size: var(--font-size-caption);
-  color: var(--text-tertiary);
+  font-size: 14px;
+  color: #888888;
 }
 
 .comment-content {
-  font-size: var(--font-size-body);
+  font-size: 16px;
   line-height: 1.6;
-  color: var(--text-secondary);
+  color: #1A1A1A;
+  width: 100%;
 }
 
 .comment-content p {
   margin: 0;
 }
 
+/* 笔记部分 */
+.notes-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.notes-placeholder p {
+  font-size: 16px;
+  color: #888888;
+  margin-bottom: 16px;
+}
+
+.notes-icon {
+  font-size: 48px;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .course-header-content {
-    grid-template-columns: 1fr;
-  }
-  
-  .course-image {
-    height: 200px;
-  }
-  
-  .back-button-container {
-    flex-direction: column;
-    gap: var(--spacing-md);
-  }
-  
   .course-content {
-    padding: 0 var(--spacing-sm);
+    flex-direction: column;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
   }
   
   .rating-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--spacing-sm);
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .course-header-content {
-    grid-template-columns: 1fr;
-  }
-  
-  .course-image {
-    height: 250px;
-  }
-}
-
-/* 动画效果 */
-.course-header,
-.course-description,
-.rating-section,
-.comment-section {
-  transition: all 0.3s ease;
-}
-
-.course-header:hover,
-.course-description:hover,
-.rating-section:hover,
-.comment-section:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-xl);
-}
-
-/* 主题切换动画 */
-.elastic-in {
-  animation: elasticIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes elasticIn {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* 求评价功能样式 */
-.evaluation-request-section {
-  margin-top: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  border: 1px solid rgba(47, 169, 20, 0.2);
-}
-
-.btn-evaluation {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-}
-
-.btn-evaluation:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ff5252 0%, #ff7575 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
-}
-
-.btn-evaluation:active {
-  transform: translateY(0);
-}
-
-.btn-evaluation:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.evaluation-request-success {
-  margin-top: var(--spacing-sm);
-  font-size: var(--font-size-caption);
-  color: var(--success-base);
-  font-weight: var(--font-weight-medium);
-}
-
-/* 登录提示样式 */
-.login-prompt {
-  margin-top: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--background-secondary);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  font-size: var(--font-size-caption);
-  color: var(--text-tertiary);
-}
-
-.prompt-icon {
-  font-size: 14px;
-}
-
-.login-link {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: var(--font-weight-medium);
-  margin-left: auto;
-  transition: var(--transition-standard);
-}
-
-.login-link:hover {
-  color: var(--primary-color-dark);
-  text-decoration: underline;
-}
-
-/* 按钮禁用状态 */
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-/* 暗色主题支持 */
-@media (prefers-color-scheme: dark) {
-  .course-detail-container {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  }
-  
-  .course-title {
-    background: linear-gradient(135deg, #4fc830 0%, #2fa914 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .card-glass {
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .comment-input {
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
-  }
-
-  .login-prompt {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.8);
-  }
-
-  .login-link {
-    color: #4fc830;
-  }
-
-  .login-link:hover {
-    color: #2fa914;
+    gap: 8px;
   }
 }
 </style>

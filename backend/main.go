@@ -167,6 +167,18 @@ func ensureTablesExist() error {
 }
 
 func seedData() {
+	// 检查是否已经有数据，如果有则跳过种子数据创建
+	var courseCount int64
+	if err := config.DB.Model(&models.Course{}).Count(&courseCount).Error; err != nil {
+		fmt.Printf("检查课程数量失败: %v\n", err)
+		return
+	}
+
+	if courseCount > 0 {
+		fmt.Println("数据库中已有数据，跳过种子数据创建")
+		return
+	}
+
 	// 创建管理员账号
 	adminPassword := "123456"
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
@@ -187,11 +199,6 @@ func seedData() {
 			fmt.Println("Admin user created or already exists")
 		}
 	}
-
-	// 清除现有数据
-	config.DB.Exec("DELETE FROM ratings")
-	config.DB.Exec("DELETE FROM comments")
-	config.DB.Exec("DELETE FROM courses")
 
 	// 创建测试课程
 	courses := []models.Course{
@@ -282,7 +289,7 @@ func seedData() {
 		}
 
 		for _, course := range createdCourses {
-			courseIndex := int(course.ID - 42) // 减去偏移量，因为课程ID从43开始
+			courseIndex := int(course.ID) // 课程ID现在从1开始
 			if scores, exists := ratingData[courseIndex]; exists {
 				for i, score := range scores {
 					rating := models.Rating{

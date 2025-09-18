@@ -63,11 +63,12 @@ func GetCourses(c *gin.Context) {
 		return
 	}
 
-	// 获取每个课程的平均评分
+	// 获取每个课程的平均评分和评分分布
 	type CourseWithRating struct {
 		models.Course
-		AverageRating float64 `json:"averageRating"`
-		TotalRatings  int     `json:"totalRatings"`
+		AverageRating      float64     `json:"averageRating"`
+		TotalRatings       int         `json:"totalRatings"`
+		RatingDistribution map[int]int `json:"ratingDistribution"` // 1-5星评分分布
 	}
 
 	var coursesWithRatings []CourseWithRating
@@ -87,10 +88,21 @@ func GetCourses(c *gin.Context) {
 			avgRating = 0
 		}
 
+		// 获取评分分布（1-5星）
+		ratingDistribution := make(map[int]int)
+		for i := 1; i <= 5; i++ {
+			var count int64
+			config.DB.Model(&models.Rating{}).
+				Where("course_id = ? AND score >= ? AND score < ?", course.ID, float64(i)-0.5, float64(i)+0.5).
+				Count(&count)
+			ratingDistribution[i] = int(count)
+		}
+
 		coursesWithRatings = append(coursesWithRatings, CourseWithRating{
-			Course:        course,
-			AverageRating: avgRating,
-			TotalRatings:  int(totalRatings),
+			Course:             course,
+			AverageRating:      avgRating,
+			TotalRatings:       int(totalRatings),
+			RatingDistribution: ratingDistribution,
 		})
 	}
 

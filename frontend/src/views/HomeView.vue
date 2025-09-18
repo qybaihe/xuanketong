@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, watch, computed, nextTick } from 'vue'
-import { RouterLink } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 import { courseService, type Course, type CourseWithRating } from '@/services/api'
+
+const router = useRouter()
 
 interface CourseWithDisplay extends CourseWithRating {
   Students?: number;
   isPopular?: boolean;
   isNew?: boolean;
+  RatingDistribution?: Record<number, number>; // 1-5星评分分布
 }
 
 const courses = ref<CourseWithDisplay[]>([])
@@ -49,28 +52,27 @@ const showNewOnly = () => {
 const goToRateCourse = (courseId: number | undefined) => {
   if (courseId) {
     // 使用Vue Router进行导航
-    window.location.href = `#/courses/${courseId}/rate`
+    router.push(`/courses/${courseId}/rate`)
   }
 }
 
 // 获取评分百分比（用于评分条）
-const getRatingPercentage = (rating: number, starLevel: number) => {
-  // 根据评分级别计算百分比，模拟真实数据分布
-  const baseDistribution = [0.05, 0.15, 0.35, 0.30, 0.15] // 1-5星的基准分布
-  const ratingIndex = Math.max(0, Math.min(4, Math.floor(rating) - 1))
-  const basePercent = baseDistribution[4 - (starLevel - 1)] * 100
+const getRatingPercentage = (course: CourseWithDisplay, starLevel: number) => {
+  // 使用真实的评分分布数据
+  const ratingDistribution = course.RatingDistribution || {}
+  const countForStar = ratingDistribution[starLevel] || 0
+  const totalRatings = course.TotalRatings || 1
   
-  // 根据实际评分调整分布
-  const adjustment = (rating % 1) * (starLevel <= rating ? 10 : -10)
-  
-  return Math.max(5, Math.min(95, basePercent + adjustment))
+  // 计算百分比
+  const percentage = (countForStar / totalRatings) * 100
+  return Math.max(5, Math.min(95, percentage)) // 限制在5-95之间，确保可见
 }
 
 // 获取评分数量（用于评分条）
-const getRatingCount = (rating: number, starLevel: number) => {
-  const totalReviews = Math.floor((rating || 0) * 20) // 假设每0.1分对应2条评价
-  const percentage = getRatingPercentage(rating, starLevel)
-  return Math.floor(totalReviews * percentage / 100)
+const getRatingCount = (course: CourseWithDisplay, starLevel: number) => {
+  // 使用真实的评分分布数据
+  const ratingDistribution = course.RatingDistribution || {}
+  return ratingDistribution[starLevel] || 0
 }
 
 // 获取卡片类名
@@ -88,7 +90,6 @@ const mapCourseData = (course: any): CourseWithDisplay => {
     description: course.description,
     teacher: course.teacher,
     credits: course.credits,
-    imageURL: course.imageURL,
     grade: course.grade,
     semester: course.semester,
     subject: course.subject,
@@ -96,20 +97,21 @@ const mapCourseData = (course: any): CourseWithDisplay => {
     updatedAt: course.updatedAt,
     averageRating: course.averageRating,
     totalRatings: course.totalRatings,
+    ratingDistribution: course.ratingDistribution,
     // 兼容字段映射（大写）
     ID: course.id,
     Name: course.name,
     Description: course.description,
     Teacher: course.teacher,
     Credits: course.credits,
-    ImageURL: course.imageURL || `https://picsum.photos/seed/course-${course.id}/400/200.jpg`,
     Grade: course.grade,
     Semester: course.semester,
     Subject: course.subject,
     CreatedAt: course.createdAt,
     UpdatedAt: course.updatedAt,
     AverageRating: course.averageRating,
-    TotalRatings: course.totalRatings
+    TotalRatings: course.totalRatings,
+    RatingDistribution: course.ratingDistribution
   }
 }
 
@@ -228,20 +230,6 @@ const addMagneticEffect = (element: HTMLElement) => {
   })
 }
 
-// 图片加载处理
-const handleImageLoad = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  img.classList.add('loaded')
-  console.log('图片加载成功:', img.src)
-}
-
-// 图片加载错误处理
-const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  console.log('图片加载失败，使用备用URL:', img.src)
-  // 使用备用图片URL
-  img.src = `https://picsum.photos/seed/course-${img.alt || 'default'}/400/200.jpg`
-}
 
 // 添加性能监控
 const initPerformanceMonitoring = () => {
@@ -314,24 +302,6 @@ onMounted(() => {
   nextTick(() => {
     document.querySelectorAll('.btn').forEach(btn => {
       addMagneticEffect(btn as HTMLElement)
-    })
-    
-    // 为图片添加懒加载观察器
-    const imageObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target as HTMLImageElement
-          if (img.dataset.src) {
-            img.src = img.dataset.src
-            img.removeAttribute('data-src')
-          }
-          imageObserver.unobserve(img)
-        }
-      })
-    })
-    
-    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
-      imageObserver.observe(img)
     })
   })
 })
@@ -502,9 +472,9 @@ onMounted(() => {
                   <div class="rating-bar" v-for="i in 5" :key="i">
                     <span class="bar-label">{{ 6-i }}星</span>
                     <div class="bar-container">
-                      <div class="bar-fill" :style="{ width: getRatingPercentage(getDisplayRating(course), 6-i) + '%' }"></div>
+                      <div class="bar-fill" :style="{ width: getRatingPercentage(course, 6-i) + '%' }"></div>
                     </div>
-                    <span class="bar-count">{{ getRatingCount(getDisplayRating(course), 6-i) }}</span>
+                    <span class="bar-count">{{ getRatingCount(course, 6-i) }}</span>
                   </div>
                 </div>
               </div>

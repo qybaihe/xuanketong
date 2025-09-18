@@ -45,7 +45,6 @@ export interface Course {
   description: string
   teacher: string
   credits: number
-  imageURL: string
   grade: string
   semester: string
   subject: string
@@ -88,7 +87,6 @@ export interface EvaluationRequest {
     id: number
     name: string
     teacher: string
-    imageURL: string
   }
 }
 
@@ -106,18 +104,19 @@ export interface CreateEvaluationRequestRequest {
 export interface CourseWithRating extends Course {
   AverageRating?: number
   TotalRatings?: number
+  ratingDistribution?: Record<number, number> // 1-5星评分分布
   // 兼容字段映射
   ID?: number
   Name?: string
   Description?: string
   Teacher?: string
   Credits?: number
-  ImageURL?: string
   Grade?: string
   Semester?: string
   Subject?: string
   CreatedAt?: string
   UpdatedAt?: string
+  RatingDistribution?: Record<number, number> // 1-5星评分分布（大写形式）
 }
 
 export interface CourseFilters {

@@ -9,8 +9,8 @@ import (
 
 func EvaluationRequestRoutes(router *gin.Engine) {
 	// 获取求评价列表 - 公开访问
-	router.GET("/api/evaluation-requests", controllers.GetEvaluationRequests)
+	router.GET("/api/v1/evaluation-requests", controllers.GetEvaluationRequests)
 
 	// 创建求评价请求 - 需要认证
-	router.POST("/api/evaluation-requests", middleware.AuthMiddleware(), controllers.CreateEvaluationRequest)
+	router.POST("/api/v1/evaluation-requests", middleware.AuthMiddleware(), controllers.CreateEvaluationRequest)
 }
