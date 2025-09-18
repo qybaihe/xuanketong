@@ -126,6 +126,13 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // OAuth2 Login
+  const oauth2Login = async (token: string, userInfo: User) => {
+    setToken(token)
+    user.value = userInfo
+    error.value = null
+  }
+
   // Clear error
   const clearError = () => {
     error.value = null
@@ -142,6 +149,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     getCurrentUser,
+    oauth2Login,
     clearError
   }
 })
