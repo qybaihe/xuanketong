@@ -498,11 +498,9 @@ onMounted(() => {
               <h3 class="course-card-title text-shine">{{ course.Name }}</h3>
               <div class="course-teacher-section">
                 <div class="teacher-label">授课老师</div>
-                <div class="teacher-name">{{ course.Teacher }}</div>
-              </div>
-              <div class="course-meta-info">
-                <div class="meta-item">
-                  <span class="meta-text">{{ course.Credits }} 学分</span>
+                <div class="teacher-info">
+                  <div class="teacher-name">{{ course.Teacher }}</div>
+                  <div class="teacher-credits">{{ course.Credits }} 学分</div>
                 </div>
               </div>
             </div>
@@ -537,14 +535,6 @@ onMounted(() => {
             
             <!-- 课程操作区域 -->
             <div class="course-card-actions">
-              <div class="engagement-stats">
-                <div class="meta-item">
-                  <span class="meta-text">{{ course.Credits }} 学分</span>
-                </div>
-                <div class="meta-item">
-                  <span class="meta-text">{{ (course.TotalRatings || 0) }} 人评价</span>
-                </div>
-              </div>
               <button class="btn btn-rate-course" @click.prevent="goToRateCourse(course.ID)">
                 评价课程
               </button>
@@ -1762,43 +1752,37 @@ onMounted(() => {
   opacity: 0.8;
 }
 
+.teacher-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1;
+}
+
 .teacher-name {
   font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 8px;
 }
 
-
-/* 课程元信息 */
-.course-meta-info {
-  display: flex;
-  gap: var(--spacing-lg);
-  flex-wrap: wrap;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.teacher-credits {
   font-size: 14px;
   color: var(--text-secondary);
-  padding: 6px 12px;
-  background: var(--background-secondary);
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.meta-item:hover {
-  background: var(--background-tertiary);
-  transform: translateY(-1px);
+.teacher-credits::before {
+  content: "📚";
+  font-size: 16px;
 }
 
-.meta-text {
-  font-weight: var(--font-weight-medium);
-}
+
+
 
 .course-rating-section {
   padding: 20px;
@@ -1880,10 +1864,10 @@ onMounted(() => {
 
 .course-card-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-top: auto; /* Push to bottom */
-  padding-top: 16px;
+  padding-top: 20px;
 }
 
 
