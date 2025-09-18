@@ -58,6 +58,7 @@ func main() {
 	routes.AdminRoutes(r)
 	routes.UserRoutes(r)
 	routes.EvaluationRequestRoutes(r)
+	routes.OAuth2Routes(r)
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

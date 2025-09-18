@@ -9,6 +9,7 @@ import AdminView from '../views/AdminView.vue'
 import CourseManagement from '../views/CourseManagement.vue'
 import CourseDetailsAdminView from '../views/CourseDetailsAdminView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import OAuth2CallbackView from '../views/OAuth2CallbackView.vue'
 import { requireAuth, requireAdmin, redirectIfAuthenticated } from './guards'
 
 const router = createRouter({
@@ -46,6 +47,11 @@ const router = createRouter({
       name: 'auth',
       component: AuthView,
       beforeEnter: redirectIfAuthenticated
+    },
+    {
+      path: '/auth/oauth2/callback',
+      name: 'oauth2-callback',
+      component: OAuth2CallbackView
     },
     {
       path: '/admin',
