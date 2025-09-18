@@ -9,14 +9,23 @@ import (
 )
 
 func CreateComment(c *gin.Context) {
-	var input models.Comment
+	var input struct {
+		CourseID uint   `json:"courseId" binding:"required"`
+		Content  string `json:"content" binding:"required"`
+	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	userID, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	comment := models.Comment{
-		UserID:   input.UserID,
+		UserID:   userID.(uint),
 		CourseID: input.CourseID,
 		Content:  input.Content,
 	}
@@ -31,33 +40,10 @@ func CreateComment(c *gin.Context) {
 
 func GetCommentsByCourse(c *gin.Context) {
 	var comments []models.Comment
-	config.DB.Where("course_id = ?", c.Param("id")).Find(&comments)
-
-	// 获取用户信息
-	type CommentWithUser struct {
-		models.Comment
-		Username string `json:"username"`
-		Nickname string `json:"nickname"`
+	if err := config.DB.Preload("User").Where("course_id = ?", c.Param("id")).Find(&comments).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve comments"})
+		return
 	}
 
-	var result []CommentWithUser
-	for _, comment := range comments {
-		var user models.User
-		if err := config.DB.Where("id = ?", comment.UserID).First(&user).Error; err == nil {
-			result = append(result, CommentWithUser{
-				Comment:  comment,
-				Username: user.Username,
-				Nickname: user.Nickname,
-			})
-		} else {
-			// 如果用户不存在，使用默认值
-			result = append(result, CommentWithUser{
-				Comment:  comment,
-				Username: "用户" + string(comment.UserID),
-				Nickname: "用户" + string(comment.UserID),
-			})
-		}
-	}
-
-	c.JSON(http.StatusOK, gin.H{"data": result})
+	c.JSON(http.StatusOK, gin.H{"data": comments})
 }

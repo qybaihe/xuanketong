@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import api from '@/services/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -42,17 +43,17 @@ const ratingOptions = [
 const fetchCourseInfo = async () => {
   loading.value = true
   try {
-    // 模拟API调用
-    const mockCourse = {
-      id: courseId.value,
-      name: '高等数学',
-      teacher: '张教授',
-      credits: 4,
-      grade: '大一',
-      semester: '2024春季',
-      subject: '数学'
-    }
-    Object.assign(course, mockCourse)
+    const response = await api.get(`/courses/${courseId.value}`)
+    const courseData = response.data.data
+    Object.assign(course, {
+      id: courseData.id,
+      name: courseData.name,
+      teacher: courseData.teacher,
+      credits: courseData.credits,
+      grade: courseData.grade,
+      semester: courseData.semester,
+      subject: courseData.subject
+    })
   } catch (error) {
     console.error('获取课程信息失败:', error)
   } finally {
@@ -61,14 +62,30 @@ const fetchCourseInfo = async () => {
 }
 
 // 处理星级点击
-const handleStarClick = (ratingType: keyof typeof ratingForm, value: number) => {
-  ratingForm[ratingType] = value
+const handleStarClick = (ratingType: string, value: number) => {
+  // 使用类型断言来允许动态属性访问
+  (ratingForm as any)[ratingType] = value
 }
 
 // 提交评价
 const submitRating = async () => {
   if (ratingForm.overall === 0) {
     alert('请给出总体评分')
+    return
+  }
+  
+  if (ratingForm.difficulty === 0) {
+    alert('请给出课程难度评分')
+    return
+  }
+  
+  if (ratingForm.usefulness === 0) {
+    alert('请给出实用性评分')
+    return
+  }
+  
+  if (ratingForm.teaching === 0) {
+    alert('请给出教学质量评分')
     return
   }
   
@@ -79,17 +96,25 @@ const submitRating = async () => {
 
   submitting.value = true
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 提交评分数据，包括课程难度、实用性和教学质量
+    await api.post(`/courses/${courseId.value}/ratings`, {
+      score: ratingForm.overall,
+      difficulty: ratingForm.difficulty,
+      usefulness: ratingForm.usefulness,
+      teaching: ratingForm.teaching,
+      content: ratingForm.content,
+      isAnonymous: ratingForm.isAnonymous
+    })
     
     // 显示成功提示
     alert('评价提交成功！感谢您的反馈。')
     
     // 返回课程详情页面
     router.push({ name: 'course-detail', params: { id: courseId.value } })
-  } catch (error) {
+  } catch (error: any) {
     console.error('提交评价失败:', error)
-    alert('提交失败，请稍后重试')
+    const errorMessage = error.response?.data?.error || '提交失败，请稍后重试'
+    alert(errorMessage)
   } finally {
     submitting.value = false
   }
@@ -109,15 +134,12 @@ onMounted(() => {
 
 <template>
   <div class="course-rate-container">
-    <!-- 顶部导航 -->
-    <div class="rate-header">
-      <div class="header-content">
-        <button @click="cancelRating" class="btn-back">
-          <span class="back-icon">←</span>
-          返回
-        </button>
-        <h1 class="page-title">课程评价</h1>
-      </div>
+    <!-- 返回按钮 -->
+    <div class="back-button-container">
+      <button @click="cancelRating" class="btn back-button">
+        <span class="btn-icon">←</span>
+        返回课程详情
+      </button>
     </div>
 
     <!-- 加载状态 -->
@@ -129,40 +151,41 @@ onMounted(() => {
     <!-- 评价表单 -->
     <div v-else class="rate-content">
       <!-- 课程信息卡片 -->
-      <div class="course-info-card">
+      <div class="card course-info-card">
+        <h2 class="card-title">课程信息</h2>
         <div class="course-info">
-          <h2 class="course-name">{{ course.name }}</h2>
+          <h3 class="course-name">{{ course.name }}</h3>
           <div class="course-meta">
-            <span class="meta-item">
+            <div class="meta-item">
               <span class="meta-icon">👨‍🏫</span>
-              {{ course.teacher }}
-            </span>
-            <span class="meta-item">
+              <span class="meta-text">{{ course.teacher }}</span>
+            </div>
+            <div class="meta-item">
               <span class="meta-icon">📚</span>
-              {{ course.credits }} 学分
-            </span>
-            <span class="meta-item">
+              <span class="meta-text">{{ course.credits }} 学分</span>
+            </div>
+            <div class="meta-item">
               <span class="meta-icon">🏷️</span>
-              {{ course.grade }} · {{ course.semester }} · {{ course.subject }}
-            </span>
+              <span class="meta-text">{{ course.grade }} · {{ course.semester }} · {{ course.subject }}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 评价表单 -->
-      <div class="rating-form">
-        <h3 class="form-title">为这门课程打分</h3>
+      <!-- 评价表单卡片 -->
+      <div class="card rating-form-card">
+        <h2 class="card-title">课程评价</h2>
         <p class="form-subtitle">您的真实评价将帮助其他同学做出更好的选择</p>
 
         <!-- 总体评分 -->
         <div class="rating-section">
           <div class="section-header">
-            <h4 class="section-title">总体评分 *</h4>
+            <h3 class="section-title">总体评分 *</h3>
             <p class="section-desc">您对这门课程的总体满意度</p>
           </div>
           <div class="rating-stars">
-            <span 
-              v-for="i in 5" 
+            <span
+              v-for="i in 5"
               :key="i"
               class="star"
               :class="{ active: i <= ratingForm.overall }"
@@ -178,16 +201,18 @@ onMounted(() => {
 
         <!-- 详细评分 -->
         <div class="detailed-ratings">
-          <div class="rating-section">
-            <div class="section-header">
-              <h4 class="section-title">课程难度</h4>
-              <p class="section-desc">课程的难易程度</p>
+          <h3 class="detailed-title">详细评分</h3>
+          
+          <div class="rating-item">
+            <div class="rating-item-header">
+              <h4 class="rating-item-title">课程难度</h4>
+              <p class="rating-item-desc">课程的难易程度</p>
             </div>
             <div class="rating-stars">
-              <span 
-                v-for="i in 5" 
+              <span
+                v-for="i in 5"
                 :key="i"
-                class="star small"
+                class="star"
                 :class="{ active: i <= ratingForm.difficulty }"
                 @click="handleStarClick('difficulty', i)"
               >
@@ -196,16 +221,16 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="rating-section">
-            <div class="section-header">
-              <h4 class="section-title">实用性</h4>
-              <p class="section-desc">课程内容对您是否有帮助</p>
+          <div class="rating-item">
+            <div class="rating-item-header">
+              <h4 class="rating-item-title">实用性</h4>
+              <p class="rating-item-desc">课程内容对您是否有帮助</p>
             </div>
             <div class="rating-stars">
-              <span 
-                v-for="i in 5" 
+              <span
+                v-for="i in 5"
                 :key="i"
-                class="star small"
+                class="star"
                 :class="{ active: i <= ratingForm.usefulness }"
                 @click="handleStarClick('usefulness', i)"
               >
@@ -214,16 +239,16 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="rating-section">
-            <div class="section-header">
-              <h4 class="section-title">教学质量</h4>
-              <p class="section-desc">教师的教学水平和方法</p>
+          <div class="rating-item">
+            <div class="rating-item-header">
+              <h4 class="rating-item-title">教学质量</h4>
+              <p class="rating-item-desc">教师的教学水平和方法</p>
             </div>
             <div class="rating-stars">
-              <span 
-                v-for="i in 5" 
+              <span
+                v-for="i in 5"
                 :key="i"
-                class="star small"
+                class="star"
                 :class="{ active: i <= ratingForm.teaching }"
                 @click="handleStarClick('teaching', i)"
               >
@@ -236,7 +261,7 @@ onMounted(() => {
         <!-- 文字评价 -->
         <div class="text-rating">
           <div class="section-header">
-            <h4 class="section-title">详细评价 *</h4>
+            <h3 class="section-title">详细评价 *</h3>
             <p class="section-desc">分享您的学习体验和建议</p>
           </div>
           <textarea
@@ -269,8 +294,8 @@ onMounted(() => {
           <button @click="cancelRating" class="btn btn-secondary">
             取消
           </button>
-          <button 
-            @click="submitRating" 
+          <button
+            @click="submitRating"
             class="btn btn-primary"
             :disabled="submitting"
           >
@@ -279,34 +304,34 @@ onMounted(() => {
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- 评价指南 -->
-    <div class="rating-guide">
-      <h3 class="guide-title">评价指南</h3>
-      <div class="guide-content">
-        <div class="guide-item">
-          <span class="guide-icon">✓</span>
-          <div class="guide-text">
-            <strong>真实客观：</strong>基于您的真实学习体验进行评价
+      <!-- 评价指南卡片 -->
+      <div class="card rating-guide-card">
+        <h2 class="card-title">评价指南</h2>
+        <div class="guide-content">
+          <div class="guide-item">
+            <div class="guide-icon">✓</div>
+            <div class="guide-text">
+              <strong>真实客观：</strong>基于您的真实学习体验进行评价
+            </div>
           </div>
-        </div>
-        <div class="guide-item">
-          <span class="guide-icon">✓</span>
-          <div class="guide-text">
-            <strong>详细具体：</strong>提供具体的例子和详细描述
+          <div class="guide-item">
+            <div class="guide-icon">✓</div>
+            <div class="guide-text">
+              <strong>详细具体：</strong>提供具体的例子和详细描述
+            </div>
           </div>
-        </div>
-        <div class="guide-item">
-          <span class="guide-icon">✓</span>
-          <div class="guide-text">
-            <strong>尊重他人：</strong>使用文明用语，尊重教师和其他同学
+          <div class="guide-item">
+            <div class="guide-icon">✓</div>
+            <div class="guide-text">
+              <strong>尊重他人：</strong>使用文明用语，尊重教师和其他同学
+            </div>
           </div>
-        </div>
-        <div class="guide-item">
-          <span class="guide-icon">✓</span>
-          <div class="guide-text">
-            <strong>建设性：</strong>提出有价值的建议和改进意见
+          <div class="guide-item">
+            <div class="guide-icon">✓</div>
+            <div class="guide-text">
+              <strong>建设性：</strong>提出有价值的建议和改进意见
+            </div>
           </div>
         </div>
       </div>
@@ -315,273 +340,234 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* ===== 课程评价页面样式 ===== */
+/* 主容器 */
 .course-rate-container {
   min-height: 100vh;
-  background: var(--background-primary);
-  padding-bottom: var(--spacing-3xl);
+  background-color: #FEF6F7;
+  font-family: sans-serif;
+  color: #1A1A1A;
+  padding: 20px;
 }
 
-.rate-header {
-  background: var(--background-secondary);
-  border-bottom: 1px solid var(--separator-color);
-  padding: var(--spacing-lg) 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+/* 返回按钮容器 */
+.back-button-container {
+  margin-bottom: 24px;
 }
 
-.header-content {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-lg);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.btn-back {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: var(--transition-standard);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 8px;
-}
-
-.btn-back:hover {
-  background: var(--background-tertiary);
-  color: var(--text-primary);
-}
-
-.back-icon {
-  font-size: 18px;
-  font-weight: var(--font-weight-bold);
-}
-
-.page-title {
-  font-size: var(--font-size-title2);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin: 0;
-}
-
+/* 加载状态 */
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-3xl);
-  gap: var(--spacing-md);
-}
-
-.loader {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--background-secondary);
-  border-top: 3px solid var(--primary-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  padding: 60px;
+  gap: 16px;
 }
 
 .loading-text {
-  font-size: var(--font-size-body);
-  color: var(--text-secondary);
+  font-size: 16px;
+  color: #888888;
+  font-weight: bold;
 }
 
+/* 评价内容 */
 .rate-content {
   max-width: 800px;
   margin: 0 auto;
-  padding: var(--spacing-lg);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: 24px;
 }
 
-.course-info-card {
-  background: white;
-  border-radius: 16px;
-  padding: var(--spacing-xl);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--separator-color);
+/* 卡片通用样式 */
+.card {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
+  padding: 24px;
+  margin-bottom: 24px;
 }
 
+/* 卡片标题 */
+.card-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+/* 课程信息卡片 */
 .course-info {
   text-align: center;
 }
 
 .course-name {
-  font-size: var(--font-size-title3);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-md) 0;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
 }
 
 .course-meta {
   display: flex;
   justify-content: center;
-  gap: var(--spacing-lg);
+  gap: 16px;
   flex-wrap: wrap;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  font-size: var(--font-size-body2);
-  color: var(--text-secondary);
+  gap: 8px;
+  font-size: 16px;
+  color: #1A1A1A;
 }
 
 .meta-icon {
+  font-size: 18px;
+}
+
+.meta-text {
   font-size: 16px;
 }
 
-.rating-form {
-  background: white;
-  border-radius: 16px;
-  padding: var(--spacing-xl);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--separator-color);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xl);
-}
-
-.form-title {
-  font-size: var(--font-size-title2);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin: 0;
-  text-align: center;
-}
-
+/* 表单副标题 */
 .form-subtitle {
-  font-size: var(--font-size-body);
-  color: var(--text-secondary);
-  margin: 0 0 var(--spacing-xl) 0;
+  font-size: 16px;
+  color: #888888;
   text-align: center;
+  margin: 0 0 24px 0;
 }
 
+/* 评分部分 */
 .rating-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
+  margin-bottom: 24px;
 }
 
 .section-header {
   text-align: center;
+  margin-bottom: 16px;
 }
 
 .section-title {
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 8px 0;
 }
 
 .section-desc {
-  font-size: var(--font-size-body2);
-  color: var(--text-secondary);
-  margin: var(--spacing-xs) 0 0;
+  font-size: 14px;
+  color: #888888;
+  margin: 0;
 }
 
 .rating-stars {
   display: flex;
   justify-content: center;
-  gap: var(--spacing-sm);
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .star {
-  font-size: 32px;
+  font-size: 24px;
   cursor: pointer;
-  transition: var(--transition-standard);
-  color: var(--text-tertiary);
+  transition: transform 0.2s ease;
 }
 
 .star:hover {
   transform: scale(1.1);
-  color: var(--warning-color);
 }
 
 .star.active {
-  color: var(--warning-color);
-  animation: starPulse 0.3s ease;
-}
-
-.star.small {
-  font-size: 24px;
-}
-
-@keyframes starPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  color: #F7D074;
 }
 
 .rating-help {
   text-align: center;
-  font-size: var(--font-size-body2);
-  color: var(--primary-color);
-  font-weight: var(--font-weight-medium);
-  margin-top: var(--spacing-xs);
+  font-size: 14px;
+  color: #1A1A1A;
+  font-weight: bold;
 }
 
+/* 详细评分 */
 .detailed-ratings {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-xl);
-  padding: var(--spacing-xl) 0;
-  border-top: 1px solid var(--separator-color);
-  border-bottom: 1px solid var(--separator-color);
+  margin-bottom: 24px;
 }
 
+.detailed-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.rating-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #FEF6F7;
+  border-radius: 8px;
+  border: 2px solid #000000;
+  margin-bottom: 16px;
+}
+
+.rating-item-header {
+  flex: 1;
+}
+
+.rating-item-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0 0 4px 0;
+}
+
+.rating-item-desc {
+  font-size: 14px;
+  color: #888888;
+  margin: 0;
+}
+
+/* 文字评价 */
 .text-rating {
-  padding: var(--spacing-xl) 0;
+  margin-bottom: 24px;
 }
 
 .rating-textarea {
   width: 100%;
-  padding: var(--spacing-md);
-  border: 2px solid var(--separator-color);
-  border-radius: 12px;
-  font-size: var(--font-size-body);
-  font-family: inherit;
+  padding: 12px;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: sans-serif;
   resize: vertical;
   min-height: 120px;
-  transition: var(--transition-standard);
-  background: var(--background-primary);
+  background-color: #FFFFFF;
+  box-shadow: 4px 4px 0px 0px #000000;
+  transition: transform 0.2s ease;
 }
 
 .rating-textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(47, 169, 20, 0.1);
+  transform: translateY(-2px);
 }
 
 .char-count {
   text-align: right;
-  font-size: var(--font-size-caption);
-  color: var(--text-tertiary);
-  margin-top: var(--spacing-xs);
+  font-size: 14px;
+  color: #888888;
+  margin-top: 8px;
 }
 
+/* 匿名选项 */
 .anonymous-option {
-  padding: var(--spacing-lg) 0;
+  margin-bottom: 24px;
 }
 
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 12px;
   cursor: pointer;
   user-select: none;
 }
@@ -591,162 +577,151 @@ onMounted(() => {
 }
 
 .checkmark {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--separator-color);
-  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #000000;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition-standard);
-  position: relative;
+  background-color: #FFFFFF;
+  box-shadow: 4px 4px 0px 0px #000000;
+  transition: transform 0.2s ease;
 }
 
 .checkbox:checked + .checkmark {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
+  background-color: #76D7C4;
 }
 
 .checkbox:checked + .checkmark::after {
   content: '✓';
-  color: white;
-  font-size: 12px;
-  font-weight: var(--font-weight-bold);
+  color: #1A1A1A;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .label-text {
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: bold;
+  color: #1A1A1A;
 }
 
 .anonymous-help {
-  font-size: var(--font-size-body2);
-  color: var(--text-tertiary);
-  margin: var(--spacing-xs) 0 0 0;
+  font-size: 14px;
+  color: #888888;
+  margin-top: 8px;
+  margin-left: 36px;
 }
 
-.form-actions {
-  display: flex;
-  justify-content: center;
-  gap: var(--spacing-md);
-  padding-top: var(--spacing-xl);
-}
-
+/* 按钮通用样式 */
 .btn {
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: 12px;
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-semibold);
+  background-color: #F7D074;
+  border-radius: 8px;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #1A1A1A;
   cursor: pointer;
-  transition: var(--transition-standard);
-  border: none;
-  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
 }
 
-.btn-secondary {
-  background: var(--background-secondary);
-  color: var(--text-primary);
+.btn:hover {
+  transform: translateY(-2px);
 }
 
-.btn-secondary:hover {
-  background: var(--background-tertiary);
-  transform: translateY(-1px);
-}
-
-.btn-primary {
-  background: var(--gradient-primary);
-  color: white;
-}
-
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(47, 169, 20, 0.3);
+.btn:active {
+  transform: translateY(0);
 }
 
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
+}
+
+.btn-secondary {
+  background-color: #76D7C4;
 }
 
 .btn-icon {
   font-size: 16px;
 }
 
-.rating-guide {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: var(--spacing-lg);
-  background: rgba(47, 169, 20, 0.05);
-  border-radius: 16px;
-  border: 1px solid rgba(47, 169, 20, 0.2);
+/* 表单操作按钮 */
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
 }
 
-.guide-title {
-  font-size: var(--font-size-title3);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-lg) 0;
-  text-align: center;
-}
-
+/* 评价指南 */
 .guide-content {
-  display: grid;
-  gap: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .guide-item {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 12px;
   align-items: flex-start;
 }
 
 .guide-icon {
-  font-size: 18px;
-  color: var(--success-base);
-  margin-top: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #76D7C4;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 2px solid #000000;
+  flex-shrink: 0;
 }
 
 .guide-text {
-  flex: 1;
-  font-size: var(--font-size-body);
-  color: var(--text-secondary);
+  font-size: 16px;
   line-height: 1.5;
+  color: #1A1A1A;
 }
 
 .guide-text strong {
-  color: var(--text-primary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: bold;
+}
+
+/* 加载动画 */
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #FEF6F7;
+  border-top: 3px solid #F7D074;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .header-content {
-    padding: 0 var(--spacing-md);
+  .course-rate-container {
+    padding: 16px;
   }
   
-  .rate-content {
-    padding: var(--spacing-md);
-  }
-  
-  .course-info-card,
-  .rating-form {
-    padding: var(--spacing-lg);
-  }
-  
-  .detailed-ratings {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg) 0;
-  }
-  
-  .star {
-    font-size: 28px;
-  }
-  
-  .star.small {
-    font-size: 20px;
+  .rating-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
   
   .form-actions {

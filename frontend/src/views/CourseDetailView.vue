@@ -64,6 +64,9 @@ interface Rating {
   UserID: number;
   CourseID: number;
   Score: number;
+  Difficulty?: number;
+  Usefulness?: number;
+  Teaching?: number;
   Username?: string;
   // 后端API返回的字段
   username?: string;
@@ -106,7 +109,7 @@ const fetchRatings = async (courseId: number) => {
     // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
     ratings.value = response.data.data.map((rating: any) => ({
       ...rating,
-      Username: rating.username || rating.nickname || `用户${rating.UserID}`,
+      Username: rating.user?.username || rating.user?.nickname || `用户${rating.UserID}`,
       Score: !isNaN(rating.score) && isFinite(rating.score) ? rating.score : (!isNaN(rating.Score) && isFinite(rating.Score) ? rating.Score : 0)
     }))
   } catch (error) {
@@ -119,7 +122,7 @@ const fetchComments = async (courseId: number) => {
     const response = await api.get(`/courses/${courseId}/comments`)
     comments.value = (response.data.data || []).map((comment: any) => ({
       ...comment,
-      Username: comment.username || comment.nickname || `用户${comment.UserID}`,
+      Username: comment.user?.username || comment.user?.nickname || `用户${comment.UserID}`,
       CreatedAt: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : new Date().toLocaleDateString()
     }))
   } catch (error) {
@@ -133,6 +136,39 @@ const averageRating = computed(() => {
   const validRatings = ratings.value.filter(rating => !isNaN(rating.Score) && isFinite(rating.Score))
   if (validRatings.length === 0) return 0
   const sum = validRatings.reduce((acc, rating) => acc + rating.Score, 0)
+  return Number((sum / validRatings.length).toFixed(1))
+})
+
+// 计算平均难度评分
+const averageDifficulty = computed(() => {
+  if (ratings.value.length === 0) return 0
+  const validRatings = ratings.value.filter(rating =>
+    rating.Difficulty !== undefined && !isNaN(rating.Difficulty) && isFinite(rating.Difficulty)
+  )
+  if (validRatings.length === 0) return 0
+  const sum = validRatings.reduce((acc, rating) => acc + (rating.Difficulty as number), 0)
+  return Number((sum / validRatings.length).toFixed(1))
+})
+
+// 计算平均实用性评分
+const averageUsefulness = computed(() => {
+  if (ratings.value.length === 0) return 0
+  const validRatings = ratings.value.filter(rating =>
+    rating.Usefulness !== undefined && !isNaN(rating.Usefulness) && isFinite(rating.Usefulness)
+  )
+  if (validRatings.length === 0) return 0
+  const sum = validRatings.reduce((acc, rating) => acc + (rating.Usefulness as number), 0)
+  return Number((sum / validRatings.length).toFixed(1))
+})
+
+// 计算平均教学质量评分
+const averageTeaching = computed(() => {
+  if (ratings.value.length === 0) return 0
+  const validRatings = ratings.value.filter(rating =>
+    rating.Teaching !== undefined && !isNaN(rating.Teaching) && isFinite(rating.Teaching)
+  )
+  if (validRatings.length === 0) return 0
+  const sum = validRatings.reduce((acc, rating) => acc + (rating.Teaching as number), 0)
   return Number((sum / validRatings.length).toFixed(1))
 })
 
@@ -204,13 +240,13 @@ onMounted(async () => {
     // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
     ratings.value = ratingsResponse.data.data.map((rating: Rating) => ({
       ...rating,
-      Username: (rating as any).username || (rating as any).nickname || `用户${rating.UserID}`,
+      Username: (rating as any).user?.username || (rating as any).user?.nickname || `用户${rating.UserID}`,
       Score: !isNaN((rating as any).score) && isFinite((rating as any).score) ? (rating as any).score : (!isNaN(rating.Score) && isFinite(rating.Score) ? rating.Score : 0)
     }))
     // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
     comments.value = (commentsResponse.data.data || []).map((comment: Comment) => ({
       ...comment,
-      Username: (comment as any).username || (comment as any).nickname || `用户${comment.UserID}`,
+      Username: (comment as any).user?.username || (comment as any).user?.nickname || `用户${comment.UserID}`,
       CreatedAt: (comment as any).createdAt ? new Date((comment as any).createdAt).toLocaleDateString() : new Date().toLocaleDateString()
     }))
   } catch (error) {
@@ -322,19 +358,74 @@ onMounted(async () => {
           <div v-if="ratings.length === 0" class="empty-state">
             <p>暂无评分</p>
           </div>
-          <div v-else class="rating-items">
-            <div v-for="rating in ratings" :key="rating.ID" class="rating-item">
-              <div class="rating-user">
-                <span class="user-avatar">{{ rating.Username?.charAt(0) || 'U' }}</span>
-                <span class="user-name">{{ rating.Username }}</span>
-              </div>
-              <div class="rating-score">
-                <div class="rating-stars">
-                  <span v-for="i in 5" :key="i" class="star">
-                    {{ i <= Math.floor(rating.Score) ? '⭐' : (i - 0.5 <= rating.Score ? '🌟' : '☆') }}
-                  </span>
+          <div v-else>
+            <!-- 平均评分展示 -->
+            <div class="average-ratings">
+              <div class="average-rating-item">
+                <div class="rating-label">总体评分</div>
+                <div class="rating-value-stars">
+                  <div class="rating-stars">
+                    <span v-for="i in 5" :key="i" class="star">
+                      {{ i <= Math.floor(averageRating) ? '⭐' : (i - 0.5 <= averageRating ? '🌟' : '☆') }}
+                    </span>
+                  </div>
+                  <span class="rating-number">{{ averageRating }}</span>
                 </div>
-                <span class="score-value">{{ rating.Score }}</span>
+              </div>
+              
+              <div class="average-rating-item">
+                <div class="rating-label">课程难度</div>
+                <div class="rating-value-stars">
+                  <div class="rating-stars">
+                    <span v-for="i in 5" :key="i" class="star">
+                      {{ i <= Math.floor(averageDifficulty) ? '⭐' : (i - 0.5 <= averageDifficulty ? '🌟' : '☆') }}
+                    </span>
+                  </div>
+                  <span class="rating-number">{{ averageDifficulty }}</span>
+                </div>
+              </div>
+              
+              <div class="average-rating-item">
+                <div class="rating-label">实用性</div>
+                <div class="rating-value-stars">
+                  <div class="rating-stars">
+                    <span v-for="i in 5" :key="i" class="star">
+                      {{ i <= Math.floor(averageUsefulness) ? '⭐' : (i - 0.5 <= averageUsefulness ? '🌟' : '☆') }}
+                    </span>
+                  </div>
+                  <span class="rating-number">{{ averageUsefulness }}</span>
+                </div>
+              </div>
+              
+              <div class="average-rating-item">
+                <div class="rating-label">教学质量</div>
+                <div class="rating-value-stars">
+                  <div class="rating-stars">
+                    <span v-for="i in 5" :key="i" class="star">
+                      {{ i <= Math.floor(averageTeaching) ? '⭐' : (i - 0.5 <= averageTeaching ? '🌟' : '☆') }}
+                    </span>
+                  </div>
+                  <span class="rating-number">{{ averageTeaching }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 用户评分列表 -->
+            <h3 class="user-ratings-title">用户评分</h3>
+            <div class="rating-items">
+              <div v-for="rating in ratings" :key="rating.ID" class="rating-item">
+                <div class="rating-user">
+                  <span class="user-avatar">{{ rating.Username?.charAt(0) || 'U' }}</span>
+                  <span class="user-name">{{ rating.Username }}</span>
+                </div>
+                <div class="rating-score">
+                  <div class="rating-stars">
+                    <span v-for="i in 5" :key="i" class="star">
+                      {{ i <= Math.floor(rating.Score) ? '⭐' : (i - 0.5 <= rating.Score ? '🌟' : '☆') }}
+                    </span>
+                  </div>
+                  <span class="score-value">{{ rating.Score }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -611,6 +702,50 @@ onMounted(async () => {
   padding: 24px;
   color: #888888;
   font-size: 16px;
+}
+
+/* 平均评分展示 */
+.average-ratings {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #FEF6F7;
+  border-radius: 8px;
+  border: 2px solid #000000;
+}
+
+.average-rating-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #1A1A1A;
+}
+
+.rating-value-stars {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-number {
+  font-size: 16px;
+  font-weight: bold;
+  color: #1A1A1A;
+}
+
+.user-ratings-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+  text-align: center;
 }
 
 .rating-items,

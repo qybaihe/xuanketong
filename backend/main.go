@@ -38,6 +38,19 @@ func main() {
 	// 添加种子数据
 	seedData()
 
+	// 迁移admin用户角色
+	var adminUser models.User
+	if err := config.DB.Where("username = ?", "admin").First(&adminUser).Error; err == nil {
+		if adminUser.Role != "admin" {
+			adminUser.Role = "admin"
+			if err := config.DB.Save(&adminUser).Error; err != nil {
+				fmt.Printf("Failed to update admin user role: %v\n", err)
+			} else {
+				fmt.Println("Admin user role successfully updated to 'admin'.")
+			}
+		}
+	}
+
 	routes.AuthRoutes(r)
 	routes.CourseRoutes(r)
 	routes.RatingRoutes(r)
@@ -125,6 +138,10 @@ func ensureTablesExist() error {
 			user_id INTEGER,
 			course_id INTEGER,
 			score REAL,
+			difficulty REAL DEFAULT 0,
+			usefulness REAL DEFAULT 0,
+			teaching REAL DEFAULT 0,
+			content TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)

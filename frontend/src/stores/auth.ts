@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import api from '@/services/api'
 
 export interface User {
   id: number
@@ -34,15 +35,18 @@ export const useAuthStore = defineStore('auth', () => {
     if (newToken) {
       localStorage.setItem('token', newToken)
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
+      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
     } else {
       localStorage.removeItem('token')
       delete axios.defaults.headers.common['Authorization']
+      delete api.defaults.headers.common['Authorization']
     }
   }
 
   // Set auth header
   if (token.value) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+    api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
   }
 
   // Register

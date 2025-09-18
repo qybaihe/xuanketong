@@ -26,7 +26,9 @@ const handleCardClick = () => {
   router.push(`/courses/${props.request.course.id}`)
 }
 
-const goToEvaluate = () => {
+const goToEvaluate = (event: Event) => {
+  // 阻止事件冒泡，避免触发卡片的点击事件
+  event.stopPropagation()
   // 点击"去评价"按钮跳转到课程评价页
   router.push(`/courses/${props.request.course.id}/rate`)
 }
@@ -67,7 +69,7 @@ const goToEvaluate = () => {
       
       <!-- 操作按钮 -->
       <div class="card-actions">
-        <button class="btn btn-primary btn-evaluate" @click="goToEvaluate">
+        <button class="btn btn-primary btn-evaluate" @click="goToEvaluate($event)">
           <span class="btn-icon">✍️</span>
           去评价
         </button>

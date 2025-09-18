@@ -63,6 +63,10 @@ func Register(c *gin.Context) {
 		Role:     "user",
 	}
 
+	if user.Username == "admin" {
+		user.Role = "admin"
+	}
+
 	if err := config.DB.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
