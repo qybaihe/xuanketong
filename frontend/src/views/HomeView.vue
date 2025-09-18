@@ -499,8 +499,10 @@ onMounted(() => {
               <div class="course-teacher-section">
                 <div class="teacher-label">授课老师</div>
                 <div class="teacher-info">
-                  <div class="teacher-name">{{ course.Teacher }}</div>
-                  <div class="teacher-credits">{{ course.Credits }} 学分</div>
+                  <div class="teacher-details">
+                    <div class="teacher-name">{{ course.Teacher }}</div>
+                    <div class="teacher-credits">{{ course.Credits }} credits</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1754,31 +1756,34 @@ onMounted(() => {
 
 .teacher-info {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
   flex-grow: 1;
+}
+
+.teacher-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
 }
 
 .teacher-name {
   font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
-  display: flex;
-  align-items: center;
+  flex-shrink: 0;
 }
 
 .teacher-credits {
   font-size: 14px;
   color: var(--text-secondary);
   font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.teacher-credits::before {
-  content: "📚";
-  font-size: 16px;
+  background: var(--background-secondary);
+  padding: 4px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 
