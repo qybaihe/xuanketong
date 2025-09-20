@@ -81,7 +81,7 @@ export interface EnhancedHomeStats {
 
 // API服务类
 export class StatsApi {
-  private baseURL = 'http://localhost:8080/api/v1'
+  private baseURL = `${import.meta.env.VITE_BACKEND_BASE_URL}/`
 
   // 获取增强版首页统计数据
   async getEnhancedHomeStats(): Promise<EnhancedHomeStats> {

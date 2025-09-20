@@ -122,9 +122,9 @@ const fetchDetails = async () => {
   const courseId = route.params.id
   try {
     const [courseRes, ratingsRes, commentsRes] = await Promise.all([
-      axios.get(`http://localhost:8080/api/v1/courses/${courseId}`),
-      axios.get(`http://localhost:8080/api/v1/courses/${courseId}/ratings`),
-      axios.get(`http://localhost:8080/api/v1/courses/${courseId}/comments`)
+      axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/courses/${courseId}`),
+      axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/courses/${courseId}/ratings`),
+      axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/courses/${courseId}/comments`)
     ])
     course.value = courseRes.data.data
     ratings.value = ratingsRes.data.data || []
