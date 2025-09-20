@@ -60,7 +60,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     
     try {
-      const response = await axios.post<AuthResponse>('http://localhost:8080/api/v1/auth/register', userData)
+      const response = await axios.post<AuthResponse>(`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/register`, userData)
       
       const { token: newToken, user: userInfo } = response.data
       setToken(newToken)
@@ -85,7 +85,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     
     try {
-      const response = await axios.post<AuthResponse>('http://localhost:8080/api/v1/auth/login', credentials)
+      const response = await axios.post<AuthResponse>(`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/login`, credentials)
       
       const { token: newToken, user: userInfo } = response.data
       setToken(newToken)
@@ -116,7 +116,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     
     try {
-      const response = await axios.get<User>('http://localhost:8080/api/v1/auth/me')
+      const response = await axios.get<User>(`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/me`)
       user.value = response.data
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || 'Failed to get user info'

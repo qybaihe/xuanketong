@@ -232,9 +232,9 @@ onMounted(async () => {
     loading.value = true
     const courseId = route.params.id
     const [courseResponse, ratingsResponse, commentsResponse] = await Promise.all([
-      axios.get(`http://localhost:8080/api/v1/courses/${courseId}`),
-      axios.get(`http://localhost:8080/api/v1/courses/${courseId}/ratings`),
-      axios.get(`http://localhost:8080/api/v1/courses/${courseId}/comments`)
+      axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/courses/${courseId}`),
+      axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/courses/${courseId}/ratings`),
+      axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/courses/${courseId}/comments`)
     ])
     course.value = mapCourseData(courseResponse.data.data)
     // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
@@ -416,7 +416,7 @@ onMounted(async () => {
               <div v-for="rating in ratings" :key="rating.ID" class="rating-item">
                 <div class="rating-user">
                   <span class="user-avatar">{{ rating.Username?.charAt(0) || 'U' }}</span>
-                  <span class="user-name">{{ rating.Username }}</span>
+                  <span class="user-name">{{ rating.nickname || rating.Username }}</span>
                 </div>
                 <div class="rating-score">
                   <div class="rating-stars">

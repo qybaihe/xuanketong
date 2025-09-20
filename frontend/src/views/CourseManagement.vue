@@ -180,7 +180,7 @@ import * as bootstrap from 'bootstrap';
 import api from '@/services/api';
 import { useAuthStore } from '@/stores/auth';
 
-const API_BASE = 'http://localhost:8080/api/v1';
+const API_BASE = import.meta.env.VITE_BACKEND_BASE_URL;
 const courses = ref<any[]>([]);
 const currentDeleteId = ref<number | null>(null);
 const authStore = useAuthStore();
