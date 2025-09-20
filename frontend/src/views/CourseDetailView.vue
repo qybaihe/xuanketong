@@ -68,9 +68,7 @@ interface Rating {
   Usefulness?: number;
   Teaching?: number;
   Username?: string;
-  // 后端API返回的字段
-  username?: string;
-  nickname?: string;
+  Nickname?: string;
 }
 
 interface Comment {
@@ -79,9 +77,8 @@ interface Comment {
   CourseID: number;
   Content: string;
   Username?: string;
+  Nickname?: string;
   CreatedAt?: string;
-  // 后端API返回的字段
-  createdAt?: string;
 }
 
 const route = useRoute()
@@ -109,7 +106,8 @@ const fetchRatings = async (courseId: number) => {
     // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
     ratings.value = response.data.data.map((rating: any) => ({
       ...rating,
-      Username: rating.user?.username || rating.user?.nickname || `用户${rating.UserID}`,
+      Username: rating.user?.username || `用户${rating.UserID}`,
+      Nickname: rating.user?.nickname || `用户${rating.UserID}`,
       Score: !isNaN(rating.score) && isFinite(rating.score) ? rating.score : (!isNaN(rating.Score) && isFinite(rating.Score) ? rating.Score : 0)
     }))
   } catch (error) {
@@ -122,7 +120,8 @@ const fetchComments = async (courseId: number) => {
     const response = await api.get(`/courses/${courseId}/comments`)
     comments.value = (response.data.data || []).map((comment: any) => ({
       ...comment,
-      Username: comment.user?.username || comment.user?.nickname || `用户${comment.UserID}`,
+      Username: comment.user?.username  || `用户${comment.UserID}`,
+      Nickname: comment.user?.nickname || `用户${comment.UserID}`,
       CreatedAt: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : new Date().toLocaleDateString()
     }))
   } catch (error) {
@@ -177,7 +176,7 @@ const getRatingStars = (rating: number) => {
   const fullStars = Math.floor(rating)
   const hasHalfStar = rating % 1 >= 0.5
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
-  
+
   return {
     full: fullStars,
     half: hasHalfStar,
@@ -201,18 +200,18 @@ const submitEvaluationRequest = async () => {
     alert('请先登录后再发起求评价！')
     return
   }
-  
+
   if (!currentUser.value) {
     alert('无法获取用户信息，请重新登录！')
     return
   }
-  
+
   const courseId = Number(route.params.id)
   if (!courseId) {
     alert('课程ID无效')
     return
   }
-  
+
   evaluationRequestLoading.value = true
   try {
     await evaluationRequestService.createEvaluationRequest(courseId)
@@ -240,13 +239,15 @@ onMounted(async () => {
     // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
     ratings.value = ratingsResponse.data.data.map((rating: Rating) => ({
       ...rating,
-      Username: (rating as any).user?.username || (rating as any).user?.nickname || `用户${rating.UserID}`,
+      Username: (rating as any).user?.username || `用户${rating.UserID}`,
+      Nickname: (rating as any).user?.nickname || `用户${rating.UserID}`,
       Score: !isNaN((rating as any).score) && isFinite((rating as any).score) ? (rating as any).score : (!isNaN(rating.Score) && isFinite(rating.Score) ? rating.Score : 0)
     }))
     // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
     comments.value = (commentsResponse.data.data || []).map((comment: Comment) => ({
       ...comment,
-      Username: (comment as any).user?.username || (comment as any).user?.nickname || `用户${comment.UserID}`,
+      Username: (comment as any).user?.username || `用户${comment.UserID}`,
+      Nickname: (comment as any).user?.nickname || `用户${comment.UserID}`,
       CreatedAt: (comment as any).createdAt ? new Date((comment as any).createdAt).toLocaleDateString() : new Date().toLocaleDateString()
     }))
   } catch (error) {
@@ -281,9 +282,9 @@ onMounted(async () => {
           <div class="course-credits-badge">
             {{ course.Credits }} 学分
           </div>
-          
+
           <h1 class="course-title">{{ course.Name }}</h1>
-          
+
           <div class="course-meta">
             <div class="meta-item">
               <span class="meta-icon">👨‍🏫</span>
@@ -298,48 +299,36 @@ onMounted(async () => {
               <span class="meta-text">{{ course.Subject }}</span>
             </div>
           </div>
-          
+
           <div class="course-tags">
-            <span
-              v-for="(tag, index) in getTags(course)"
-              :key="index"
-              :class="['course-tag', tag.type]"
-            >
+            <span v-for="(tag, index) in getTags(course)" :key="index" :class="['course-tag', tag.type]">
               {{ tag.text }}
             </span>
           </div>
-          
+
           <div class="course-rating-summary">
             <div class="rating-stars">
               <span v-for="i in 5" :key="i" class="star">
-                {{ i <= Math.floor(averageRating) ? '⭐' : (i - 0.5 <= averageRating ? '🌟' : '☆') }}
-              </span>
+                {{ i <= Math.floor(averageRating) ? '⭐' : (i - 0.5 <= averageRating ? '🌟' : '☆') }} </span>
             </div>
             <span class="rating-value">{{ averageRating }}</span>
             <span class="rating-count">({{ ratings.length }} 人评分)</span>
           </div>
-          
+
           <!-- Action Buttons -->
           <div class="action-buttons">
-            <RouterLink
-              :to="`/courses/${course.ID}/rate`"
-              class="btn btn-primary"
-            >
+            <RouterLink :to="`/courses/${course.ID}/rate`" class="btn btn-primary">
               <span class="btn-icon">⭐</span>
               去评价课程
             </RouterLink>
-            
-            <button
-              v-if="canSubmit"
-              @click="submitEvaluationRequest"
-              class="btn btn-secondary"
-              :disabled="evaluationRequestLoading || hasEvaluationRequested"
-            >
+
+            <button v-if="canSubmit" @click="submitEvaluationRequest" class="btn btn-secondary"
+              :disabled="evaluationRequestLoading || hasEvaluationRequested">
               <span class="btn-icon">📢</span>
               {{ evaluationRequestLoading ? '发送中...' : (hasEvaluationRequested ? '已求评价' : '求评价') }}
             </button>
           </div>
-          
+
           <p v-if="hasEvaluationRequested" class="evaluation-request-success">
             已成功发起求评价请求，请耐心等待其他同学的评价！
           </p>
@@ -354,7 +343,7 @@ onMounted(async () => {
         <!-- Rating Section Card -->
         <div class="card rating-section">
           <h2 class="card-title">课程评分</h2>
-          
+
           <div v-if="ratings.length === 0" class="empty-state">
             <p>暂无评分</p>
           </div>
@@ -366,63 +355,60 @@ onMounted(async () => {
                 <div class="rating-value-stars">
                   <div class="rating-stars">
                     <span v-for="i in 5" :key="i" class="star">
-                      {{ i <= Math.floor(averageRating) ? '⭐' : (i - 0.5 <= averageRating ? '🌟' : '☆') }}
-                    </span>
+                      {{ i <= Math.floor(averageRating) ? '⭐' : (i - 0.5 <= averageRating ? '🌟' : '☆') }} </span>
                   </div>
                   <span class="rating-number">{{ averageRating }}</span>
                 </div>
               </div>
-              
+
               <div class="average-rating-item">
                 <div class="rating-label">课程难度</div>
                 <div class="rating-value-stars">
                   <div class="rating-stars">
                     <span v-for="i in 5" :key="i" class="star">
                       {{ i <= Math.floor(averageDifficulty) ? '⭐' : (i - 0.5 <= averageDifficulty ? '🌟' : '☆') }}
-                    </span>
+                        </span>
                   </div>
                   <span class="rating-number">{{ averageDifficulty }}</span>
                 </div>
               </div>
-              
+
               <div class="average-rating-item">
                 <div class="rating-label">实用性</div>
                 <div class="rating-value-stars">
                   <div class="rating-stars">
                     <span v-for="i in 5" :key="i" class="star">
                       {{ i <= Math.floor(averageUsefulness) ? '⭐' : (i - 0.5 <= averageUsefulness ? '🌟' : '☆') }}
-                    </span>
+                        </span>
                   </div>
                   <span class="rating-number">{{ averageUsefulness }}</span>
                 </div>
               </div>
-              
+
               <div class="average-rating-item">
                 <div class="rating-label">教学质量</div>
                 <div class="rating-value-stars">
                   <div class="rating-stars">
                     <span v-for="i in 5" :key="i" class="star">
-                      {{ i <= Math.floor(averageTeaching) ? '⭐' : (i - 0.5 <= averageTeaching ? '🌟' : '☆') }}
-                    </span>
+                      {{ i <= Math.floor(averageTeaching) ? '⭐' : (i - 0.5 <= averageTeaching ? '🌟' : '☆') }} </span>
                   </div>
                   <span class="rating-number">{{ averageTeaching }}</span>
                 </div>
               </div>
             </div>
-            
+
             <!-- 用户评分列表 -->
             <h3 class="user-ratings-title">用户评分</h3>
             <div class="rating-items">
               <div v-for="rating in ratings" :key="rating.ID" class="rating-item">
                 <div class="rating-user">
-                  <span class="user-avatar">{{ rating.Username?.charAt(0) || 'U' }}</span>
-                  <span class="user-name">{{ rating.nickname || rating.Username }}</span>
+                  <span class="user-avatar">{{ (rating.Nickname || rating.Username)?.charAt(0) || 'U' }}</span>
+                  <span class="user-name">{{ rating.Nickname || rating.Username }}</span>
                 </div>
                 <div class="rating-score">
                   <div class="rating-stars">
                     <span v-for="i in 5" :key="i" class="star">
-                      {{ i <= Math.floor(rating.Score) ? '⭐' : (i - 0.5 <= rating.Score ? '🌟' : '☆') }}
-                    </span>
+                      {{ i <= Math.floor(rating.Score) ? '⭐' : (i - 0.5 <= rating.Score ? '🌟' : '☆') }} </span>
                   </div>
                   <span class="score-value">{{ rating.Score }}</span>
                 </div>
@@ -434,7 +420,7 @@ onMounted(async () => {
         <!-- Comment Section Card -->
         <div class="card comment-section">
           <h2 class="card-title">课程评论</h2>
-          
+
           <div v-if="comments.length === 0" class="empty-state">
             <p>暂无评论</p>
           </div>
@@ -442,9 +428,9 @@ onMounted(async () => {
             <div v-for="comment in comments" :key="comment.ID" class="comment-item">
               <div class="comment-header">
                 <div class="comment-user">
-                  <span class="user-avatar">{{ comment.Username?.charAt(0) || 'U' }}</span>
+                  <span class="user-avatar">{{ (comment.Nickname || comment.Username)?.charAt(0) || 'U' }}</span>
                   <div class="user-info">
-                    <span class="user-name">{{ comment.Username }}</span>
+                    <span class="user-name">{{ comment.Nickname || comment.Username }}</span>
                     <span class="comment-date">{{ comment.CreatedAt }}</span>
                   </div>
                 </div>
@@ -861,11 +847,11 @@ onMounted(async () => {
   .course-content {
     flex-direction: column;
   }
-  
+
   .action-buttons {
     flex-direction: column;
   }
-  
+
   .rating-item {
     flex-direction: column;
     align-items: flex-start;
