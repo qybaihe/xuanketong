@@ -41,7 +41,6 @@ const goToEvaluate = (event: Event) => {
     
     <!-- 热门标记 -->
     <div v-if="request.status === 'pending'" class="status-badge status-pending">
-      <span class="badge-icon">🔥</span>
       求评价中
     </div>
     
@@ -51,7 +50,10 @@ const goToEvaluate = (event: Event) => {
       <div class="course-info">
         <h3 class="course-name">{{ request.course.name }}</h3>
         <div class="course-teacher">
-          <span class="teacher-icon">👨‍🏫</span>
+          <svg class="teacher-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="7" r="4" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
           <span class="teacher-name">{{ request.course.teacher }}</span>
         </div>
       </div>
@@ -70,11 +72,17 @@ const goToEvaluate = (event: Event) => {
       <!-- 操作按钮 -->
       <div class="card-actions">
         <button class="btn btn-primary btn-evaluate" @click="goToEvaluate($event)">
-          <span class="btn-icon">✍️</span>
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 20h9" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
           去评价
         </button>
         <RouterLink :to="`/courses/${request.course.id}`" class="btn btn-secondary" @click.stop>
-          <span class="btn-icon">👀</span>
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="3" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
           查看详情
         </RouterLink>
       </div>
@@ -90,81 +98,48 @@ const goToEvaluate = (event: Event) => {
 <style scoped>
 .evaluation-request-card {
   position: relative;
-  background: #ffffff;
-  border-radius: 20px;
+  background-color: #FFFFFF;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 5px 5px 0px 0px #000000;
+  transition: transform 0.2s ease;
   min-height: 280px;
   display: flex;
   flex-direction: column;
-  border: 2px solid transparent;
+  border: 3px solid #000000;
+  cursor: pointer;
 }
 
 .evaluation-request-card:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  border-color: var(--primary-color);
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0px 0px #000000;
 }
 
 .card-border {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 20px;
-  padding: 2px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, #1ebd8d 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.evaluation-request-card:hover .card-border {
-  opacity: 1;
+  display: none;
 }
 
 .status-badge {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  padding: 8px 12px;
-  border-radius: 20px;
+  top: 12px;
+  right: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: bold;
   display: flex;
   align-items: center;
   gap: 6px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   z-index: 2;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px 0px #000000;
 }
 
 .status-pending {
-  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-  color: white;
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-  animation: pulse 2s infinite;
+  background-color: #FF6B6B;
+  color: #1A1A1A;
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-  }
-}
 
 .badge-icon {
   font-size: 14px;
@@ -172,11 +147,11 @@ const goToEvaluate = (event: Event) => {
 
 
 .card-content {
-  padding: 32px;
+  padding: 20px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 16px;
 }
 
 .course-info {
@@ -184,10 +159,10 @@ const goToEvaluate = (event: Event) => {
 }
 
 .course-name {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #1A1A1A;
+  margin: 0 0 8px 0;
   line-height: 1.4;
 }
 
@@ -196,39 +171,42 @@ const goToEvaluate = (event: Event) => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 15px;
-  color: var(--text-secondary);
+  font-size: 14px;
+  color: #1A1A1A;
 }
 
 .teacher-icon {
-  font-size: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 .teacher-name {
-  font-weight: 500;
+  font-weight: bold;
 }
 
 .requester-info {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
-  background: linear-gradient(135deg, rgba(47, 169, 20, 0.08) 0%, rgba(47, 169, 20, 0.04) 100%);
-  border-radius: 16px;
-  border: 1px solid rgba(47, 169, 20, 0.15);
+  gap: 12px;
+  padding: 12px;
+  background-color: #F7D074;
+  border-radius: 8px;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px 0px #000000;
 }
 
 .requester-avatar {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-color), #1ebd8d);
-  color: white;
+  background-color: #76D7C4;
+  color: #1A1A1A;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 20px;
+  font-weight: bold;
+  font-size: 16px;
+  border: 2px solid #000000;
 }
 
 .requester-details {
@@ -236,64 +214,71 @@ const goToEvaluate = (event: Event) => {
 }
 
 .requester-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #1A1A1A;
+  margin-bottom: 4px;
 }
 
 .request-time {
-  font-size: 13px;
-  color: var(--text-tertiary);
+  font-size: 12px;
+  color: #1A1A1A;
+  font-weight: 500;
 }
 
 .card-actions {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   margin-top: auto;
 }
 
 .btn-evaluate {
   flex-grow: 1;
-  padding: 16px 20px;
-  font-size: 16px;
-  font-weight: 600;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #F7D074;
+  color: #1A1A1A;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  box-shadow: 4px 4px 0px 0px #000000;
+  transition: transform 0.2s ease;
+}
+
+.btn-evaluate:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .btn-secondary {
-  padding: 16px 20px;
-  background: rgba(47, 169, 20, 0.1);
-  color: var(--primary-color);
-  border: 1px solid rgba(47, 169, 20, 0.2);
-  border-radius: 14px;
-  font-size: 16px;
-  font-weight: 600;
+  padding: 12px 16px;
+  background-color: #76D7C4;
+  color: #1A1A1A;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
   text-decoration: none;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease;
+  box-shadow: 3px 3px 0px 0px #000000;
 }
 
 .btn-secondary:hover {
-  background: rgba(47, 169, 20, 0.2);
-  transform: translateY(-1px);
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px 0px #000000;
 }
 
 .card-footer {
-  padding: 0 32px 32px;
-}
-
-.footer-decoration {
-  height: 3px;
-  background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
-  border-radius: 2px;
-  opacity: 0.5;
+  display: none;
 }
 
 .btn-icon {
-  font-size: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 /* 响应式设计 */

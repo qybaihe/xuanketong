@@ -26,26 +26,30 @@ onMounted(async () => {
       <p>加载中...</p>
     </div>
     
-    <div v-else-if="authStore.user" class="profile-content card-glass">
+    <div v-else-if="authStore.user" class="profile-content">
       <div class="user-info">
         <div class="user-avatar">
           <img 
-            :src="authStore.user.avatar || '/default-avatar.png'" 
+            v-if="authStore.user.avatar" 
+            :src="authStore.user.avatar" 
             :alt="authStore.user.nickname"
             class="avatar-img"
           />
+          <div v-else class="avatar-placeholder">
+            {{ authStore.user.nickname.charAt(0).toUpperCase() || 'U' }}
+          </div>
         </div>
         <div class="user-details">
           <h2>{{ authStore.user.nickname }}</h2>
           <p class="username">@{{ authStore.user.username }}</p>
           <p class="email">{{ authStore.user.email }}</p>
-          <p class="role">角色: {{ authStore.user.role === 'admin' ? '管理员' : '普通用户' }}</p>
+          <p v-if="authStore.user.role === 'admin'" class="role">管理员</p>
           <p class="created-at">注册时间: {{ new Date(authStore.user.createdAt).toLocaleString('zh-CN') }}</p>
         </div>
       </div>
       
       <div class="profile-actions">
-        <button @click="authStore.logout()" class="logout-btn btn-primary">
+        <button @click="authStore.logout()" class="logout-btn">
           退出登录
         </button>
       </div>
@@ -53,7 +57,7 @@ onMounted(async () => {
     
     <div v-else class="error-container">
       <p>无法加载用户信息</p>
-      <button @click="authStore.getCurrentUser()" class="retry-btn btn-secondary">
+      <button @click="authStore.getCurrentUser()" class="retry-btn">
         重试
       </button>
     </div>
@@ -63,32 +67,38 @@ onMounted(async () => {
 <style scoped>
 .profile-container {
   min-height: 100vh;
-  padding: var(--spacing-lg);
-  background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e8 100%);
+  padding: 20px;
+  background-color: #FEF6F7;
+  font-family: sans-serif;
+  color: #1A1A1A;
 }
 
 .profile-header {
   text-align: center;
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 20px;
 }
 
 .profile-header h1 {
-  font-size: var(--font-size-title2);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  font-size: 32px;
+  font-weight: bold;
+  color: #1A1A1A;
 }
 
 .profile-content {
   max-width: 600px;
   margin: 0 auto;
-  padding: var(--spacing-xl);
+  padding: 24px;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px 0px #000000;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  gap: 20px;
+  margin-bottom: 24px;
 }
 
 .user-avatar {
@@ -100,37 +110,57 @@ onMounted(async () => {
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--primary-color);
+  border: 3px solid #000000;
+  box-shadow: 3px 3px 0px 0px #000000;
+}
+
+.avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #F7D074;
+  color: #1A1A1A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 32px;
+  border: 3px solid #000000;
+  box-shadow: 3px 3px 0px 0px #000000;
 }
 
 .user-details h2 {
-  font-size: var(--font-size-title3);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-xs);
+  font-size: 24px;
+  font-weight: bold;
+  color: #1A1A1A;
+  margin-bottom: 6px;
 }
 
 .username {
-  color: var(--text-secondary);
-  font-size: var(--font-size-body2);
+  color: #1A1A1A;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 4px;
 }
 
 .email {
-  color: var(--text-tertiary);
-  font-size: var(--font-size-caption);
+  color: #1A1A1A;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
 }
 
 .role {
-  color: var(--text-secondary);
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
-  margin-top: var(--spacing-xs);
+  color: #1A1A1A;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 6px;
 }
 
 .created-at {
-  color: var(--text-quaternary);
-  font-size: var(--font-size-caption2);
-  margin-top: var(--spacing-xs);
+  color: #666666;
+  font-size: 12px;
+  margin-top: 6px;
 }
 
 .profile-actions {
@@ -139,34 +169,36 @@ onMounted(async () => {
 }
 
 .logout-btn {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
-  border-radius: var(--border-radius-base);
-  font-weight: var(--font-weight-medium);
+  padding: 12px 24px;
+  background-color: #FF6B6B;
+  color: #1A1A1A;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
+  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 .logout-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .loading-container,
 .error-container {
   text-align: center;
-  padding: var(--spacing-2xl);
+  padding: 40px;
 }
 
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid var(--text-quaternary);
-  border-top: 3px solid var(--primary-color);
+  border: 4px solid #F7D074;
+  border-top: 4px solid #76D7C4;
   border-radius: 50%;
-  margin: 0 auto var(--spacing-md);
+  margin: 0 auto 16px;
   animation: spin 1s linear infinite;
 }
 
@@ -177,33 +209,37 @@ onMounted(async () => {
 }
 
 .retry-btn {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  background: var(--background-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--separator-color);
-  border-radius: var(--border-radius-base);
-  font-weight: var(--font-weight-medium);
+  padding: 12px 24px;
+  background-color: #F7D074;
+  color: #1A1A1A;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
+  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 .retry-btn:hover {
-  background: var(--background-tertiary);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .profile-container {
-    padding: var(--spacing-md);
+    padding: 16px;
   }
   
   .user-info {
     flex-direction: column;
     text-align: center;
+    gap: 16px;
   }
   
   .profile-content {
-    padding: var(--spacing-lg);
+    padding: 20px;
   }
 }
 </style>

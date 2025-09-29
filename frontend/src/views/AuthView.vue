@@ -404,6 +404,7 @@ const handleSSELogin = async () => {
 .toggle-text {
   font-size: 14px;
   color: #888888;
+  margin-bottom: 0;
 }
 
 .toggle-btn {
@@ -412,14 +413,13 @@ const handleSSELogin = async () => {
   color: #F7D074;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s ease;
-  padding: 4px 8px;
-  border-radius: 8px;
+  transition: color 0.2s ease;
+  padding: 0;
+  text-decoration: underline;
 }
 
 .toggle-btn:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0px 0px #000000;
+  color: #1A1A1A;
 }
 
 /* Register Fields */
@@ -468,27 +468,26 @@ const handleSSELogin = async () => {
   padding: 14px 24px;
   border-radius: 8px;
   font-size: 16px;
-  font-weight: 500;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: var(--text-primary);
+  font-weight: bold;
+  border: 3px solid #000000;
+  background-color: #FFFFFF;
+  box-shadow: 4px 4px 0px 0px #000000;
+  color: #1A1A1A;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
   min-height: 48px;
 }
 
 .sse-login-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: var(--primary-color);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .sse-login-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 /* Decorative Elements */
@@ -536,14 +535,14 @@ const handleSSELogin = async () => {
 /* Responsive Design */
 @media (min-width: 768px) {
   .auth-container {
-    max-width: 768px;
+    max-width: 100%;
     margin: 0 auto;
   }
 }
 
 @media (min-width: 1024px) {
   .auth-container {
-    max-width: 1024px;
+    max-width: 100%;
     margin: 0 auto;
   }
 }

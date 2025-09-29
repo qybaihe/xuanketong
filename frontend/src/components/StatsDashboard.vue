@@ -233,7 +233,9 @@
             <img :src="course.image_url" :alt="course.name" />
             <div class="course-overlay">
               <div class="course-rating-overlay">
-                <span class="rating-stars">⭐</span>
+                <svg class="rating-stars" width="16" height="16" viewBox="0 0 24 24" fill="#F7D074">
+                  <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
+                </svg>
                 <span class="rating-value">{{ course.average_rating.toFixed(1) }}</span>
               </div>
               <div class="course-engagement">

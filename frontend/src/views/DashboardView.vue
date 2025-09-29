@@ -27,7 +27,9 @@
       <div class="stat-card card-glass">
         <div class="stat-content">
           <div class="stat-icon rating-icon">
-            <span class="icon-emoji">⭐</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#F7D074">
+              <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
+            </svg>
           </div>
           <div class="stat-info">
             <h3 class="stat-value">{{ stats.average_rating.toFixed(1) }}</h3>
@@ -108,7 +110,9 @@
         
         <div class="activity-item">
           <div class="activity-icon activity-rating">
-            <span>⭐</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#F7D074">
+              <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
+            </svg>
           </div>
           <div class="activity-content">
             <p class="activity-text">用户 <span class="activity-user">李四</span> 评分了课程 <span class="activity-course">线性代数</span></p>
