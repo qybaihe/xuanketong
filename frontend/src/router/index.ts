@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import HomeView from '../views/HomeView.vue'
+import SearchView from '../views/SearchView.vue'
 import CourseDetailView from '../views/CourseDetailView.vue'
 import CourseRateView from '../views/CourseRateView.vue'
 import ProfileView from '../views/ProfileView.vue'
@@ -19,6 +20,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView
+    },
+    {
+      path: '/search',
+      name: 'search',
+      component: SearchView,
+      meta: { title: '课程搜索' }
     },
     {
       path: '/courses/:id',

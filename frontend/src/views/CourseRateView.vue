@@ -32,11 +32,11 @@ const ratingForm = reactive({
 
 // 预设评价选项
 const ratingOptions = [
-  { value: 5, label: '非常好', emoji: '⭐⭐⭐⭐⭐' },
-  { value: 4, label: '很好', emoji: '⭐⭐⭐⭐' },
-  { value: 3, label: '一般', emoji: '⭐⭐⭐' },
-  { value: 2, label: '不太好', emoji: '⭐⭐' },
-  { value: 1, label: '很不好', emoji: '⭐' }
+  { value: 5, label: '非常好', emoji: '★★★★★' },
+  { value: 4, label: '很好', emoji: '★★★★☆' },
+  { value: 3, label: '一般', emoji: '★★★☆☆' },
+  { value: 2, label: '不太好', emoji: '★★☆☆☆' },
+  { value: 1, label: '很不好', emoji: '★☆☆☆☆' }
 ]
 
 // 获取课程信息
@@ -191,7 +191,12 @@ onMounted(() => {
               :class="{ active: i <= ratingForm.overall }"
               @click="handleStarClick('overall', i)"
             >
-              {{ i <= ratingForm.overall ? '⭐' : '☆' }}
+              <svg v-if="i <= ratingForm.overall" width="24" height="24" viewBox="0 0 24 24" fill="#F7D074">
+                <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
+              </svg>
+              <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="2">
+                <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
+              </svg>
             </span>
           </div>
           <div class="rating-help">
@@ -216,7 +221,12 @@ onMounted(() => {
                 :class="{ active: i <= ratingForm.difficulty }"
                 @click="handleStarClick('difficulty', i)"
               >
-                {{ i <= ratingForm.difficulty ? '⭐' : '☆' }}
+                <svg v-if="i <= ratingForm.difficulty" width="20" height="20" viewBox="0 0 24 24" fill="#F7D074">
+                  <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
+                </svg>
+                <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
+                </svg>
               </span>
             </div>
           </div>
@@ -234,7 +244,12 @@ onMounted(() => {
                 :class="{ active: i <= ratingForm.usefulness }"
                 @click="handleStarClick('usefulness', i)"
               >
-                {{ i <= ratingForm.usefulness ? '⭐' : '☆' }}
+                <svg v-if="i <= ratingForm.usefulness" width="20" height="20" viewBox="0 0 24 24" fill="#F7D074">
+                  <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
+                </svg>
+                <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
+                </svg>
               </span>
             </div>
           </div>
@@ -252,7 +267,12 @@ onMounted(() => {
                 :class="{ active: i <= ratingForm.teaching }"
                 @click="handleStarClick('teaching', i)"
               >
-                {{ i <= ratingForm.teaching ? '⭐' : '☆' }}
+                <svg v-if="i <= ratingForm.teaching" width="20" height="20" viewBox="0 0 24 24" fill="#F7D074">
+                  <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
+                </svg>
+                <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
+                </svg>
               </span>
             </div>
           </div>

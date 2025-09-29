@@ -123,6 +123,8 @@ export interface CourseFilters {
   grade?: string
   semester?: string
   subject?: string
+  name?: string
+  teacher?: string
 }
 
 const courseService = {
