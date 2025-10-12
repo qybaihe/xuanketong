@@ -99,7 +99,12 @@ const router = createRouter({
           path: 'ratings',
           name: 'rating-management',
           component: { template: '<div>Rating Management placeholder</div>' }
-        }
+        },
+        {
+          path: 'stats',
+          name: 'stats',
+          component: () => import('../views/StatsView.vue')
+        },
       ]
     },
     {
@@ -109,11 +114,6 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue')
-    },
-    {
-      path: '/stats',
-      name: 'stats',
-      component: () => import('../views/StatsView.vue')
     },
     {
       path: '/evaluation-requests',

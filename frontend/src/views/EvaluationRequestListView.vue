@@ -109,10 +109,10 @@ const formatDate = (dateString: string) => {
         <div class="toolbar-right">
           <button class="btn btn-secondary" @click="refreshData" :disabled="loading">
             <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M21 3v5h-5" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M3 21v-5h5" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M21 3v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3 21v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             {{ loading ? '刷新中...' : '刷新' }}
           </button>
@@ -129,18 +129,18 @@ const formatDate = (dateString: string) => {
     <!-- 错误状态 -->
     <div v-else-if="error" class="error-container">
       <svg class="error-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="10" stroke="#FF6B6B" stroke-width="2"/>
-        <line x1="15" y1="9" x2="9" y2="15" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"/>
-        <line x1="9" y1="9" x2="15" y2="15" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+        <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
       <h3 class="error-title">加载失败</h3>
       <p class="error-message">{{ error }}</p>
       <button class="btn btn-primary" @click="refreshData">
         <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M21 3v5h-5" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M3 21v-5h5" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M21 3v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 21v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         重试
       </button>
@@ -149,16 +149,16 @@ const formatDate = (dateString: string) => {
     <!-- 空状态 -->
     <div v-else-if="evaluationRequests.length === 0" class="empty-container">
       <svg class="empty-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#76D7C4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#76D7C4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <h3 class="empty-title">暂无求评价课程</h3>
       <p class="empty-description">目前还没有用户发起求评价请求</p>
       <p class="empty-hint">浏览课程列表，为感兴趣的课程发起求评价吧！</p>
       <RouterLink to="/" class="btn btn-primary">
         <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <polyline points="9,22 9,12 15,12 15,22" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         返回首页
       </RouterLink>
@@ -194,7 +194,7 @@ const formatDate = (dateString: string) => {
             @click="handlePageChange(currentPage - 1)"
           >
             <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polyline points="15,18 9,12 15,6" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             上一页
           </button>
@@ -218,7 +218,7 @@ const formatDate = (dateString: string) => {
           >
             下一页
             <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polyline points="9,18 15,12 9,6" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="9,18 15,12 9,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
         </div>
@@ -228,7 +228,7 @@ const formatDate = (dateString: string) => {
     <!-- 返回顶部按钮 -->
     <div class="back-to-top" @click="scrollToTop">
       <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polyline points="18,15 12,9 6,15" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <polyline points="18,15 12,9 6,15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
   </div>
@@ -237,10 +237,10 @@ const formatDate = (dateString: string) => {
 <style scoped>
 .evaluation-requests-container {
   min-height: 100vh;
-  background-color: #FEF6F7;
+  background-color: var(--color-background);
   padding: 20px;
   font-family: sans-serif;
-  color: #1A1A1A;
+  color: var(--color-text);
 }
 
 /* 页面头部 */
@@ -264,23 +264,23 @@ const formatDate = (dateString: string) => {
 }
 
 .breadcrumb-link {
-  color: #76D7C4;
+  color: var(--color-accent);
   text-decoration: none;
   font-weight: bold;
   transition: color 0.2s ease;
 }
 
 .breadcrumb-link:hover {
-  color: #1A1A1A;
+  color: var(--color-text);
   text-decoration: underline;
 }
 
 .breadcrumb-separator {
-  color: #666666;
+  color: var(--color-text-secondary);
 }
 
 .breadcrumb-current {
-  color: #1A1A1A;
+  color: var(--color-text);
   font-weight: bold;
 }
 
@@ -291,14 +291,14 @@ const formatDate = (dateString: string) => {
 .page-title {
   font-size: 32px;
   font-weight: bold;
-  color: #1A1A1A;
+  color: var(--color-text);
   margin-bottom: 8px;
   text-align: center;
 }
 
 .page-subtitle {
   font-size: 16px;
-  color: #1A1A1A;
+  color: var(--color-text);
   margin: 16px 0 0;
   font-weight: 500;
 }
@@ -313,65 +313,63 @@ const formatDate = (dateString: string) => {
 .stat-item {
   text-align: center;
   min-width: 100px;
-  background-color: #FFFFFF;
+  background-color: var(--color-surface);
   padding: 16px;
   border-radius: 8px;
-  border: 2px solid #000000;
-  box-shadow: 3px 3px 0px 0px #000000;
+  border: 1px solid var(--color-border);
+  box-shadow: none;
 }
 
 .stat-number {
   font-size: 24px;
   font-weight: bold;
-  color: #76D7C4;
+  color: var(--color-accent);
   margin-bottom: 4px;
   display: block;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #1A1A1A;
+  color: var(--color-text);
   font-weight: bold;
 }
 
 /* 按钮基础样式 */
 .btn {
-  background-color: #F7D074;
+  background-color: var(--color-primary);
   border-radius: 8px;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid var(--color-border);
+  box-shadow: none;
   padding: 12px 20px;
   font-size: 14px;
   font-weight: bold;
-  color: #1A1A1A;
+  color: var(--color-text);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   text-decoration: none;
-  transition: transform 0.2s ease;
+  transition: none;
 }
 
-.btn:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
-}
-
-.btn:active {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px 0px #000000;
+.btn:hover,
+.btn:active,
+.btn:focus {
+  transform: none;
+  box-shadow: none;
+  outline: none;
 }
 
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: none;
 }
 
 .btn-secondary {
-  background-color: #76D7C4;
+  background-color: var(--color-accent);
 }
 
 /* 工具栏 */
@@ -386,10 +384,10 @@ const formatDate = (dateString: string) => {
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  background-color: #FFFFFF;
+  background-color: var(--color-surface);
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid var(--color-border);
+  box-shadow: none;
 }
 
 .toolbar-left {
@@ -399,13 +397,13 @@ const formatDate = (dateString: string) => {
 .section-title {
   font-size: 20px;
   font-weight: bold;
-  color: #1A1A1A;
+  color: var(--color-text);
   margin-bottom: 4px;
 }
 
 .section-description {
   font-size: 14px;
-  color: #1A1A1A;
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -424,8 +422,8 @@ const formatDate = (dateString: string) => {
 .loader {
   width: 40px;
   height: 40px;
-  border: 4px solid #F7D074;
-  border-top: 4px solid #76D7C4;
+  border: 4px solid var(--color-primary);
+  border-top: 4px solid var(--color-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -437,7 +435,7 @@ const formatDate = (dateString: string) => {
 
 .loading-text {
   font-size: 16px;
-  color: #1A1A1A;
+  color: var(--color-text);
   font-weight: bold;
 }
 
@@ -447,10 +445,10 @@ const formatDate = (dateString: string) => {
   margin: 60px auto;
   text-align: center;
   padding: 40px;
-  background-color: #FFFFFF;
+  background-color: var(--color-surface);
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid var(--color-border);
+  box-shadow: none;
 }
 
 .error-icon {
@@ -460,13 +458,13 @@ const formatDate = (dateString: string) => {
 .error-title {
   font-size: 20px;
   font-weight: bold;
-  color: #FF6B6B;
+  color: var(--color-error);
   margin-bottom: 8px;
 }
 
 .error-message {
   font-size: 16px;
-  color: #1A1A1A;
+  color: var(--color-text);
   margin-bottom: 32px;
 }
 
@@ -476,10 +474,10 @@ const formatDate = (dateString: string) => {
   margin: 60px auto;
   text-align: center;
   padding: 40px;
-  background-color: #FFFFFF;
+  background-color: var(--color-surface);
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid var(--color-border);
+  box-shadow: none;
 }
 
 .empty-icon {
@@ -489,19 +487,19 @@ const formatDate = (dateString: string) => {
 .empty-title {
   font-size: 20px;
   font-weight: bold;
-  color: #1A1A1A;
+  color: var(--color-text);
   margin-bottom: 8px;
 }
 
 .empty-description {
   font-size: 16px;
-  color: #1A1A1A;
+  color: var(--color-text);
   margin-bottom: 8px;
 }
 
 .empty-hint {
   font-size: 14px;
-  color: #666666;
+  color: var(--color-text-secondary);
   margin-bottom: 32px;
 }
 
@@ -524,18 +522,18 @@ const formatDate = (dateString: string) => {
 .grid-title {
   font-size: 18px;
   font-weight: bold;
-  color: #1A1A1A;
+  color: var(--color-text);
   margin: 0;
 }
 
 .highlight {
-  color: #76D7C4;
+  color: var(--color-accent);
   font-weight: bold;
 }
 
 .view-info {
   font-size: 14px;
-  color: #1A1A1A;
+  color: var(--color-text);
   font-weight: bold;
 }
 
@@ -550,7 +548,7 @@ const formatDate = (dateString: string) => {
 .pagination-container {
   margin-top: 60px;
   padding-top: 24px;
-  border-top: 2px solid #000000;
+  border-top: 1px solid var(--color-border);
 }
 
 .pagination-content {
@@ -562,30 +560,30 @@ const formatDate = (dateString: string) => {
 
 .pagination-btn {
   padding: 8px 16px;
-  border: 2px solid #000000;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background-color: #FFFFFF;
-  color: #1A1A1A;
+  background-color: var(--color-surface);
+  color: var(--color-text);
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: none;
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 3px 3px 0px 0px #000000;
+  box-shadow: none;
 }
 
 .pagination-btn:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0px 0px #000000;
+  transform: none;
+  box-shadow: none;
 }
 
 .pagination-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 3px 3px 0px 0px #000000;
+  box-shadow: none;
 }
 
 .pagination-pages {
@@ -596,26 +594,25 @@ const formatDate = (dateString: string) => {
 .pagination-page {
   width: 36px;
   height: 36px;
-  border: 2px solid #000000;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background-color: #FFFFFF;
-  color: #1A1A1A;
+  background-color: var(--color-surface);
+  color: var(--color-text);
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s ease;
-  box-shadow: 2px 2px 0px 0px #000000;
+  transition: none;
 }
 
 .pagination-page:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px 0px #000000;
+  transform: none;
+  box-shadow: none;
 }
 
 .pagination-page.active {
-  background-color: #76D7C4;
-  color: #1A1A1A;
-  border-color: #000000;
+  background-color: var(--color-accent);
+  color: var(--color-text);
+  border-color: var(--color-border);
 }
 
 /* 返回顶部 */
@@ -625,22 +622,22 @@ const formatDate = (dateString: string) => {
   right: 30px;
   width: 50px;
   height: 50px;
-  background-color: #F7D074;
-  color: #1A1A1A;
+  background-color: var(--color-primary);
+  color: var(--color-text);
   border-radius: 50%;
-  border: 3px solid #000000;
+  border: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 4px 4px 0px 0px #000000;
-  transition: transform 0.2s ease;
+  box-shadow: none;
+  transition: none;
   z-index: 100;
 }
 
 .back-to-top:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  transform: none;
+  box-shadow: none;
 }
 
 /* 响应式设计 */

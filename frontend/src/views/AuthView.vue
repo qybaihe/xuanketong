@@ -272,8 +272,7 @@ const handleSSELogin = async () => {
   padding: 32px 24px;
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
 }
 
 /* Auth Header */
@@ -317,17 +316,16 @@ const handleSSELogin = async () => {
 
 .input-glass {
   background-color: #FFFFFF;
-  border: 3px solid #000000;
+  border: 1px solid #000000;
   border-radius: 8px;
   padding: 12px;
   font-size: 16px;
   font-family: sans-serif;
-  transition: transform 0.2s ease;
+  transition: none;
+  box-shadow: none;
 }
 
 .input-glass:focus {
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0px 0px #000000;
   outline: none;
 }
 
@@ -345,8 +343,7 @@ const handleSSELogin = async () => {
   padding: 8px;
   background-color: #FFFFFF;
   border-radius: 8px;
-  border: 3px solid #FF3B30;
-  box-shadow: 4px 4px 0px 0px rgba(255, 59, 48, 0.2);
+  border: 1px solid var(--color-error);
 }
 
 /* Submit Button */
@@ -360,8 +357,7 @@ const handleSSELogin = async () => {
   font-size: 16px;
   font-weight: bold;
   background-color: #F7D074;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid #000000;
   color: #1A1A1A;
   cursor: pointer;
   transition: transform 0.2s ease;
@@ -369,21 +365,18 @@ const handleSSELogin = async () => {
 }
 
 .submit-btn:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 .loading-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   border-top: 2px solid #1A1A1A;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -469,9 +462,8 @@ const handleSSELogin = async () => {
   border-radius: 8px;
   font-size: 16px;
   font-weight: bold;
-  border: 3px solid #000000;
+  border: 1px solid #000000;
   background-color: #FFFFFF;
-  box-shadow: 4px 4px 0px 0px #000000;
   color: #1A1A1A;
   cursor: pointer;
   transition: transform 0.2s ease;
@@ -479,15 +471,12 @@ const handleSSELogin = async () => {
 }
 
 .sse-login-btn:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .sse-login-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 /* Decorative Elements */

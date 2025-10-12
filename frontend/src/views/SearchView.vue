@@ -349,8 +349,7 @@ onMounted(() => {
 .header-content {
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 24px;
 }
 
@@ -376,8 +375,7 @@ onMounted(() => {
 .search-form-container {
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 24px;
 }
 
@@ -436,7 +434,7 @@ onMounted(() => {
 .search-input {
   flex: 1;
   background-color: #FFFFFF;
-  border: 3px solid #000000;
+  border: 1px solid #000000;
   border-radius: 8px;
   padding: 12px;
   font-size: 16px;
@@ -445,8 +443,6 @@ onMounted(() => {
 }
 
 .search-input:focus {
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0px 0px #000000;
   outline: none;
 }
 
@@ -460,8 +456,7 @@ onMounted(() => {
   font-size: 16px;
   font-weight: bold;
   background-color: #F7D074;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid #000000;
   color: #1A1A1A;
   cursor: pointer;
   transition: transform 0.2s ease;
@@ -469,15 +464,12 @@ onMounted(() => {
 }
 
 .search-button:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .search-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 /* Results Section */
@@ -488,8 +480,7 @@ onMounted(() => {
 .results-header {
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 24px;
   margin-bottom: 16px;
   display: flex;
@@ -530,8 +521,7 @@ onMounted(() => {
 .clear-button {
   background-color: #FFFFFF;
   border-radius: 8px;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 8px 16px;
   font-size: 14px;
   font-weight: bold;
@@ -541,8 +531,6 @@ onMounted(() => {
 }
 
 .clear-button:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 /* Course Grid */
@@ -556,8 +544,7 @@ onMounted(() => {
 .course-card {
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   overflow: hidden;
   text-decoration: none;
   color: #1A1A1A;
@@ -567,8 +554,6 @@ onMounted(() => {
 }
 
 .course-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 7px 7px 0px 0px #000000;
 }
 
 .course-card-content {
@@ -588,7 +573,7 @@ onMounted(() => {
 .course-card-tag {
   padding: 4px 8px;
   border-radius: 8px;
-  border: 2px solid #000000;
+  border: 1px solid #000000;
   font-size: 12px;
   font-weight: bold;
 }
@@ -632,14 +617,11 @@ onMounted(() => {
   padding: 16px;
   background-color: #FFFFFF;
   border-radius: 8px;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid #000000;
   transition: transform 0.2s ease;
 }
 
 .course-teacher-section:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .teacher-label {
@@ -678,7 +660,7 @@ onMounted(() => {
   background-color: #FFFFFF;
   padding: 4px 10px;
   border-radius: 8px;
-  border: 2px solid #000000;
+  border: 1px solid #000000;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -687,8 +669,7 @@ onMounted(() => {
   padding: 24px;
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   margin-bottom: 24px;
 }
 
@@ -746,7 +727,7 @@ onMounted(() => {
   flex: 1;
   height: 8px;
   background-color: #FFFFFF;
-  border: 2px solid #000000;
+  border: 1px solid #000000;
   border-radius: 4px;
   overflow: hidden;
   position: relative;
@@ -775,8 +756,7 @@ onMounted(() => {
 .btn-rate-course {
   background-color: #76D7C4;
   border-radius: 8px;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 12px 24px;
   font-size: 15px;
   font-weight: bold;
@@ -786,13 +766,9 @@ onMounted(() => {
 }
 
 .btn-rate-course:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .btn-rate-course:active {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px 0px #000000;
 }
 
 /* 评分星级样式 */
@@ -825,7 +801,7 @@ onMounted(() => {
 }
 
 .course-card:hover .star {
-  transform: scale(1.1);
+  transform: none;
 }
 
 /* Loading State */
@@ -835,7 +811,7 @@ onMounted(() => {
 }
 
 .loader {
-  border: 4px solid #000000;
+  border: 1px solid var(--color-border);
   border-top: 4px solid #F7D074;
   border-radius: 50%;
   width: 40px;
@@ -857,7 +833,7 @@ onMounted(() => {
 .loading-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   border-top: 2px solid #1A1A1A;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -869,8 +845,7 @@ onMounted(() => {
   padding: 40px 0;
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
 }
 
 .empty-title {
@@ -895,8 +870,7 @@ onMounted(() => {
 .initial-content {
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 40px 24px;
 }
 
@@ -917,8 +891,7 @@ onMounted(() => {
 .btn {
   background-color: #F7D074;
   border-radius: 8px;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 12px 24px;
   font-size: 16px;
   font-weight: bold;
@@ -928,8 +901,6 @@ onMounted(() => {
 }
 
 .btn:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .btn-primary {

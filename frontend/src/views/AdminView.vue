@@ -1,93 +1,122 @@
 <template>
-  <div class="admin-container">
-    <div class="container-fluid">
-      <div class="row">
-        <!-- 侧边栏 -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-          <div class="position-sticky pt-3">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <RouterLink to="/admin/courses" class="nav-link" active-class="active">
-                  <i class="bi bi-book me-2"></i>
-                  课程管理
-                </RouterLink>
-              </li>
-              <li class="nav-item">
-                <RouterLink to="/admin/users" class="nav-link" active-class="active">
-                  <i class="bi bi-people me-2"></i>
-                  用户管理
-                </RouterLink>
-              </li>
-              <li class="nav-item">
-                <RouterLink to="/admin/stats" class="nav-link" active-class="active">
-                  <i class="bi bi-graph-up me-2"></i>
-                  数据统计
-                </RouterLink>
-              </li>
-            </ul>
-          </div>
-        </nav>
+  <el-container class="admin-container">
+    <!-- 侧边栏 -->
+    <el-aside width="250px" class="admin-sidebar">
+      <el-menu
+        :default-active="activeMenu"
+        class="admin-menu"
+        router
+        background-color="var(--color-background)"
+        text-color="var(--color-text-secondary)"
+        active-text-color="var(--color-primary)"
+      >
+        <el-menu-item index="/admin">
+          <el-icon><Odometer /></el-icon>
+          <span>仪表盘</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/courses">
+          <el-icon><Reading /></el-icon>
+          <span>课程管理</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/users">
+          <el-icon><User /></el-icon>
+          <span>用户管理</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/stats">
+          <el-icon><TrendCharts /></el-icon>
+          <span>数据统计</span>
+        </el-menu-item>
+      </el-menu>
+    </el-aside>
 
-        <!-- 主要内容区域 -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-          <div class="main-header mb-4">
-            <div class="d-flex justify-content-between align-items-center">
-              <h1 class="mb-0">课程管理系统</h1>
-              <button type="button" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-download me-1"></i>导出
-              </button>
-            </div>
-          </div>
-          <router-view></router-view>
-        </main>
-      </div>
-    </div>
-  </div>
+    <!-- 主要内容区域 -->
+    <el-container>
+      <el-header class="admin-header">
+        <div class="header-content">
+          <h1 class="page-title">课程管理系统</h1>
+        </div>
+      </el-header>
+      
+      <el-main class="admin-main">
+        <router-view></router-view>
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <script setup lang="ts">
-import { RouterView, RouterLink } from 'vue-router'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const activeMenu = computed(() => {
+  return route.path
+})
 </script>
 
 <style scoped>
-
 .admin-container {
-  background-color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 14px;
-  color: #333333;
-}
-.sidebar {
   height: 100vh;
-  background: #f8f9fa;
-  border-right: 1px solid #dee2e6;
-  padding-top: 1rem;
+  background-color: var(--color-background);
 }
-.sidebar .nav-link {
-  color: #495057;
-  padding: 0.75rem 1.25rem;
-  font-weight: 500;
-  transition: all 0.2s;
-  border-radius: 4px;
+
+.admin-sidebar {
+  background-color: var(--color-background);
+  border-right: 1px solid var(--color-border);
 }
-.sidebar .nav-link:hover,
-.sidebar .nav-link.active {
-  color: #007bff;
-  background-color: #e3f2fd;
+
+.admin-menu {
+  border-right: none;
+  height: 100%;
 }
-.sidebar .nav-link i {
-  width: 20px;
-  margin-right: 0.75rem;
+
+.admin-header {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
 }
-.main-header {
-  background: #ffffff;
-  border-bottom: 1px solid #dee2e6;
-  padding: 1rem 0;
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
-.main-header h1 {
+
+.page-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text);
   margin: 0;
+}
+
+.admin-main {
+  background-color: var(--color-background);
+  padding: 20px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 200px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-container {
+    flex-direction: column;
+  }
+  
+  .admin-sidebar {
+    width: 100% !important;
+    height: auto;
+  }
+  
+  .admin-main {
+    padding: 10px;
+  }
 }
 </style>

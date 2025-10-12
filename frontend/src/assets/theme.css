@@ -1,0 +1,113 @@
+/* 主题CSS变量 */
+:root {
+  /* 默认主题颜色 */
+  --color-primary: #F7D074;
+  --color-secondary: #FF6B6B;
+  --color-accent: #4ECDC4;
+  --color-background: #FEF6F7;
+  --color-surface: #FFFFFF;
+  --color-text: #1A1A1A;
+  --color-textSecondary: #888888;
+  --color-border: #000000;
+  --color-success: #28a745;
+  --color-error: #dc3545;
+  --color-warning: #ffc107;
+  --color-info: #17a2b8;
+}
+
+/* 基础样式使用CSS变量 */
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+/* 卡片样式 */
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+/* 按钮样式 */
+.btn {
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+}
+
+.btn-accent {
+  background-color: var(--color-accent);
+}
+
+/* 输入框样式 */
+.input-glass {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.input-glass:focus {
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+
+/* 文本颜色 */
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+.text-error {
+  color: var(--color-error);
+}
+
+/* 背景颜色 */
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-secondary {
+  background-color: var(--color-secondary);
+}
+
+.bg-surface {
+  background-color: var(--color-surface);
+}
+
+/* 边框颜色 */
+.border-primary {
+  border-color: var(--color-primary);
+}
+
+.border-secondary {
+  border-color: var(--color-secondary);
+}
+
+/* 夜间模式特定样式 - 由JS动态控制 */

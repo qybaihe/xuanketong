@@ -2,6 +2,9 @@
 import { ref, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/services/api'
+import TeacherIcon from '@/components/icons/TeacherIcon.vue'
+import BookIcon from '@/components/icons/BookIcon.vue'
+import TagIcon from '@/components/icons/TagIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -157,15 +160,21 @@ onMounted(() => {
           <h3 class="course-name">{{ course.name }}</h3>
           <div class="course-meta">
             <div class="meta-item">
-              <span class="meta-icon">👨‍🏫</span>
+              <span class="meta-icon">
+                <TeacherIcon :size="16" color="var(--color-text-secondary)" />
+              </span>
               <span class="meta-text">{{ course.teacher }}</span>
             </div>
             <div class="meta-item">
-              <span class="meta-icon">📚</span>
+              <span class="meta-icon">
+                <BookIcon :size="16" color="var(--color-text-secondary)" />
+              </span>
               <span class="meta-text">{{ course.credits }} 学分</span>
             </div>
             <div class="meta-item">
-              <span class="meta-icon">🏷️</span>
+              <span class="meta-icon">
+                <TagIcon :size="16" color="var(--color-text-secondary)" />
+              </span>
               <span class="meta-text">{{ course.grade }} · {{ course.semester }} · {{ course.subject }}</span>
             </div>
           </div>
@@ -403,8 +412,7 @@ onMounted(() => {
 .card {
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid var(--color-border);
   padding: 24px;
   margin-bottom: 24px;
 }
@@ -495,7 +503,6 @@ onMounted(() => {
 }
 
 .star:hover {
-  transform: scale(1.1);
 }
 
 .star.active {
@@ -528,7 +535,7 @@ onMounted(() => {
   padding: 16px;
   background-color: #FEF6F7;
   border-radius: 8px;
-  border: 2px solid #000000;
+  border: 1px solid var(--color-border);
   margin-bottom: 16px;
 }
 
@@ -556,20 +563,19 @@ onMounted(() => {
 .rating-textarea {
   width: 100%;
   padding: 12px;
-  border: 3px solid #000000;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 16px;
   font-family: sans-serif;
   resize: vertical;
   min-height: 120px;
   background-color: #FFFFFF;
-  box-shadow: 4px 4px 0px 0px #000000;
   transition: transform 0.2s ease;
 }
 
 .rating-textarea:focus {
   outline: none;
-  transform: translateY(-2px);
+  transform: none;
 }
 
 .char-count {
@@ -599,13 +605,12 @@ onMounted(() => {
 .checkmark {
   width: 24px;
   height: 24px;
-  border: 3px solid #000000;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #FFFFFF;
-  box-shadow: 4px 4px 0px 0px #000000;
   transition: transform 0.2s ease;
 }
 
@@ -637,8 +642,7 @@ onMounted(() => {
 .btn {
   background-color: #F7D074;
   border-radius: 8px;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid var(--color-border);
   padding: 12px 24px;
   font-size: 16px;
   font-weight: bold;
@@ -653,11 +657,11 @@ onMounted(() => {
 }
 
 .btn:hover {
-  transform: translateY(-2px);
+  transform: none;
 }
 
 .btn:active {
-  transform: translateY(0);
+  transform: none;
 }
 
 .btn:disabled {
@@ -703,7 +707,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  border: 2px solid #000000;
+  border: 1px solid var(--color-border);
   flex-shrink: 0;
 }
 
