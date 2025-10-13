@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, reactive, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { courseService, type Course, type CourseWithRating } from '@/services/api'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { courseService, type CourseWithRating } from '@/services/api'
+import CourseCard from '@/components/CourseCard.vue'
 
-const router = useRouter()
 const route = useRoute()
 
 interface CourseWithDisplay extends CourseWithRating {
+  ID: number; // 明确指定ID为必需字段
+  Name: string; // 明确指定Name为必需字段
+  Teacher: string; // 明确指定Teacher为必需字段
+  Credits: number; // 明确指定Credits为必需字段
   Students?: number;
   isPopular?: boolean;
   isNew?: boolean;
@@ -18,11 +22,7 @@ const loading = ref(true)
 const searchQuery = ref('')
 const searchType = ref<'course' | 'teacher'>('course')
 
-// 从路由参数获取搜索条件
-const searchParams = reactive({
-  query: '',
-  type: 'course' as 'course' | 'teacher'
-})
+
 
 // 数据字段映射函数
 const mapCourseData = (course: any): CourseWithDisplay => {
@@ -40,50 +40,23 @@ const mapCourseData = (course: any): CourseWithDisplay => {
     averageRating: course.averageRating,
     totalRatings: course.totalRatings,
     ratingDistribution: course.ratingDistribution,
-    ID: course.id,
-    Name: course.name,
-    Description: course.description,
-    Teacher: course.teacher,
-    Credits: course.credits,
-    Grade: course.grade,
-    Semester: course.semester,
-    Subject: course.subject,
-    CreatedAt: course.createdAt,
-    UpdatedAt: course.updatedAt,
-    AverageRating: course.averageRating,
-    TotalRatings: course.totalRatings,
-    RatingDistribution: course.ratingDistribution
+    ID: course.id || 0,
+    Name: course.name || '',
+    Description: course.description || '',
+    Teacher: course.teacher || '',
+    Credits: course.credits || 0,
+    Grade: course.grade || '',
+    Semester: course.semester || '',
+    Subject: course.subject || '',
+    CreatedAt: course.createdAt || '',
+    UpdatedAt: course.updatedAt || '',
+    AverageRating: course.averageRating || 0,
+    TotalRatings: course.totalRatings || 0,
+    RatingDistribution: course.ratingDistribution || {}
   }
 }
 
-// 获取标签
-const getTags = (course: CourseWithDisplay) => {
-  const tags = []
-  if (course.Grade) tags.push({ text: course.Grade, type: 'primary' })
-  if (course.Semester) tags.push({ text: course.Semester, type: 'secondary' })
-  if (course.Subject) tags.push({ text: course.Subject, type: 'accent' })
-  return tags
-}
 
-// 获取评分百分比
-const getRatingPercentage = (course: CourseWithDisplay, starLevel: number) => {
-  const ratingDistribution = course.RatingDistribution || {}
-  const countForStar = ratingDistribution[starLevel] || 0
-  const totalRatings = course.TotalRatings || 1
-  const percentage = (countForStar / totalRatings) * 100
-  return Math.max(5, Math.min(95, percentage))
-}
-
-// 获取评分数量
-const getRatingCount = (course: CourseWithDisplay, starLevel: number) => {
-  const ratingDistribution = course.RatingDistribution || {}
-  return ratingDistribution[starLevel] || 0
-}
-
-// 获取显示评分
-const getDisplayRating = (course: CourseWithDisplay): number => {
-  return course.AverageRating || 0
-}
 
 // 搜索课程
 const searchCourses = async () => {
@@ -91,9 +64,13 @@ const searchCourses = async () => {
   
   loading.value = true
   try {
-    const filters = searchType.value === 'course' 
-      ? { name: searchQuery.value }
-      : { teacher: searchQuery.value }
+    // 根据搜索类型构建正确的查询参数
+    const filters: any = {}
+    if (searchType.value === 'course') {
+      filters.name = searchQuery.value.trim()
+    } else {
+      filters.teacher = searchQuery.value.trim()
+    }
     
     const coursesData = await courseService.getCourses(filters)
     
@@ -108,23 +85,31 @@ const searchCourses = async () => {
     })
   } catch (error) {
     console.error('搜索课程失败', error)
+    courses.value = []
   } finally {
     loading.value = false
   }
 }
 
-// 跳转到课程评价页面
-const goToRateCourse = (courseId: number | undefined) => {
-  if (courseId) {
-    router.push(`/courses/${courseId}/rate`)
-  }
-}
 
 // 清空搜索
 const clearSearch = () => {
   searchQuery.value = ''
   courses.value = []
 }
+
+// 切换搜索类型下拉菜单
+const toggleSearchType = () => {
+  showSearchDropdown.value = !showSearchDropdown.value
+}
+
+// 选择搜索类型
+const selectSearchType = (type: 'course' | 'teacher') => {
+  searchType.value = type
+  showSearchDropdown.value = false
+}
+
+const showSearchDropdown = ref(false)
 
 // 计算搜索结果统计
 const searchStats = computed(() => {
@@ -167,44 +152,57 @@ onMounted(() => {
     <section class="search-section">
       <div class="search-form-container">
         <form @submit.prevent="searchCourses" class="search-form">
-          <div class="search-inputs">
-            <div class="search-type-selector">
-              <label class="search-type-label">搜索类型</label>
-              <div class="search-type-options">
-                <label class="search-type-option">
-                  <input 
-                    type="radio" 
-                    v-model="searchType" 
-                    value="course" 
-                    class="search-type-radio"
-                  />
-                  <span class="search-type-text">按课程名</span>
-                </label>
-                <label class="search-type-option">
-                  <input 
-                    type="radio" 
-                    v-model="searchType" 
-                    value="teacher" 
-                    class="search-type-radio"
-                  />
-                  <span class="search-type-text">按老师名</span>
-                </label>
+          <div class="search-input-container">
+            <!-- 搜索类型选择器 -->
+            <div class="search-type-dropdown">
+              <button 
+                type="button" 
+                class="search-type-button"
+                @click="toggleSearchType"
+              >
+                <span class="search-type-text">{{ searchType === 'course' ? '课程' : '老师' }}</span>
+                <svg class="search-type-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <div v-if="showSearchDropdown" class="search-type-options">
+                <button 
+                  type="button"
+                  class="search-type-option"
+                  :class="{ active: searchType === 'course' }"
+                  @click="selectSearchType('course')"
+                >
+                  课程
+                </button>
+                <button 
+                  type="button"
+                  class="search-type-option"
+                  :class="{ active: searchType === 'teacher' }"
+                  @click="selectSearchType('teacher')"
+                >
+                  老师
+                </button>
               </div>
             </div>
             
-            <div class="search-input-group">
-              <input
-                type="text"
-                v-model="searchQuery"
-                class="search-input"
-                :placeholder="searchType === 'course' ? '输入课程名称...' : '输入老师姓名...'"
-                required
-              />
-              <button type="submit" class="search-button" :disabled="loading">
-                <span v-if="loading" class="loading-spinner"></span>
-                {{ loading ? '搜索中...' : '搜索' }}
-              </button>
-            </div>
+            <!-- 搜索输入框 -->
+            <input
+              type="text"
+              v-model="searchQuery"
+              class="search-input"
+              :placeholder="searchType === 'course' ? '输入课程名称...' : '输入老师姓名...'"
+              required
+            />
+            
+            <!-- 搜索按钮 -->
+            <button type="submit" class="search-button" :disabled="loading">
+              <span v-if="loading" class="loading-spinner"></span>
+              <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              {{ loading ? '搜索中...' : '搜索' }}
+            </button>
           </div>
         </form>
       </div>
@@ -236,74 +234,14 @@ onMounted(() => {
 
       <!-- Results Grid -->
       <div v-else-if="courses.length > 0" class="course-grid">
-        <router-link
+        <CourseCard 
           v-for="course in courses"
           :key="course.ID"
-          :to="`/courses/${course.ID}`"
-          class="course-card"
-        >
-          <div class="course-card-content">
-            <!-- 课程标签 -->
-            <div class="course-card-tags">
-              <span
-                v-for="(tag, index) in getTags(course)"
-                :key="index"
-                :class="['course-card-tag', tag.type]"
-              >
-                {{ tag.text }}
-              </span>
-            </div>
-
-            <!-- 课程标题和基本信息 -->
-            <div class="course-card-header">
-              <h3 class="course-card-title">{{ course.Name }}</h3>
-              <div class="course-teacher-section">
-                <div class="teacher-label">授课老师</div>
-                <div class="teacher-info">
-                  <div class="teacher-details">
-                    <div class="teacher-name">{{ course.Teacher }}</div>
-                    <div class="teacher-credits">{{ course.Credits }} credits</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 评价统计区域 -->
-            <div class="course-rating-section">
-              <div class="rating-overview">
-                <div class="rating-average">
-                  <span class="rating-number">{{ getDisplayRating(course).toFixed(1) }}</span>
-                  <div class="rating-stars">
-                    <span
-                      v-for="i in 5"
-                      :key="i"
-                      :class="['star',
-                        i <= Math.floor(getDisplayRating(course)) ? 'star-filled' :
-                        (i - 0.5 <= getDisplayRating(course) ? 'star-half' : 'star-empty')]"
-                    ></span>
-                  </div>
-                  <span class="rating-count">{{ (course.TotalRatings || 0) }} 人评价</span>
-                </div>
-                <div class="rating-breakdown">
-                  <div class="rating-bar" v-for="i in 5" :key="i">
-                    <span class="bar-label">{{ 6-i }}星</span>
-                    <div class="bar-container">
-                      <div class="bar-fill" :style="{ width: getRatingPercentage(course, 6-i) + '%' }"></div>
-                    </div>
-                    <span class="bar-count">{{ getRatingCount(course, 6-i) }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 课程操作区域 -->
-            <div class="course-card-actions">
-              <button class="btn-rate-course" @click.prevent="goToRateCourse(course.ID)">
-                评价课程
-              </button>
-            </div>
-          </div>
-        </router-link>
+          :course="course"
+          :show-upload-button="true"
+          :show-comments="true"
+          :show-materials="true"
+        />
       </div>
 
       <!-- Empty State -->
@@ -334,7 +272,7 @@ onMounted(() => {
   font-family: sans-serif;
   color: #1A1A1A;
   padding: 20px;
-  max-width: 420px;
+  max-width: 1200px;
   margin: 0 auto;
   background-color: #FEF6F7;
   min-height: 100vh;
@@ -349,8 +287,7 @@ onMounted(() => {
 .header-content {
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 24px;
 }
 
@@ -376,8 +313,7 @@ onMounted(() => {
 .search-form-container {
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 24px;
 }
 
@@ -387,97 +323,137 @@ onMounted(() => {
   gap: 20px;
 }
 
-.search-inputs {
+/* 搜索输入容器样式 - 参考HomeView设计 */
+.search-input-container {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: none;
+  transition: none;
 }
 
-.search-type-selector {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.search-input-container:focus-within {
+  box-shadow: none;
 }
 
-.search-type-label {
+/* 搜索类型下拉菜单 */
+.search-type-dropdown {
+  position: relative;
+}
+
+.search-type-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #F7D074;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  padding: 8px 12px;
   font-size: 14px;
   font-weight: bold;
   color: #1A1A1A;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.search-type-button:hover {
+  background: #F0C74A;
+}
+
+.search-type-arrow {
+  transition: transform 0.2s ease;
+}
+
+.search-type-dropdown.open .search-type-arrow {
+  transform: rotate(180deg);
 }
 
 .search-type-options {
-  display: flex;
-  gap: 16px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  z-index: 1000;
+  box-shadow: none;
 }
 
 .search-type-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.search-type-radio {
-  width: 16px;
-  height: 16px;
-  accent-color: #F7D074;
-}
-
-.search-type-text {
+  display: block;
+  width: 100%;
+  background: #FFFFFF;
+  border: none;
+  border-bottom: 1px solid #000000;
+  padding: 8px 12px;
   font-size: 14px;
+  font-weight: bold;
   color: #1A1A1A;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: left;
 }
 
-.search-input-group {
-  display: flex;
-  gap: 12px;
+.search-type-option:last-child {
+  border-bottom: none;
 }
 
+.search-type-option:hover {
+  background: #F7D074;
+}
+
+.search-type-option.active {
+  background: #F7D074;
+}
+
+/* 搜索输入框 */
 .search-input {
+  border: none;
+  outline: none !important;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  min-width: 200px;
+  background: transparent;
+  color: #1A1A1A;
   flex: 1;
-  background-color: #FFFFFF;
-  border: 3px solid #000000;
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 16px;
-  font-family: sans-serif;
-  transition: transform 0.2s ease;
 }
 
-.search-input:focus {
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0px 0px #000000;
-  outline: none;
+.search-input::placeholder {
+  color: #999;
+  font-weight: normal;
 }
 
+/* 搜索按钮 */
 .search-button {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
-  background-color: #F7D074;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  gap: 6px;
+  background: #76D7C4;
   color: #1A1A1A;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s ease;
-  min-width: 100px;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
 }
 
 .search-button:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  background: #6BC4B1;
 }
 
 .search-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 /* Results Section */
@@ -488,8 +464,7 @@ onMounted(() => {
 .results-header {
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 24px;
   margin-bottom: 16px;
   display: flex;
@@ -530,8 +505,7 @@ onMounted(() => {
 .clear-button {
   background-color: #FFFFFF;
   border-radius: 8px;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 8px 16px;
   font-size: 14px;
   font-weight: bold;
@@ -541,8 +515,6 @@ onMounted(() => {
 }
 
 .clear-button:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 /* Course Grid */
@@ -556,8 +528,7 @@ onMounted(() => {
 .course-card {
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   overflow: hidden;
   text-decoration: none;
   color: #1A1A1A;
@@ -567,8 +538,6 @@ onMounted(() => {
 }
 
 .course-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 7px 7px 0px 0px #000000;
 }
 
 .course-card-content {
@@ -588,7 +557,7 @@ onMounted(() => {
 .course-card-tag {
   padding: 4px 8px;
   border-radius: 8px;
-  border: 2px solid #000000;
+  border: 1px solid #000000;
   font-size: 12px;
   font-weight: bold;
 }
@@ -632,14 +601,11 @@ onMounted(() => {
   padding: 16px;
   background-color: #FFFFFF;
   border-radius: 8px;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid #000000;
   transition: transform 0.2s ease;
 }
 
 .course-teacher-section:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .teacher-label {
@@ -678,7 +644,7 @@ onMounted(() => {
   background-color: #FFFFFF;
   padding: 4px 10px;
   border-radius: 8px;
-  border: 2px solid #000000;
+  border: 1px solid #000000;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -687,8 +653,7 @@ onMounted(() => {
   padding: 24px;
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   margin-bottom: 24px;
 }
 
@@ -746,7 +711,7 @@ onMounted(() => {
   flex: 1;
   height: 8px;
   background-color: #FFFFFF;
-  border: 2px solid #000000;
+  border: 1px solid #000000;
   border-radius: 4px;
   overflow: hidden;
   position: relative;
@@ -775,8 +740,7 @@ onMounted(() => {
 .btn-rate-course {
   background-color: #76D7C4;
   border-radius: 8px;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 12px 24px;
   font-size: 15px;
   font-weight: bold;
@@ -786,13 +750,9 @@ onMounted(() => {
 }
 
 .btn-rate-course:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .btn-rate-course:active {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px 0px #000000;
 }
 
 /* 评分星级样式 */
@@ -825,7 +785,7 @@ onMounted(() => {
 }
 
 .course-card:hover .star {
-  transform: scale(1.1);
+  transform: none;
 }
 
 /* Loading State */
@@ -835,7 +795,7 @@ onMounted(() => {
 }
 
 .loader {
-  border: 4px solid #000000;
+  border: 1px solid var(--color-border);
   border-top: 4px solid #F7D074;
   border-radius: 50%;
   width: 40px;
@@ -857,7 +817,7 @@ onMounted(() => {
 .loading-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   border-top: 2px solid #1A1A1A;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -869,8 +829,7 @@ onMounted(() => {
   padding: 40px 0;
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
 }
 
 .empty-title {
@@ -895,8 +854,7 @@ onMounted(() => {
 .initial-content {
   background-color: #FFFFFF;
   border-radius: 12px;
-  border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 40px 24px;
 }
 
@@ -917,8 +875,7 @@ onMounted(() => {
 .btn {
   background-color: #F7D074;
   border-radius: 8px;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: 1px solid #000000;
   padding: 12px 24px;
   font-size: 16px;
   font-weight: bold;
@@ -928,8 +885,6 @@ onMounted(() => {
 }
 
 .btn:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .btn-primary {
@@ -941,13 +896,32 @@ onMounted(() => {
 }
 
 /* 响应式设计 */
+@media (max-width: 768px) {
+  .search-input-container {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+  }
+  
+  .search-type-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .search-input {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .search-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media (min-width: 768px) {
   .search-container {
     max-width: 768px;
-  }
-  
-  .search-input-group {
-    flex-direction: row;
   }
   
   .course-grid {
@@ -973,10 +947,6 @@ onMounted(() => {
   
   .search-form {
     gap: 32px;
-  }
-  
-  .search-inputs {
-    gap: 24px;
   }
 }
 

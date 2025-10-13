@@ -40,9 +40,11 @@ const goToEvaluate = (event: Event) => {
     <div class="card-border"></div>
     
     <!-- 热门标记 -->
+    <!--
     <div v-if="request.status === 'pending'" class="status-badge status-pending">
       求评价中
     </div>
+    -->
     
     <!-- 卡片内容 -->
     <div class="card-content">
@@ -51,8 +53,8 @@ const goToEvaluate = (event: Event) => {
         <h3 class="course-name">{{ request.course.name }}</h3>
         <div class="course-teacher">
           <svg class="teacher-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="12" cy="7" r="4" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="var(--color-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="7" r="4" stroke="var(--color-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <span class="teacher-name">{{ request.course.teacher }}</span>
         </div>
@@ -72,17 +74,21 @@ const goToEvaluate = (event: Event) => {
       <!-- 操作按钮 -->
       <div class="card-actions">
         <button class="btn btn-primary btn-evaluate" @click="goToEvaluate($event)">
+          <!--
           <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 20h9" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 20h9" stroke="var(--color-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="var(--color-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
+          -->
           去评价
         </button>
         <RouterLink :to="`/courses/${request.course.id}`" class="btn btn-secondary" @click.stop>
+          <!--
           <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="12" cy="12" r="3" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="var(--color-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="3" stroke="var(--color-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
+          -->
           查看详情
         </RouterLink>
       </div>
@@ -98,21 +104,18 @@ const goToEvaluate = (event: Event) => {
 <style scoped>
 .evaluation-request-card {
   position: relative;
-  background-color: #FFFFFF;
+  background-color: var(--color-surface);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 5px 5px 0px 0px #000000;
   transition: transform 0.2s ease;
   min-height: 280px;
   display: flex;
   flex-direction: column;
-  border: 3px solid #000000;
+  border: 1px solid var(--color-border);
   cursor: pointer;
 }
 
 .evaluation-request-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 7px 7px 0px 0px #000000;
 }
 
 .card-border {
@@ -131,13 +134,12 @@ const goToEvaluate = (event: Event) => {
   align-items: center;
   gap: 6px;
   z-index: 2;
-  border: 2px solid #000000;
-  box-shadow: 2px 2px 0px 0px #000000;
+  border: 1px solid var(--color-border);
 }
 
 .status-pending {
-  background-color: #FF6B6B;
-  color: #1A1A1A;
+  background-color: var(--color-secondary);
+  color: var(--color-text);
 }
 
 
@@ -161,7 +163,7 @@ const goToEvaluate = (event: Event) => {
 .course-name {
   font-size: 18px;
   font-weight: bold;
-  color: #1A1A1A;
+  color: var(--color-text);
   margin: 0 0 8px 0;
   line-height: 1.4;
 }
@@ -172,7 +174,7 @@ const goToEvaluate = (event: Event) => {
   justify-content: center;
   gap: 8px;
   font-size: 14px;
-  color: #1A1A1A;
+  color: var(--color-text);
 }
 
 .teacher-icon {
@@ -189,24 +191,23 @@ const goToEvaluate = (event: Event) => {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background-color: #F7D074;
+  background-color: var(--color-primary);
   border-radius: 8px;
-  border: 2px solid #000000;
-  box-shadow: 2px 2px 0px 0px #000000;
+  border: 1px solid var(--color-border);
 }
 
 .requester-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #76D7C4;
-  color: #1A1A1A;
+  background-color: var(--color-accent);
+  color: var(--color-text);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   font-size: 16px;
-  border: 2px solid #000000;
+  border: 1px solid var(--color-border);
 }
 
 .requester-details {
@@ -216,13 +217,13 @@ const goToEvaluate = (event: Event) => {
 .requester-name {
   font-size: 14px;
   font-weight: bold;
-  color: #1A1A1A;
+  color: var(--color-text);
   margin-bottom: 4px;
 }
 
 .request-time {
   font-size: 12px;
-  color: #1A1A1A;
+  color: var(--color-text);
   font-weight: 500;
 }
 
@@ -237,24 +238,27 @@ const goToEvaluate = (event: Event) => {
   padding: 12px 16px;
   font-size: 14px;
   font-weight: bold;
-  background-color: #F7D074;
-  color: #1A1A1A;
-  border: 3px solid #000000;
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: none;
   transition: transform 0.2s ease;
 }
 
-.btn-evaluate:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
+.btn-evaluate:hover,
+.btn-evaluate:active,
+.btn-evaluate:focus {
+  box-shadow: none;
+  outline: none;
+  transform: none;
 }
 
 .btn-secondary {
   padding: 12px 16px;
-  background-color: #76D7C4;
-  color: #1A1A1A;
-  border: 2px solid #000000;
+  background-color: var(--color-accent);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 14px;
   font-weight: bold;
@@ -264,12 +268,15 @@ const goToEvaluate = (event: Event) => {
   justify-content: center;
   gap: 8px;
   transition: transform 0.2s ease;
-  box-shadow: 3px 3px 0px 0px #000000;
+  box-shadow: none;
 }
 
-.btn-secondary:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0px 0px #000000;
+.btn-secondary:hover,
+.btn-secondary:active,
+.btn-secondary:focus {
+  box-shadow: none;
+  outline: none;
+  transform: none;
 }
 
 .card-footer {
@@ -296,7 +303,7 @@ const goToEvaluate = (event: Event) => {
 /* 暗色主题支持 */
 @media (prefers-color-scheme: dark) {
   .evaluation-request-card {
-    background: #1a1a1a;
+    background: var(--color-text);
     border-color: rgba(255, 255, 255, 0.1);
   }
   
@@ -305,7 +312,7 @@ const goToEvaluate = (event: Event) => {
   }
   
   .status-pending {
-    background: linear-gradient(135deg, #ff4757, #ff6b6b);
+    background: linear-gradient(135deg, var(--color-secondary), var(--color-secondary));
   }
   
   .requester-info {
@@ -316,11 +323,11 @@ const goToEvaluate = (event: Event) => {
   .btn-secondary {
     background: rgba(47, 169, 20, 0.15);
     border-color: rgba(47, 169, 20, 0.3);
-    color: #4fc830;
+    color: var(--color-success);
   }
   
   .footer-decoration {
-    background: linear-gradient(90deg, transparent, #4fc830, transparent);
+    background: linear-gradient(90deg, transparent, var(--color-success), transparent);
   }
 }
 </style>

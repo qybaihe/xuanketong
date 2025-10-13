@@ -14,6 +14,7 @@ func AdminRoutes(router *gin.Engine) {
 	{
 		admin.GET("/stats", controllers.GetStats)
 		admin.GET("/stats/enhanced", controllers.GetEnhancedHomeStats) // 增强版首页统计
+		admin.GET("/stats/detailed", controllers.GetDetailedStats)     // 详细统计数据
 		admin.GET("/user-stats", controllers.GetUserStats)
 
 		// 用户管理路由
@@ -21,12 +22,15 @@ func AdminRoutes(router *gin.Engine) {
 		admin.GET("/users/:id", controllers.GetUserByID)
 		admin.PUT("/users/:id", controllers.UpdateUser)
 		admin.DELETE("/users/:id", controllers.DeleteUser)
+		admin.PUT("/users/:id/ban", controllers.BanUser)
+		admin.PUT("/users/:id/unban", controllers.UnbanUser)
 
 		admin.GET("/ratings", controllers.GetAllRatings)
 		admin.GET("/comments", controllers.GetAllComments)
 
 		// 课程管理路由
 		admin.POST("/courses", controllers.CreateCourse)
+		admin.POST("/courses/batch", controllers.BatchCreateCourses)
 		admin.GET("/courses", controllers.GetCourses)
 		admin.GET("/courses/:id", controllers.GetCourse)
 		admin.PUT("/courses/:id", controllers.UpdateCourse)

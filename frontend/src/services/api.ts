@@ -48,6 +48,8 @@ export interface Course {
   grade: string
   semester: string
   subject: string
+  courseUnitName?: string
+  courseCategory?: string
   createdAt: string
   updatedAt: string
   averageRating?: number
@@ -104,7 +106,11 @@ export interface CreateEvaluationRequestRequest {
 export interface CourseWithRating extends Course {
   AverageRating?: number
   TotalRatings?: number
+  AverageDifficulty?: number // 平均难度
   ratingDistribution?: Record<number, number> // 1-5星评分分布
+  materialsCount?: number // 资料数量
+  hotComments?: string[] // 热门评论
+  hotMaterials?: string[] // 热门资料
   // 兼容字段映射
   ID?: number
   Name?: string

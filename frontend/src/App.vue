@@ -2,10 +2,12 @@
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { computed, onMounted, ref, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 const isHomeRoute = computed(() => route.path === '/')
 
@@ -20,6 +22,9 @@ const showDropdown = ref(false)
 onMounted(async () => {
   // Try to get current user if token exists
   await authStore.getCurrentUser()
+  
+  // 初始化主题
+  themeStore.initTheme()
 })
 
 const handleLogout = async () => {
@@ -203,11 +208,11 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 
 <style scoped>
 .app-header {
-  background: var(--background-blur);
+  background: var(--color-surface);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--separator-color);
-  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+  padding: 16px 24px;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -223,36 +228,37 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 
 .main-nav {
   display: flex;
-  gap: var(--spacing-lg);
+  gap: 24px;
 }
 
 .nav-link {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--border-radius-base);
+  padding: 8px 16px;
+  border-radius: 8px;
   text-decoration: none;
-  color: var(--text-secondary);
-  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  font-weight: 500;
   transition: all 0.2s ease;
 }
 
 .nav-link:hover {
-  background: var(--background-secondary);
-  color: var(--text-primary);
+  background: var(--color-background);
+  color: var(--color-text);
 }
 
 .nav-link.router-link-exact-active {
-  background: var(--primary-color);
+  background: var(--color-primary);
   color: white;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: 16px;
 }
 
 .search-section {
   position: relative;
+  overflow: visible;
 }
 
 .search-toggle {
@@ -260,17 +266,14 @@ const selectSearchType = (type: 'course' | 'teacher') => {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: #FFFFFF;
-  border: 3px solid #000000;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  box-shadow: 4px 4px 0px 0px #000000;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
 
 .search-toggle:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .search-icon {
@@ -278,7 +281,7 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 }
 
 .search-text {
-  color: #1A1A1A;
+  color: var(--color-text);
   font-size: 14px;
   font-weight: bold;
 }
@@ -287,18 +290,19 @@ const selectSearchType = (type: 'course' | 'teacher') => {
   position: absolute;
   top: 50%;
   left: 50%;
+  transform: translateX(-50%) translateY(-50%);
   z-index: 1000;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #FFFFFF;
-  border: 3px solid #000000;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 8px;
-  box-shadow: 4px 4px 0px 0px #000000;
   height: 48px;
   min-width: 400px;
-  transform: translate(-50%, -50%);
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: expandWidth 0.3s ease-out;
 }
 
@@ -321,13 +325,13 @@ const selectSearchType = (type: 'course' | 'teacher') => {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #FFFFFF;
-  border: 2px solid #000000;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 6px 10px;
   font-size: 14px;
   font-weight: bold;
-  color: #1A1A1A;
+  color: var(--color-text);
   cursor: pointer;
   transition: background-color 0.2s ease;
   height: 32px;
@@ -335,7 +339,7 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 }
 
 .search-type-button:hover {
-  background: #F7D074;
+  background: var(--color-primary);
 }
 
 .dropdown-arrow {
@@ -343,7 +347,6 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 }
 
 .dropdown-arrow.rotated {
-  transform: rotate(180deg);
 }
 
 .search-type-options {
@@ -351,10 +354,9 @@ const selectSearchType = (type: 'course' | 'teacher') => {
   top: 100%;
   left: 0;
   z-index: 1000;
-  background: #FFFFFF;
-  border: 3px solid #000000;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  box-shadow: 4px 4px 0px 0px #000000;
   margin-top: 4px;
   min-width: 100%;
   overflow: hidden;
@@ -363,47 +365,48 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 .search-type-option {
   display: block;
   width: 100%;
-  background: #FFFFFF;
+  background: var(--color-surface);
   border: none;
   padding: 8px 12px;
   font-size: 14px;
   font-weight: bold;
-  color: #1A1A1A;
+  color: var(--color-text);
   cursor: pointer;
   transition: background-color 0.2s ease;
   text-align: left;
 }
 
 .search-type-option:hover {
-  background: #F7D074;
+  background: var(--color-primary);
 }
 
 .search-type-option.active {
-  background: #F7D074;
+  background: var(--color-primary);
 }
 
 .search-input {
   border: none;
-  outline: none;
+  outline: none !important;
   padding: 8px;
   font-size: 14px;
   font-weight: bold;
   min-width: 200px;
   background: transparent;
-  color: #1A1A1A;
+  color: var(--color-text);
   height: 100%;
   flex: 1;
+  box-shadow: none;
 }
 
 .search-input::placeholder {
-  color: #888888;
+  color: var(--color-textSecondary);
   font-weight: normal;
 }
 
 .search-button {
-  background: #F7D074;
-  color: #1A1A1A;
-  border: 2px solid #000000;
+  background: var(--color-primary);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 14px;
@@ -415,13 +418,13 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 }
 
 .search-button:hover {
-  background: #E6C066;
+  background: var(--color-primary);
 }
 
 .search-cancel {
-  background: #FFFFFF;
-  color: #1A1A1A;
-  border: 2px solid #000000;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 14px;
@@ -433,7 +436,7 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 }
 
 .search-cancel:hover {
-  background: #F0F0F0;
+  background: var(--color-background);
 }
 
 .mobile-search {
@@ -441,10 +444,9 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 }
 
 .mobile-search-btn {
-  background: #FFFFFF;
-  border: 3px solid #000000;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  box-shadow: 4px 4px 0px 0px #000000;
   cursor: pointer;
   padding: 8px;
   transition: transform 0.2s ease;
@@ -454,51 +456,57 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 }
 
 .mobile-search-btn:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .auth-section {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: 16px;
 }
 
 .welcome-text {
-  color: var(--text-secondary);
-  font-size: var(--font-size-body2);
+  color: var(--color-text-secondary);
+  font-size: 14px;
 }
 
 .logout-btn,
 .login-btn {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--border-radius-base);
+  padding: 8px 16px;
+  border-radius: 8px;
   text-decoration: none;
-  font-weight: var(--font-weight-medium);
-  transition: all 0.2s ease;
+  font-weight: 500;
+  transition: none;
   cursor: pointer;
 }
 
 .logout-btn {
-  background: var(--background-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--separator-color);
+  background: var(--color-background);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
 }
 
-.logout-btn:hover {
-  background: var(--background-tertiary);
+.logout-btn:hover,
+.logout-btn:active,
+.logout-btn:focus {
+  background: var(--color-background);
+  box-shadow: none;
+  outline: none;
+  transform: none;
 }
 
 .login-btn {
-  background: var(--gradient-primary);
-  color: #1A1A1A;
-  border: 2px solid #000000;
-  /*box-shadow: 0 2px 8px rgba(47, 169, 20, 0.2);*/
+  background: var(--color-primary);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
 }
 
-.login-btn:hover {
-  transform: translateY(-1px);
-  /*box-shadow: 0 4px 12px rgba(47, 169, 20, 0.3);*/
+.login-btn:hover,
+.login-btn:active,
+.login-btn:focus {
+  background: var(--color-primary);
+  box-shadow: none;
+  outline: none;
+  transform: none;
 }
 
 .main-content {
@@ -508,6 +516,22 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 /* Desktop-only elements */
 .desktop-only {
   display: block;
+}
+
+/* 中等屏幕尺寸优化 */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .search-input-container {
+    min-width: 350px;
+    max-width: 450px;
+  }
+}
+
+/* 小屏幕桌面端优化 */
+@media (max-width: 1200px) and (min-width: 1025px) {
+  .search-input-container {
+    min-width: 380px;
+    max-width: 480px;
+  }
 }
 
 /* Responsive Design */
@@ -545,7 +569,7 @@ const selectSearchType = (type: 'course' | 'teacher') => {
     right: 0 !important;
     bottom: 0 !important;
     z-index: 1000;
-    background: #FFFFFF;
+    background: var(--color-surface);
     width: 100% !important;
     height: 100% !important;
     display: flex;

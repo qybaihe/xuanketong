@@ -29,7 +29,7 @@ func main() {
 	fmt.Println("数据库初始化成功")
 
 	// GORM自动迁移（可选，确保模型同步）
-	if err := config.DB.AutoMigrate(&models.User{}, &models.Course{}, &models.Rating{}, &models.Comment{}, &models.EvaluationRequest{}); err != nil {
+	if err := config.DB.AutoMigrate(&models.User{}, &models.Course{}, &models.Rating{}, &models.Comment{}, &models.EvaluationRequest{}, &models.CourseMaterial{}, &models.CourseNote{}); err != nil {
 		fmt.Printf("GORM自动迁移失败: %v\n", err)
 	} else {
 		fmt.Println("GORM数据库迁移成功")
@@ -59,6 +59,8 @@ func main() {
 	routes.UserRoutes(r)
 	routes.EvaluationRequestRoutes(r)
 	routes.OAuth2Routes(r)
+	routes.CourseMaterialRoutes(r)
+	routes.CourseNoteRoutes(r)
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -106,8 +108,10 @@ func ensureTablesExist() error {
 			semester TEXT,
 			subject TEXT,
 			teacher TEXT,
-			credits INTEGER,
+			credits REAL,
 			image_url TEXT,
+			course_unit_name TEXT,
+			course_category TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)
@@ -179,6 +183,47 @@ func ensureTablesExist() error {
 	`).Error
 	if err != nil {
 		return fmt.Errorf("failed to create evaluation_requests table: %v", err)
+	}
+
+	err = config.DB.Exec(`
+		CREATE TABLE IF NOT EXISTS course_materials (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			course_id INTEGER NOT NULL,
+			material_name TEXT NOT NULL,
+			type VARCHAR(20) NOT NULL,
+			service TEXT NOT NULL,
+			link TEXT NOT NULL,
+			access_password TEXT,
+			description TEXT,
+			uploader_id INTEGER NOT NULL,
+			upload_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+			download_count INTEGER DEFAULT 0,
+			is_active BOOLEAN DEFAULT 1,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (course_id) REFERENCES courses(id),
+			FOREIGN KEY (uploader_id) REFERENCES users(id)
+		)
+	`).Error
+	if err != nil {
+		return fmt.Errorf("failed to create course_materials table: %v", err)
+	}
+
+	err = config.DB.Exec(`
+		CREATE TABLE IF NOT EXISTS course_notes (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			course_id INTEGER NOT NULL,
+			content TEXT,
+			author_id INTEGER NOT NULL,
+			is_public BOOLEAN DEFAULT 0,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (course_id) REFERENCES courses(id),
+			FOREIGN KEY (author_id) REFERENCES users(id)
+		)
+	`).Error
+	if err != nil {
+		return fmt.Errorf("failed to create course_notes table: %v", err)
 	}
 
 	return nil

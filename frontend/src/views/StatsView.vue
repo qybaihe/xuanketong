@@ -1,270 +1,550 @@
 <template>
   <div class="stats-view">
-    <!-- 页面头部 -->
-    <div class="stats-view-header">
-      <div class="header-content">
-        <div class="header-left">
-          <h1 class="page-title">数据统计中心</h1>
-          <p class="page-description">全面了解平台运行情况和用户行为数据</p>
-        </div>
-        <div class="header-right">
-          <div class="refresh-controls">
-            <span class="last-update">最后更新：{{ lastUpdateTime }}</span>
-            <button class="refresh-btn" @click="refreshData">
-              <i class="bi bi-arrow-clockwise"></i>
-              刷新数据
-            </button>
-          </div>
-          <div class="view-controls">
-            <button 
-              class="view-btn" 
-              :class="{ active: currentView === 'home' }"
-              @click="currentView = 'home'"
-            >
-              <i class="bi bi-house-door"></i>
-              首页概览
-            </button>
-            <button 
-              class="view-btn" 
-              :class="{ active: currentView === 'detailed' }"
-              @click="currentView === 'detailed'"
-            >
-              <i class="bi bi-bar-chart-line"></i>
-              详细分析
-            </button>
-          </div>
-        </div>
-      </div>
+    <!-- 页面标题 -->
+    <div class="page-header">
+      <h1 class="page-title">数据统计</h1>
+      <p class="page-subtitle">查看系统详细的数据统计和分析</p>
     </div>
 
-    <!-- 主要内容区域 -->
-    <main class="stats-content">
-      <!-- 首页概览视图 -->
-      <div v-if="currentView === 'home'" class="home-stats-section">
-        <StatsDashboard />
-      </div>
-
-      <!-- 详细分析视图 -->
-      <div v-if="currentView === 'detailed'" class="detailed-stats-section">
-        <div class="detailed-stats-placeholder">
-          <div class="placeholder-icon">
-            <i class="bi bi-graph-up"></i>
+    <!-- 统计概览 -->
+    <el-row :gutter="20" class="stats-overview">
+      <el-col :xs="24" :sm="12" :md="6">
+        <el-card class="stat-card">
+          <div class="stat-content">
+            <div class="stat-icon">
+              <el-icon size="32" color="var(--color-primary)">
+                <Reading />
+              </el-icon>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value">{{ stats.total_courses }}</h3>
+              <p class="stat-label">总课程数</p>
+            </div>
           </div>
-          <h3>详细分析功能开发中</h3>
-          <p>更多详细的数据分析功能即将推出，包括：用户行为分析、课程趋势预测、数据导出等高级功能。</p>
-        </div>
-      </div>
-    </main>
+          <div class="stat-footer">
+            <span class="stat-trend positive">↗ 12%</span>
+            <span class="stat-period">较上月</span>
+          </div>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="12" :md="6">
+        <el-card class="stat-card">
+          <div class="stat-content">
+            <div class="stat-icon">
+              <el-icon size="32" color="var(--color-primary)">
+                <User />
+              </el-icon>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value">{{ stats.total_users }}</h3>
+              <p class="stat-label">总用户数</p>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-trend positive">↗ 8%</span>
+            <span class="stat-period">较上月</span>
+          </div>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="12" :md="6">
+        <el-card class="stat-card">
+          <div class="stat-content">
+            <div class="stat-icon">
+              <el-icon size="32" color="var(--color-primary)">
+                <ChatDotRound />
+              </el-icon>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value">{{ stats.total_comments }}</h3>
+              <p class="stat-label">总评论数</p>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-trend positive">↗ 15%</span>
+            <span class="stat-period">较上月</span>
+          </div>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="12" :md="6">
+        <el-card class="stat-card">
+          <div class="stat-content">
+            <div class="stat-icon">
+              <el-icon size="32" color="var(--color-primary)">
+                <Star />
+              </el-icon>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value">{{ stats.average_rating.toFixed(1) }}</h3>
+              <p class="stat-label">平均评分</p>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-trend positive">↗ 0.3</span>
+            <span class="stat-period">较上月</span>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 操作栏 -->
+    <el-card class="control-card">
+      <el-row :gutter="20" align="center">
+        <el-col :xs="24" :sm="8" :md="6">
+          <el-form-item label="时间范围">
+            <el-select
+              v-model="timeRange"
+              placeholder="选择时间范围"
+              @change="handleTimeRangeChange"
+            >
+              <el-option label="最近7天" value="7d" />
+              <el-option label="最近30天" value="30d" />
+              <el-option label="最近90天" value="90d" />
+              <el-option label="最近一年" value="1y" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :xs="24" :sm="8" :md="6">
+          <el-form-item label="数据类型">
+            <el-select
+              v-model="dataType"
+              placeholder="选择数据类型"
+              @change="handleDataTypeChange"
+            >
+              <el-option label="用户活跃度" value="users" />
+              <el-option label="课程访问量" value="courses" />
+              <el-option label="评论数量" value="comments" />
+              <el-option label="评分分布" value="ratings" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :xs="24" :sm="8" :md="6">
+          <el-button type="primary" @click="refreshData" :loading="refreshing">
+            <el-icon><Refresh /></el-icon>
+            刷新数据
+          </el-button>
+        </el-col>
+        <el-col :xs="24" :sm="24" :md="6">
+          <el-button type="success" @click="exportData">
+            <el-icon><Download /></el-icon>
+            导出报告
+          </el-button>
+        </el-col>
+      </el-row>
+    </el-card>
+
+    <!-- 图表区域 -->
+    <el-row :gutter="20" class="charts-section">
+      <el-col :xs="24" :lg="12">
+        <el-card class="chart-card">
+          <template #header>
+            <div class="chart-header">
+              <h3 class="chart-title">用户增长趋势</h3>
+              <el-tag type="info" size="small">{{ timeRangeText }}</el-tag>
+            </div>
+          </template>
+          <div class="chart-container">
+            <div class="chart-placeholder">
+              <el-icon size="48" color="var(--color-text-secondary)">
+                <TrendCharts />
+              </el-icon>
+              <p class="chart-text">用户增长趋势图表将显示在这里</p>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :lg="12">
+        <el-card class="chart-card">
+          <template #header>
+            <div class="chart-header">
+              <h3 class="chart-title">课程评分分布</h3>
+              <el-tag type="success" size="small">实时数据</el-tag>
+            </div>
+          </template>
+          <div class="chart-container">
+            <div class="chart-placeholder">
+              <el-icon size="48" color="var(--color-text-secondary)">
+                <PieChart />
+              </el-icon>
+              <p class="chart-text">课程评分分布图表将显示在这里</p>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 详细统计 -->
+    <el-card class="detailed-stats-section">
+      <template #header>
+        <h3 class="section-title">详细统计信息</h3>
+      </template>
+      
+      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+        <el-tab-pane label="用户统计" name="users">
+          <el-table :data="userStats" stripe>
+            <el-table-column prop="metric" label="指标" />
+            <el-table-column prop="value" label="数值" />
+            <el-table-column prop="change" label="变化" />
+            <el-table-column prop="trend" label="趋势">
+              <template #default="{ row }">
+                <el-tag :type="row.trend === 'up' ? 'success' : 'danger'" size="small">
+                  {{ row.trend === 'up' ? '↗' : '↘' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        
+        <el-tab-pane label="课程统计" name="courses">
+          <el-table :data="courseStats" stripe>
+            <el-table-column prop="metric" label="指标" />
+            <el-table-column prop="value" label="数值" />
+            <el-table-column prop="change" label="变化" />
+            <el-table-column prop="trend" label="趋势">
+              <template #default="{ row }">
+                <el-tag :type="row.trend === 'up' ? 'success' : 'danger'" size="small">
+                  {{ row.trend === 'up' ? '↗' : '↘' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        
+        <el-tab-pane label="评论统计" name="comments">
+          <el-table :data="commentStats" stripe>
+            <el-table-column prop="metric" label="指标" />
+            <el-table-column prop="value" label="数值" />
+            <el-table-column prop="change" label="变化" />
+            <el-table-column prop="trend" label="趋势">
+              <template #default="{ row }">
+                <el-tag :type="row.trend === 'up' ? 'success' : 'danger'" size="small">
+                  {{ row.trend === 'up' ? '↗' : '↘' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import StatsDashboard from '@/components/StatsDashboard.vue'
+import { ref, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import api from '@/services/api'
+import { statsApi } from '@/services/statsApi'
 
-// 响应式数据
-const currentView = ref<'home' | 'detailed'>('home')
-const lastUpdateTime = ref<string>('')
+const refreshing = ref(false)
+const timeRange = ref('30d')
+const dataType = ref('users')
+const activeTab = ref('users')
 
-// 方法
-const refreshData = async () => {
-  // 这里可以添加刷新数据的逻辑
-  // 例如重新加载子组件的数据
-  lastUpdateTime.value = new Date().toLocaleString('zh-CN')
+const stats = ref({
+  total_users: 0,
+  total_courses: 0,
+  total_comments: 0,
+  total_ratings: 0,
+  average_rating: 0,
+  new_users_this_week: 0,
+  pending_comments: 0,
+})
+
+const userStats = ref([
+  { metric: '新注册用户', value: '0', change: '+0%', trend: 'up' },
+  { metric: '活跃用户', value: '0', change: '+0%', trend: 'up' },
+  { metric: '用户留存率', value: '0%', change: '+0%', trend: 'up' },
+  { metric: '总用户数', value: '0', change: '+0%', trend: 'up' }
+])
+
+const courseStats = ref([
+  { metric: '新增课程', value: '0', change: '+0%', trend: 'up' },
+  { metric: '总课程数', value: '0', change: '+0%', trend: 'up' },
+  { metric: '平均评分', value: '0.0', change: '+0.0', trend: 'up' },
+  { metric: '课程完成率', value: '0%', change: '+0%', trend: 'up' }
+])
+
+const commentStats = ref([
+  { metric: '新增评论', value: '0', change: '+0%', trend: 'up' },
+  { metric: '总评论数', value: '0', change: '+0%', trend: 'up' },
+  { metric: '评论参与率', value: '0%', change: '+0%', trend: 'up' },
+  { metric: '平均评论长度', value: '0字', change: '+0字', trend: 'up' }
+])
+
+const timeRangeText = computed(() => {
+  const rangeMap: Record<string, string> = {
+    '7d': '最近7天',
+    '30d': '最近30天',
+    '90d': '最近90天',
+    '1y': '最近一年'
+  }
+  return rangeMap[timeRange.value] || '最近30天'
+})
+
+const loadStats = async () => {
+  try {
+    // 加载基础统计数据
+    const response = await api.get('/admin/stats')
+    if (response.data.success) {
+      stats.value = response.data.data
+    }
+
+    // 加载详细统计数据
+    const detailedStats = await statsApi.getDetailedStats()
+    userStats.value = detailedStats.user_stats
+    courseStats.value = detailedStats.course_stats
+    commentStats.value = detailedStats.comment_stats
+  } catch (error) {
+    console.error('获取统计数据失败:', error)
+    ElMessage.error('获取统计数据失败')
+  }
 }
 
-// 初始化
+const refreshData = async () => {
+  refreshing.value = true
+  try {
+    await loadStats()
+    ElMessage.success('数据刷新成功')
+  } catch {
+    ElMessage.error('数据刷新失败')
+  } finally {
+    refreshing.value = false
+  }
+}
+
+const exportData = () => {
+  ElMessage.info('导出功能开发中...')
+}
+
+const handleTimeRangeChange = (value: string) => {
+  console.log('时间范围变更:', value)
+  // 这里可以根据时间范围重新加载数据
+}
+
+const handleDataTypeChange = (value: string) => {
+  console.log('数据类型变更:', value)
+  // 这里可以根据数据类型重新加载数据
+}
+
+const handleTabChange = (tabName: string) => {
+  console.log('切换标签页:', tabName)
+  // 这里可以根据标签页重新加载数据
+}
+
 onMounted(() => {
-  lastUpdateTime.value = new Date().toLocaleString('zh-CN')
+  loadStats()
 })
 </script>
 
 <style scoped>
 .stats-view {
+  padding: 20px;
+  background-color: var(--color-background);
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafb 0%, #e3f2fd 100%);
 }
 
-.stats-view-header {
-  background: white;
-  border-bottom: 1px solid #e9ecef;
-  padding: 2rem 0;
-  margin-bottom: 2rem;
-}
-
-.header-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
-}
-
-.header-left {
-  flex: 1;
-}
-
-.page-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.page-description {
-  font-size: 1.1rem;
-  color: #6c757d;
-  margin: 0;
-}
-
-.header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1rem;
-}
-
-.refresh-controls {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.last-update {
-  font-size: 0.9rem;
-  color: #6c757d;
-}
-
-.refresh-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.refresh-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(40, 167, 69, 0.4);
-}
-
-.view-controls {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.view-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: #f8f9fa;
-  color: #6c757d;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.view-btn:hover {
-  background: #e9ecef;
-  color: #495057;
-}
-
-.view-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-color: transparent;
-}
-
-.stats-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 2rem 2rem;
-}
-
-.home-stats-section {
-  margin-bottom: 2rem;
-}
-
-.detailed-stats-section {
-  background: white;
-  border-radius: 16px;
-  padding: 3rem;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+.page-header {
+  margin-bottom: 30px;
   text-align: center;
 }
 
-.detailed-stats-placeholder {
-  max-width: 600px;
-  margin: 0 auto;
+.page-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 10px 0;
 }
 
-.placeholder-icon {
-  font-size: 4rem;
-  color: #667eea;
-  margin-bottom: 1.5rem;
-}
-
-.placeholder-icon i {
-  animation: pulse 2s infinite;
-}
-
-.detailed-stats-placeholder h3 {
-  font-size: 1.5rem;
-  color: #2c3e50;
-  margin-bottom: 1rem;
-}
-
-.detailed-stats-placeholder p {
+.page-subtitle {
   font-size: 1rem;
-  color: #6c757d;
-  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0;
 }
 
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+.stats-overview {
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  height: 100%;
+}
+
+.stat-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 5px 0;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.stat-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-trend {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.stat-trend.positive {
+  color: var(--color-success);
+}
+
+.stat-period {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.control-card {
+  margin-bottom: 30px;
+}
+
+.control-card .el-form-item {
+  margin-bottom: 0;
+}
+
+.charts-section {
+  margin-bottom: 30px;
+}
+
+.chart-card {
+  height: 400px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chart-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.chart-container {
+  height: 300px;
+}
+
+.chart-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.chart-text {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 15px 0 0 0;
+}
+
+.detailed-stats-section {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .stats-view-header {
-    padding: 1.5rem 0;
+  .stats-view {
+    padding: 15px;
   }
   
-  .header-content {
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .stat-content {
     flex-direction: column;
     text-align: center;
-    padding: 0 1rem;
+    gap: 10px;
   }
   
-  .header-right {
-    align-items: center;
+  .stat-icon {
+    width: 40px;
+    height: 40px;
   }
   
-  .refresh-controls {
-    flex-direction: column;
-    gap: 0.5rem;
+  .stat-value {
+    font-size: 1.5rem;
   }
   
-  .stats-content {
-    padding: 0 1rem 1rem;
+  .chart-card {
+    height: 300px;
+  }
+  
+  .chart-container {
+    height: 200px;
+  }
+}
+
+/* 进一步移动端适配 */
+@media (max-width: 768px) {
+  /* 控制栏与图表列堆叠 */
+  .control-card .el-col,
+  .charts-section .el-col {
+    margin-bottom: 12px;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  /* 详细统计表横向滚动 */
+  .detailed-stats-section .el-table__body-wrapper {
+    overflow-x: auto;
+  }
+  :deep(.el-table th),
+  :deep(.el-table td) {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 576px) {
+  :deep(.el-dialog) {
+    width: 100% !important;
+    margin: 0 !important;
   }
 }
 </style>

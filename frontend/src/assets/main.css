@@ -156,17 +156,15 @@ body {
 
 /* Glass Card */
 .card-glass {
-  background: var(--background-blur);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: var(--shadow-glass);
-  border-radius: var(--border-radius-large);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .card-glass:hover {
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  background: var(--color-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Glass Button */
@@ -219,33 +217,33 @@ body {
 /* Primary Button */
 .btn-primary {
   background-color: var(--primary-color);
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: none;
 }
 
 .btn-primary:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-primary:active {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px 0px #000000;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Secondary Button */
 .btn-secondary {
   background-color: var(--secondary-color);
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: none;
 }
 
 .btn-secondary:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-secondary:active {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px 0px #000000;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Success Button */
@@ -294,41 +292,41 @@ body {
   padding: var(--card-padding);
   margin: var(--card-margin);
   border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
-  transition: transform 0.2s ease;
+  box-shadow: none;
+  transition: none;
 }
 
 .card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 7px 7px 0px 0px #000000;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Legacy Card Styles for Compatibility */
 .card-primary {
   border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  box-shadow: none;
 }
 
 .card-primary:hover {
-  box-shadow: 7px 7px 0px 0px #000000;
+  box-shadow: none;
 }
 
 .card-matching {
   border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  box-shadow: none;
 }
 
 .card-matching:hover {
-  box-shadow: 7px 7px 0px 0px #000000;
+  box-shadow: none;
 }
 
 .card-natural {
   border: 3px solid #000000;
-  box-shadow: 5px 5px 0px 0px #000000;
+  box-shadow: none;
 }
 
 .card-natural:hover {
-  box-shadow: 7px 7px 0px 0px #000000;
+  box-shadow: none;
 }
 
 /* ===== 俏皮的新拟物风格 (Playful Neobrutalism) Form Components ===== */
@@ -351,15 +349,15 @@ body {
   border-radius: var(--border-radius-base);
   font-size: var(--font-size-body);
   background: var(--background-primary);
-  transition: transform 0.2s ease;
+  transition: none;
   font-family: sans-serif;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: none;
 }
 
 .form-input:focus {
   outline: none;
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  transform: none;
+  box-shadow: none;
 }
 
 .form-input::placeholder {
@@ -371,13 +369,13 @@ body {
   background: var(--background-primary);
   border: 3px solid #000000;
   border-radius: var(--border-radius-base);
-  box-shadow: 4px 4px 0px 0px #000000;
-  transition: transform 0.2s ease;
+  box-shadow: none;
+  transition: none;
 }
 
 .input-glass:focus {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  transform: none;
+  box-shadow: none;
   background: var(--background-primary);
 }
 

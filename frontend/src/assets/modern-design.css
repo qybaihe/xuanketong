@@ -200,27 +200,26 @@ body {
   border-radius: var(--card-radius);
   padding: var(--card-padding);
   margin: var(--card-margin);
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-standard);
+  box-shadow: none;
+  transition: none;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: none;
+  box-shadow: none;
 }
 
 /* 玻璃态卡片 */
 .card-glass {
-  background: var(--background-blur);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: var(--shadow-glass);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .card-glass:hover {
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  background: var(--color-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* ===== 5. 按钮组件 ===== */
@@ -267,18 +266,18 @@ body {
 .btn-primary {
   background: var(--gradient-primary);
   color: white;
-  box-shadow: var(--shadow-primary);
+  box-shadow: none;
 }
 
 .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(47, 169, 20, 0.3);
+  transform: none;
+  box-shadow: none;
   background: var(--gradient-primary-alt);
 }
 
 .btn-primary:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(47, 169, 20, 0.2);
+  transform: none;
+  box-shadow: none;
 }
 
 /* Matching 主题按钮 */
@@ -334,7 +333,7 @@ body {
 .input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(47, 169, 20, 0.1);
+  box-shadow: none;
 }
 
 .input-glass {
@@ -350,8 +349,8 @@ body {
   background: var(--background-primary);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-standard);
+  box-shadow: none;
+  transition: none;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -361,36 +360,36 @@ body {
 }
 
 .course-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  transform: none;
+  box-shadow: none;
 }
 
 /* 课程卡片主题变体 */
 .course-card-primary {
   border: 1px solid rgba(47, 169, 20, 0.1);
-  box-shadow: 0 2px 8px rgba(47, 169, 20, 0.1);
+  box-shadow: none;
 }
 
 .course-card-primary:hover {
-  box-shadow: 0 8px 24px rgba(47, 169, 20, 0.2);
+  box-shadow: none;
 }
 
 .course-card-matching {
   border: 1px solid rgba(0, 168, 255, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 168, 255, 0.1);
+  box-shadow: none;
 }
 
 .course-card-matching:hover {
-  box-shadow: 0 8px 24px rgba(0, 168, 255, 0.2);
+  box-shadow: none;
 }
 
 .course-card-natural {
   border: 1px solid rgba(125, 152, 113, 0.1);
-  box-shadow: 0 2px 8px rgba(125, 152, 113, 0.1);
+  box-shadow: none;
 }
 
 .course-card-natural:hover {
-  box-shadow: 0 8px 24px rgba(125, 152, 113, 0.2);
+  box-shadow: none;
 }
 
 /* 课程卡片图片 */
@@ -506,12 +505,12 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: var(--shadow-glass);
+  box-shadow: none;
 }
 
 .course-card-glass:hover {
   background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
 }
 
 /* ===== 8. 动画系统 ===== */

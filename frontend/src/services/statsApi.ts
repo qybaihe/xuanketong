@@ -1,5 +1,4 @@
 import axios from 'axios'
-import type { User } from '@/stores/auth'
 
 // 首页统计数据接口定义
 export interface OverviewStats {
@@ -69,6 +68,19 @@ export interface UserActivityStats {
   new_users_this_month: number
 }
 
+export interface DetailedStat {
+  metric: string
+  value: string
+  change: string
+  trend: string
+}
+
+export interface DetailedStats {
+  user_stats: DetailedStat[]
+  course_stats: DetailedStat[]
+  comment_stats: DetailedStat[]
+}
+
 export interface EnhancedHomeStats {
   overview_data: OverviewStats
   top_rated_courses: TopRatedCourse[]
@@ -81,7 +93,7 @@ export interface EnhancedHomeStats {
 
 // API服务类
 export class StatsApi {
-  private baseURL = `${import.meta.env.VITE_BACKEND_BASE_URL}/`
+  private baseURL = `${import.meta.env.VITE_BACKEND_BASE_URL}`
 
   // 获取增强版首页统计数据
   async getEnhancedHomeStats(): Promise<EnhancedHomeStats> {
@@ -98,7 +110,7 @@ export class StatsApi {
   async getOverviewStats(): Promise<OverviewStats> {
     try {
       const response = await axios.get(`${this.baseURL}/admin/stats`)
-      const stats = response.data as any
+      const stats = response.data.data || response.data
       // 适配新的统计结构
       return {
         total_courses: stats.total_courses || 0,
@@ -106,7 +118,7 @@ export class StatsApi {
         total_ratings: stats.total_ratings || 0,
         total_comments: stats.total_comments || 0,
         average_rating: stats.average_rating || 0,
-        active_users_this_week: 0 // 从basic stats中获取不到这个数据
+        active_users_this_week: stats.new_users_this_week || 0
       }
     } catch (error) {
       console.error('获取总体统计数据失败:', error)
@@ -185,6 +197,17 @@ export class StatsApi {
     } catch (error) {
       console.error('获取热门课程失败:', error)
       throw new Error('获取热门课程失败')
+    }
+  }
+
+  // 获取详细统计数据
+  async getDetailedStats(): Promise<DetailedStats> {
+    try {
+      const response = await axios.get(`${this.baseURL}/admin/stats/detailed`)
+      return response.data.data
+    } catch (error) {
+      console.error('获取详细统计数据失败:', error)
+      throw new Error('获取详细统计数据失败')
     }
   }
 }

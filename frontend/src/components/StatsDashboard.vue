@@ -233,7 +233,7 @@
             <img :src="course.image_url" :alt="course.name" />
             <div class="course-overlay">
               <div class="course-rating-overlay">
-                <svg class="rating-stars" width="16" height="16" viewBox="0 0 24 24" fill="#F7D074">
+                <svg class="rating-stars" width="16" height="16" viewBox="0 0 24 24" fill="var(--color-primary)">
                   <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"/>
                 </svg>
                 <span class="rating-value">{{ course.average_rating.toFixed(1) }}</span>
@@ -338,6 +338,14 @@ const loadStatsData = async () => {
     lastUpdateTime.value = new Date().toLocaleString('zh-CN')
   } catch (error) {
     console.error('加载统计数据失败:', error)
+    // 如果增强版接口失败，尝试使用基础接口
+    try {
+      const basicStats = await statsApi.getOverviewStats()
+      statsData.value.overview_data = basicStats
+      lastUpdateTime.value = new Date().toLocaleString('zh-CN')
+    } catch (basicError) {
+      console.error('加载基础统计数据也失败:', basicError)
+    }
   } finally {
     loading.value = false
   }
@@ -438,7 +446,7 @@ onUnmounted(() => {
 .section-title {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--color-text);
   margin-bottom: 0.5rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
@@ -447,7 +455,7 @@ onUnmounted(() => {
 
 .section-subtitle {
   font-size: 1.1rem;
-  color: #6c757d;
+  color: var(--color-textSecondary);
   margin-bottom: 1rem;
 }
 
@@ -463,14 +471,14 @@ onUnmounted(() => {
   background: white;
   border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: none;
+  transition: none;
   border: 1px solid rgba(255,255,255,0.2);
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+  transform: none;
+  box-shadow: none;
 }
 
 .stat-card-header {
@@ -508,14 +516,14 @@ onUnmounted(() => {
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: none;
   text-align: center;
   transition: all 0.3s ease;
 }
 
 .activity-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  transform: none;
+  box-shadow: none;
 }
 
 .activity-header {
@@ -528,14 +536,14 @@ onUnmounted(() => {
 .activity-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #495057;
+  color: var(--color-textSecondary);
   margin: 0;
 }
 
 .activity-number {
   font-size: 2rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--color-text);
   margin-bottom: 0.5rem;
 }
 
@@ -549,11 +557,11 @@ onUnmounted(() => {
 }
 
 .activity-change.positive {
-  color: #28a745;
+  color: var(--color-success);
 }
 
 .activity-change.negative {
-  color: #dc3545;
+  color: var(--color-error);
 }
 
 /* 分布统计样式 */
@@ -568,13 +576,13 @@ onUnmounted(() => {
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: none;
 }
 
 .distribution-title {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--color-text);
   margin-bottom: 1rem;
 }
 
@@ -593,7 +601,7 @@ onUnmounted(() => {
 .distribution-label {
   min-width: 60px;
   font-size: 0.9rem;
-  color: #6c757d;
+  color: var(--color-textSecondary);
 }
 
 .distribution-bar {
@@ -614,7 +622,7 @@ onUnmounted(() => {
   min-width: 30px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--color-text);
   text-align: right;
 }
 
@@ -623,7 +631,7 @@ onUnmounted(() => {
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: none;
   margin-bottom: 2rem;
 }
 
@@ -643,7 +651,7 @@ onUnmounted(() => {
   padding: 0.5rem 1rem;
   border: none;
   background: #f8f9fa;
-  color: #6c757d;
+  color: var(--color-textSecondary);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -661,7 +669,7 @@ onUnmounted(() => {
 
 .chart-period {
   font-size: 0.85rem;
-  color: #6c757d;
+  color: var(--color-textSecondary);
 }
 
 .chart-data {
@@ -685,7 +693,7 @@ onUnmounted(() => {
 
 .chart-bar-label {
   font-size: 0.8rem;
-  color: #6c757d;
+  color: var(--color-textSecondary);
   margin-bottom: 0.5rem;
   text-align: center;
 }
@@ -726,13 +734,13 @@ onUnmounted(() => {
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  transition: all 0.3s ease;
+  box-shadow: none;
+  transition: none;
 }
 
 .stats-course-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+  transform: none;
+  box-shadow: none;
 }
 
 .course-image {
@@ -749,7 +757,7 @@ onUnmounted(() => {
 }
 
 .stats-course-card:hover .course-image img {
-  transform: scale(1.05);
+  transform: none;
 }
 
 .course-overlay {
@@ -802,14 +810,14 @@ onUnmounted(() => {
 .course-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--color-text);
   margin-bottom: 0.5rem;
   line-height: 1.3;
 }
 
 .course-teacher {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: var(--color-textSecondary);
   margin-bottom: 0.75rem;
 }
 
@@ -824,7 +832,7 @@ onUnmounted(() => {
   background: #f8f9fa;
   border-radius: 4px;
   font-size: 0.75rem;
-  color: #495057;
+  color: var(--color-textSecondary);
 }
 
 .course-stats {
@@ -837,7 +845,7 @@ onUnmounted(() => {
 
 .ratings-count {
   font-size: 0.8rem;
-  color: #6c757d;
+  color: var(--color-textSecondary);
 }
 
 /* 数据更新信息 */
@@ -847,7 +855,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 0.5rem;
   padding: 1rem;
-  color: #6c757d;
+  color: var(--color-textSecondary);
   font-size: 0.9rem;
 }
 
@@ -877,8 +885,8 @@ onUnmounted(() => {
 }
 
 .section-action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+  transform: none;
+  box-shadow: none;
 }
 
 /* 响应式设计 */
