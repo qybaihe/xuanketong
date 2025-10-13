@@ -7,6 +7,10 @@ import CourseCard from '@/components/CourseCard.vue'
 const route = useRoute()
 
 interface CourseWithDisplay extends CourseWithRating {
+  ID: number; // 明确指定ID为必需字段
+  Name: string; // 明确指定Name为必需字段
+  Teacher: string; // 明确指定Teacher为必需字段
+  Credits: number; // 明确指定Credits为必需字段
   Students?: number;
   isPopular?: boolean;
   isNew?: boolean;
@@ -36,19 +40,19 @@ const mapCourseData = (course: any): CourseWithDisplay => {
     averageRating: course.averageRating,
     totalRatings: course.totalRatings,
     ratingDistribution: course.ratingDistribution,
-    ID: course.id,
-    Name: course.name,
-    Description: course.description,
-    Teacher: course.teacher,
-    Credits: course.credits,
-    Grade: course.grade,
-    Semester: course.semester,
-    Subject: course.subject,
-    CreatedAt: course.createdAt,
-    UpdatedAt: course.updatedAt,
-    AverageRating: course.averageRating,
-    TotalRatings: course.totalRatings,
-    RatingDistribution: course.ratingDistribution
+    ID: course.id || 0,
+    Name: course.name || '',
+    Description: course.description || '',
+    Teacher: course.teacher || '',
+    Credits: course.credits || 0,
+    Grade: course.grade || '',
+    Semester: course.semester || '',
+    Subject: course.subject || '',
+    CreatedAt: course.createdAt || '',
+    UpdatedAt: course.updatedAt || '',
+    AverageRating: course.averageRating || 0,
+    TotalRatings: course.totalRatings || 0,
+    RatingDistribution: course.ratingDistribution || {}
   }
 }
 

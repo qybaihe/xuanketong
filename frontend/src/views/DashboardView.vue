@@ -8,7 +8,7 @@
 
     <!-- 统计卡片 -->
     <el-row :gutter="20" class="stats-row">
-      <el-col :xs="24" :sm="12" :md="6">
+      <el-col :xs="24" :sm="12" :md="8" :lg="5">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon">
@@ -28,27 +28,7 @@
         </el-card>
       </el-col>
       
-      <el-col :xs="24" :sm="12" :md="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-icon">
-              <el-icon size="32" color="var(--color-primary)">
-                <Star />
-              </el-icon>
-            </div>
-            <div class="stat-info">
-              <h3 class="stat-value">{{ stats.average_rating.toFixed(1) }}</h3>
-              <p class="stat-label">平均评分</p>
-            </div>
-          </div>
-          <div class="stat-footer">
-            <span class="stat-trend positive">↗ 0.3</span>
-            <span class="stat-period">较上月</span>
-          </div>
-        </el-card>
-      </el-col>
-      
-      <el-col :xs="24" :sm="12" :md="6">
+      <el-col :xs="24" :sm="12" :md="8" :lg="5">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon">
@@ -68,7 +48,27 @@
         </el-card>
       </el-col>
       
-      <el-col :xs="24" :sm="12" :md="6">
+      <el-col :xs="24" :sm="12" :md="8" :lg="5">
+        <el-card class="stat-card">
+          <div class="stat-content">
+            <div class="stat-icon">
+              <el-icon size="32" color="var(--color-primary)">
+                <Star />
+              </el-icon>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value">{{ stats.average_rating.toFixed(1) }}</h3>
+              <p class="stat-label">平均评分</p>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-trend positive">↗ 0.3</span>
+            <span class="stat-period">较上月</span>
+          </div>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="12" :md="8" :lg="5">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon">
@@ -83,6 +83,26 @@
           </div>
           <div class="stat-footer">
             <span class="stat-trend positive">↗ 15%</span>
+            <span class="stat-period">较上月</span>
+          </div>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="12" :md="8" :lg="4">
+        <el-card class="stat-card">
+          <div class="stat-content">
+            <div class="stat-icon">
+              <el-icon size="32" color="var(--color-primary)">
+                <TrendCharts />
+              </el-icon>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value">{{ stats.total_ratings }}</h3>
+              <p class="stat-label">总评分数</p>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-trend positive">↗ 8%</span>
             <span class="stat-period">较上月</span>
           </div>
         </el-card>
@@ -150,7 +170,10 @@ const stats = ref({
   total_users: 0,
   total_courses: 0,
   total_comments: 0,
+  total_ratings: 0,
   average_rating: 0,
+  new_users_this_week: 0,
+  pending_comments: 0,
 });
 
 const activities = ref([

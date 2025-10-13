@@ -108,19 +108,9 @@
   color: var(--color-text) !important;
 }
 
-.el-table th.el-table__cell {
-  background-color: transparent !important;
-  color: var(--color-text-secondary) !important;
-  border-bottom: 2px solid var(--color-border) !important;
-}
-
 .el-table td.el-table__cell {
   border-bottom: 1px solid var(--color-border) !important;
   color: var(--color-text) !important;
-}
-
-.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
-  background-color: transparent !important;
 }
 
 .el-table__body tr:hover > td.el-table__cell {

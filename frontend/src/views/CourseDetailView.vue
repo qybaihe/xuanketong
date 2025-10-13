@@ -656,6 +656,13 @@ onMounted(async () => {
         console.error('检查求评价请求失败:', error)
       }
     }
+
+    // 检查URL参数，如果action=upload则自动打开上传资料弹窗
+    if (route.query.action === 'upload') {
+      showUploadModal.value = true
+      // 清除URL参数，避免刷新页面时重复打开弹窗
+      router.replace({ path: route.path })
+    }
   } catch (error) {
     console.error(error)
   } finally {
@@ -1589,6 +1596,7 @@ onUnmounted(() => {
 /* 操作按钮区域 */
 .action-buttons {
   display: flex;
+  justify-content: center;
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -2635,20 +2643,11 @@ onUnmounted(() => {
     display: none;
   }
 
-  .action-buttons {
-    flex-direction: column;
-  }
-
   /* 移动端按钮优化 */
   .btn {
     padding: 10px 16px;
     font-size: 13px;
     gap: 6px;
-  }
-
-  .btn-icon {
-    width: 14px;
-    height: 14px;
   }
 
   .course-content {

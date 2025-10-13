@@ -72,11 +72,13 @@ const formatDate = (dateString: string) => {
     <!-- 页面头部 -->
     <header class="page-header">
       <div class="header-content">
+        <!--
         <div class="breadcrumb">
           <RouterLink to="/" class="breadcrumb-link">首页</RouterLink>
           <span class="breadcrumb-separator">›</span>
           <span class="breadcrumb-current">求评价中心</span>
         </div>
+        -->
         
         <div class="header-title-section">
           <h1 class="page-title">求评价中心</h1>
@@ -226,11 +228,13 @@ const formatDate = (dateString: string) => {
     </div>
 
     <!-- 返回顶部按钮 -->
+    <!--
     <div class="back-to-top" @click="scrollToTop">
       <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <polyline points="18,15 12,9 6,15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
+    -->
   </div>
 </template>
 

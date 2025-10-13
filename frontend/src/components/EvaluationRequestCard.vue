@@ -40,9 +40,11 @@ const goToEvaluate = (event: Event) => {
     <div class="card-border"></div>
     
     <!-- 热门标记 -->
+    <!--
     <div v-if="request.status === 'pending'" class="status-badge status-pending">
       求评价中
     </div>
+    -->
     
     <!-- 卡片内容 -->
     <div class="card-content">
@@ -72,17 +74,21 @@ const goToEvaluate = (event: Event) => {
       <!-- 操作按钮 -->
       <div class="card-actions">
         <button class="btn btn-primary btn-evaluate" @click="goToEvaluate($event)">
+          <!--
           <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 20h9" stroke="var(--color-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="var(--color-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
+          -->
           去评价
         </button>
         <RouterLink :to="`/courses/${request.course.id}`" class="btn btn-secondary" @click.stop>
+          <!--
           <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="var(--color-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <circle cx="12" cy="12" r="3" stroke="var(--color-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
+          -->
           查看详情
         </RouterLink>
       </div>

@@ -45,7 +45,7 @@ const parseMarkdown = (content: string): string => {
   return marked(content, {
     breaks: true,
     gfm: true
-  })
+  }) as string
 }
 
 // 预设评价选项
@@ -473,7 +473,6 @@ onMounted(() => {
 /* 主容器 */
 .course-rate-container {
   min-height: 100vh;
-  background-color: #FEF6F7;
   font-family: sans-serif;
   color: #1A1A1A;
   padding: 20px;

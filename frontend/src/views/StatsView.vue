@@ -236,6 +236,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import api from '@/services/api'
+import { statsApi } from '@/services/statsApi'
 
 const refreshing = ref(false)
 const timeRange = ref('30d')
@@ -246,28 +247,31 @@ const stats = ref({
   total_users: 0,
   total_courses: 0,
   total_comments: 0,
+  total_ratings: 0,
   average_rating: 0,
+  new_users_this_week: 0,
+  pending_comments: 0,
 })
 
 const userStats = ref([
-  { metric: '新注册用户', value: '156', change: '+12%', trend: 'up' },
-  { metric: '活跃用户', value: '1,234', change: '+8%', trend: 'up' },
-  { metric: '用户留存率', value: '78.5%', change: '+2.3%', trend: 'up' },
-  { metric: '平均在线时长', value: '45分钟', change: '-5分钟', trend: 'down' }
+  { metric: '新注册用户', value: '0', change: '+0%', trend: 'up' },
+  { metric: '活跃用户', value: '0', change: '+0%', trend: 'up' },
+  { metric: '用户留存率', value: '0%', change: '+0%', trend: 'up' },
+  { metric: '总用户数', value: '0', change: '+0%', trend: 'up' }
 ])
 
 const courseStats = ref([
-  { metric: '新增课程', value: '23', change: '+15%', trend: 'up' },
-  { metric: '课程访问量', value: '8,945', change: '+22%', trend: 'up' },
-  { metric: '平均评分', value: '4.2', change: '+0.3', trend: 'up' },
-  { metric: '课程完成率', value: '65.8%', change: '+3.2%', trend: 'up' }
+  { metric: '新增课程', value: '0', change: '+0%', trend: 'up' },
+  { metric: '总课程数', value: '0', change: '+0%', trend: 'up' },
+  { metric: '平均评分', value: '0.0', change: '+0.0', trend: 'up' },
+  { metric: '课程完成率', value: '0%', change: '+0%', trend: 'up' }
 ])
 
 const commentStats = ref([
-  { metric: '新增评论', value: '456', change: '+18%', trend: 'up' },
-  { metric: '评论回复率', value: '89.2%', change: '+5.1%', trend: 'up' },
-  { metric: '平均评论长度', value: '128字', change: '+12字', trend: 'up' },
-  { metric: '评论质量评分', value: '4.1', change: '+0.2', trend: 'up' }
+  { metric: '新增评论', value: '0', change: '+0%', trend: 'up' },
+  { metric: '总评论数', value: '0', change: '+0%', trend: 'up' },
+  { metric: '评论参与率', value: '0%', change: '+0%', trend: 'up' },
+  { metric: '平均评论长度', value: '0字', change: '+0字', trend: 'up' }
 ])
 
 const timeRangeText = computed(() => {
@@ -282,12 +286,20 @@ const timeRangeText = computed(() => {
 
 const loadStats = async () => {
   try {
+    // 加载基础统计数据
     const response = await api.get('/admin/stats')
     if (response.data.success) {
       stats.value = response.data.data
     }
-  } catch {
-    console.error('获取统计数据失败')
+
+    // 加载详细统计数据
+    const detailedStats = await statsApi.getDetailedStats()
+    userStats.value = detailedStats.user_stats
+    courseStats.value = detailedStats.course_stats
+    commentStats.value = detailedStats.comment_stats
+  } catch (error) {
+    console.error('获取统计数据失败:', error)
+    ElMessage.error('获取统计数据失败')
   }
 }
 

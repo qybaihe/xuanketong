@@ -30,7 +30,7 @@ export const useThemeStore = defineStore('theme', () => {
       colors: {
         primary: '#F7D074',
         secondary: '#FF6B6B',
-        background: '#FEF6F7',
+        background: 'rgb(255,251,255)',
         surface: '#FFFFFF',
         text: '#1A1A1A',
         textSecondary: '#888888',

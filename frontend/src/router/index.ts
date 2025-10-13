@@ -68,12 +68,12 @@ const router = createRouter({
         {
           path: '',
           name: 'admin-dashboard',
-          component: DashboardView
+          component: () => import('../views/AdminDashboardView.vue')
         },
         {
           path: 'dashboard',
           name: 'admin-dashboard-explicit',
-          component: DashboardView
+          component: () => import('../views/AdminDashboardView.vue')
         },
         {
           path: 'courses',

@@ -113,7 +113,7 @@ onMounted(async () => {
                 <div class="preview-secondary" :style="{ backgroundColor: theme.colors.secondary }"></div>
                 <div class="preview-accent" :style="{ backgroundColor: theme.colors.accent }"></div>
               </div>
-              <span class="theme-name">{{ theme.name === 'default' ? '默认配色' : '现代配色' }}</span>
+              <span class="theme-name">{{ theme.name === 'default' ? '默认' : '幽蓝' }}</span>
             </div>
           </div>
         </div>

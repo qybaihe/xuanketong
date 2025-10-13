@@ -338,6 +338,14 @@ const loadStatsData = async () => {
     lastUpdateTime.value = new Date().toLocaleString('zh-CN')
   } catch (error) {
     console.error('加载统计数据失败:', error)
+    // 如果增强版接口失败，尝试使用基础接口
+    try {
+      const basicStats = await statsApi.getOverviewStats()
+      statsData.value.overview_data = basicStats
+      lastUpdateTime.value = new Date().toLocaleString('zh-CN')
+    } catch (basicError) {
+      console.error('加载基础统计数据也失败:', basicError)
+    }
   } finally {
     loading.value = false
   }

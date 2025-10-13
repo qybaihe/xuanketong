@@ -14,6 +14,7 @@ func AdminRoutes(router *gin.Engine) {
 	{
 		admin.GET("/stats", controllers.GetStats)
 		admin.GET("/stats/enhanced", controllers.GetEnhancedHomeStats) // 增强版首页统计
+		admin.GET("/stats/detailed", controllers.GetDetailedStats)     // 详细统计数据
 		admin.GET("/user-stats", controllers.GetUserStats)
 
 		// 用户管理路由

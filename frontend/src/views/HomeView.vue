@@ -9,6 +9,10 @@ import CourseCard from '@/components/CourseCard.vue'
 const router = useRouter()
 
 interface CourseWithDisplay extends CourseWithRating {
+  ID: number; // 明确指定ID为必需字段
+  Name: string; // 明确指定Name为必需字段
+  Teacher: string; // 明确指定Teacher为必需字段
+  Credits: number; // 明确指定Credits为必需字段
   Students?: number;
   isPopular?: boolean;
   isNew?: boolean;
@@ -29,6 +33,11 @@ const filters = reactive({
   subject: '',
   teacher: ''
 })
+
+// 搜索相关状态
+const searchQuery = ref('')
+const searchType = ref<'course' | 'teacher'>('course')
+const showDropdown = ref(false)
 
 // 热门资料相关状态
 const popularMaterials = ref<CourseMaterial[]>([])
@@ -51,6 +60,36 @@ const clearFilters = () => {
   filters.teacher = ''
   fetchCourses()
 }
+
+// 搜索相关方法
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value
+}
+
+const selectSearchType = (type: 'course' | 'teacher') => {
+  searchType.value = type
+  showDropdown.value = false
+  // 根据搜索类型更新filters
+  if (type === 'course') {
+    filters.subject = searchQuery.value
+    filters.teacher = ''
+  } else {
+    filters.teacher = searchQuery.value
+    filters.subject = ''
+  }
+}
+
+const handleSearchInput = () => {
+  // 根据搜索类型更新filters
+  if (searchType.value === 'course') {
+    filters.subject = searchQuery.value
+    filters.teacher = ''
+  } else {
+    filters.teacher = searchQuery.value
+    filters.subject = ''
+  }
+}
+
 
 // 显示热门课程
 const showPopularOnly = () => {
@@ -76,7 +115,7 @@ const showPopularOnly = () => {
 
 // const handleHomeSearch = () => {
 //   if (!searchQuery.value.trim()) return
-  
+
 //   router.push({
 //     path: '/search',
 //     query: {
@@ -100,7 +139,7 @@ const calculateDifficultyLevel = (averageDifficulty: number): 'easy' | 'medium' 
 const mapCourseData = (course: CourseWithRating): CourseWithDisplay => {
   // 工作量暂时保留模拟数据（因为后端暂无此字段）
   const workloads: ('light' | 'medium' | 'heavy')[] = ['light', 'medium', 'heavy']
-  
+
   return {
     // 原始后端字段
     id: course.id,
@@ -230,16 +269,16 @@ const formatTime = (dateString: string): string => {
   const date = new Date(dateString)
   const now = new Date()
   const diff = now.getTime() - date.getTime()
-  
+
   const minutes = Math.floor(diff / (1000 * 60))
   const hours = Math.floor(diff / (1000 * 60 * 60))
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  
+
   if (minutes < 1) return '刚刚'
   if (minutes < 60) return `${minutes}分钟前`
   if (hours < 24) return `${hours}小时前`
   if (days < 7) return `${days}天前`
-  
+
   return date.toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'short',
@@ -349,10 +388,8 @@ onMounted(() => {
 
 <template>
   <main class="home-container">
-    <!-- 顶部布局：左侧内容 + 右侧筛选 -->
-    <div class="top-layout">
-      <!-- 左侧内容区域 -->
-      <div class="left-content">
+    <!-- 主要内容区域 -->
+    <div class="main-content">
         <!-- Header Section -->
         <header class="home-header">
           <div class="header-content">
@@ -366,7 +403,8 @@ onMounted(() => {
           <div class="entry-content">
             <div class="entry-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z" fill="var(--color-primary)"/>
+                <path d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z"
+                  fill="var(--color-primary)" />
               </svg>
             </div>
             <div class="entry-text">
@@ -378,37 +416,43 @@ onMounted(() => {
             </RouterLink>
           </div>
         </section>
-      </div>
 
-      <!-- 右侧筛选区域 -->
-      <div class="right-content">
-        <!-- Filter Section -->
-        <section class="filter-section">
-          <h2 class="filter-title">筛选课程</h2>
-          <p class="filter-subtitle">按科目、老师快速找到您感兴趣的课程</p>
-          <form @submit.prevent="fetchCourses">
-            <div class="filter-inputs">
-              <div class="form-group">
-                <label for="subject" class="form-label">
-                  科目
-                </label>
-                <input type="text" id="subject" v-model="filters.subject" class="input-glass" placeholder="输入科目..." />
-              </div>
-              <div class="form-group">
-                <label for="teacher" class="form-label">
-                  老师
-                </label>
-                <input type="text" id="teacher" v-model="filters.teacher" class="input-glass" placeholder="输入老师..." />
-              </div>
-              <div class="form-group form-group--button">
-                <button type="submit" class="btn btn-primary">
-                  搜索课程
+        <!-- 搜索模块 -->
+        <section class="search-section">
+          <div class="search-header">
+            <h2 class="search-title">搜索课程</h2>
+            <p class="search-description">快速找到您需要的课程</p>
+          </div>
+          <div class="search-container">
+            <form @submit.prevent="fetchCourses" class="search-form">
+              <div class="search-type-dropdown">
+                <button @click="toggleDropdown" class="search-type-button">
+                  <span>{{ searchType === 'course' ? '课程' : '老师' }}</span>
+                  <svg class="dropdown-arrow" :class="{ 'rotated': showDropdown }" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </button>
+                <div v-if="showDropdown" class="search-type-options">
+                  <button @click="selectSearchType('course')" class="search-type-option" :class="{ active: searchType === 'course' }">
+                    课程
+                  </button>
+                  <button @click="selectSearchType('teacher')" class="search-type-option" :class="{ active: searchType === 'teacher' }">
+                    老师
+                  </button>
+                </div>
               </div>
-            </div>
-          </form>
+              <input
+                v-model="searchQuery"
+                class="search-input"
+                :placeholder="searchType === 'course' ? '搜索课程...' : '搜索老师...'"
+                @input="handleSearchInput"
+              />
+              <button type="submit" class="search-button">
+                搜索
+              </button>
+            </form>
+          </div>
         </section>
-      </div>
     </div>
 
     <!-- Loading State -->
@@ -427,8 +471,7 @@ onMounted(() => {
         </div>
         -->
         <div class="course-filters">
-          <button class="filter-chip" :class="{ active: !filters.subject && !filters.teacher }"
-            @click="clearFilters">
+          <button class="filter-chip" :class="{ active: !filters.subject && !filters.teacher }" @click="clearFilters">
             全部课程
           </button>
           <button class="filter-chip" @click="showPopularOnly">
@@ -446,14 +489,8 @@ onMounted(() => {
       </div>
 
       <div v-else class="course-grid">
-        <CourseCard 
-          v-for="course in courses" 
-          :key="course.ID" 
-          :course="course"
-          :show-upload-button="true"
-          :show-comments="true"
-          :show-materials="true"
-        />
+        <CourseCard v-for="course in courses" :key="course.ID" :course="course" :show-upload-button="true"
+          :show-comments="true" :show-materials="true" />
       </div>
     </section>
 
@@ -465,12 +502,12 @@ onMounted(() => {
         <h2 class="course-title">热门资料</h2>
         <p class="course-description">最受欢迎的学习资料</p>
       </div>
-      
+
       <div v-if="!popularMaterials || popularMaterials.length === 0" class="empty-state">
         <h3 class="empty-title">暂无热门资料</h3>
         <p class="empty-description">快来上传资料，让更多人受益吧！</p>
       </div>
-      
+
       <div v-else class="materials-grid">
         <div v-for="material in popularMaterials" :key="material.id" class="material-card">
           <div class="material-card-content">
@@ -512,7 +549,8 @@ onMounted(() => {
 
             <!-- 资料操作 -->
             <div class="material-card-actions">
-              <a :href="`${backendBaseUrl}/materials/${material.id}/redirect`" target="_blank" class="btn-access-material">
+              <a :href="`${backendBaseUrl}/materials/${material.id}/redirect`" target="_blank"
+                class="btn-access-material">
                 访问资料
               </a>
               <button @click="viewCourse(material.courseId)" class="btn-view-course">
@@ -528,18 +566,18 @@ onMounted(() => {
       </div>
     </section>
 
-<!-- 最新评论部分 -->
-<section class="latest-comments-section">
+    <!-- 最新评论部分 -->
+    <section class="latest-comments-section" style="display: none;">
       <div class="course-header">
         <h2 class="course-title">最新评价</h2>
         <p class="course-description">同学们的最新学习体验分享</p>
       </div>
-      
+
       <div v-if="!latestComments || latestComments.length === 0" class="empty-state">
         <h3 class="empty-title">暂无最新评价</h3>
         <p class="empty-description">快来分享你的学习体验吧！</p>
       </div>
-      
+
       <div v-else class="comments-grid">
         <div v-for="comment in latestComments" :key="comment.id" class="comment-card">
           <div class="comment-card-content">
@@ -629,34 +667,14 @@ onMounted(() => {
   min-height: 100vh;
 }
 
-/* 顶部布局样式 */
-.top-layout {
+/* 主要内容区域样式 */
+.main-content {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.left-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.right-content {
-  display: flex;
-  flex-direction: column;
+  gap: 18px;
 }
 
 .filter-section {
-  background-color: var(--color-surface);
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-  padding: 32px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  min-height: 280px;
 }
 
 .filter-header {
@@ -711,7 +729,8 @@ onMounted(() => {
   .entry-content {
     flex-direction: column;
     text-align: center;
-    gap: 20px;
+    gap: 12px;
+    padding: 16px;
   }
 
   .entry-text {
@@ -721,12 +740,24 @@ onMounted(() => {
   .entry-button {
     order: 3;
     width: 100%;
-    max-width: 200px;
+    max-width: 160px;
+    padding: 8px 16px;
+    font-size: 12px;
   }
 
   .entry-icon {
     order: 1;
-    font-size: 40px;
+    font-size: 28px;
+  }
+
+  .entry-title {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .entry-description {
+    font-size: 12px;
+    margin: 0;
   }
 }
 
@@ -754,8 +785,7 @@ onMounted(() => {
   }
 }
 
-.entry-content:hover {
-}
+.entry-content:hover {}
 
 .entry-icon {
   font-size: 32px;
@@ -790,14 +820,14 @@ onMounted(() => {
   cursor: pointer;
   transition: none;
   flex-shrink: 0;
+  text-decoration: none;
 }
 
-.entry-button:hover {
-}
+.entry-button:hover {}
 
 /* Header Section 样式 */
 .home-header {
-  margin-bottom: 24px;
+  margin-bottom: 8px;
   text-align: center;
 }
 
@@ -810,6 +840,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
 h1.page-title {
@@ -828,27 +859,46 @@ h2.page-subtitle {
   margin: 0;
 }
 
-/* 首页搜索框样式 */
-.home-search-section {
-  width: 100%;
-  max-width: 600px;
-  margin-top: 16px;
+/* 搜索模块样式 - 采用app header样式 */
+.search-section {
+  margin-bottom: 24px;
+}
+
+.search-header {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.search-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.search-description {
+  font-size: 14px;
+  color: var(--color-textSecondary);
+  margin: 0;
 }
 
 .search-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-form {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #FFFFFF;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 8px;
-  box-shadow: none;
-  transition: none;
-}
-
-.search-container:focus-within {
-  box-shadow: none;
+  height: 48px;
+  max-width: 100%;
+  min-width: 500px;
+  width: 100%;
 }
 
 .search-type-dropdown {
@@ -859,24 +909,26 @@ h2.page-subtitle {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #F7D074;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
   font-size: 14px;
   font-weight: bold;
-  color: #1A1A1A;
+  color: var(--color-text);
   cursor: pointer;
   transition: background-color 0.2s ease;
   white-space: nowrap;
+  min-width: 80px;
+  flex-shrink: 0;
 }
 
 .search-type-button:hover {
-  background: #F0C74A;
+  background: var(--color-primary);
 }
 
 .dropdown-arrow {
-  transition: none;
+  transition: transform 0.2s ease;
 }
 
 .dropdown-arrow.rotated {
@@ -888,51 +940,51 @@ h2.page-subtitle {
   top: 100%;
   left: 0;
   z-index: 1000;
-  background: #FFFFFF;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   margin-top: 4px;
   min-width: 100%;
   overflow: hidden;
-  box-shadow: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .search-type-option {
   display: block;
   width: 100%;
-  background: #FFFFFF;
+  background: var(--color-surface);
   border: none;
-  padding: 10px 12px;
+  padding: 8px 12px;
   font-size: 14px;
   font-weight: bold;
-  color: #1A1A1A;
+  color: var(--color-text);
   cursor: pointer;
   transition: background-color 0.2s ease;
   text-align: left;
 }
 
 .search-type-option:hover {
-  background: #F7D074;
+  background: var(--color-primary);
 }
 
 .search-type-option.active {
-  background: #F7D074;
+  background: var(--color-primary);
 }
 
 .search-input {
   border: none;
-  outline: none !important;
+  outline: none;
   padding: 8px 12px;
   font-size: 14px;
   font-weight: bold;
-  min-width: 200px;
   background: transparent;
-  color: #1A1A1A;
+  color: var(--color-text);
   flex: 1;
+  min-width: 250px;
 }
 
 .search-input::placeholder {
-  color: #999;
+  color: var(--color-textSecondary);
   font-weight: normal;
 }
 
@@ -940,49 +992,25 @@ h2.page-subtitle {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #76D7C4;
-  color: #1A1A1A;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 8px 16px;
+  background: var(--color-primary);
+  color: var(--color-text);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .search-button:hover {
-  background: #6BC4B1;
+  background: var(--color-accent);
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .home-search-section {
-    max-width: 100%;
-  }
-  
-  .search-container {
-    flex-direction: column;
-    gap: 8px;
-    padding: 12px;
-  }
-  
-  .search-type-button {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .search-input {
-    min-width: auto;
-    width: 100%;
-  }
-  
-  .search-button {
-    width: 100%;
-    justify-content: center;
-  }
-}
+
+
 
 .page-subtitle {
   font-size: 16px;
@@ -1183,8 +1211,7 @@ h2.page-subtitle {
   transition: none;
 }
 
-.filter-chip:hover {
-}
+.filter-chip:hover {}
 
 .filter-chip.active {
   background-color: var(--color-primary);
@@ -1209,8 +1236,7 @@ h2.page-subtitle {
   transition: none;
 }
 
-.course-card:hover {
-}
+.course-card:hover {}
 
 .course-card-content {
   padding: 20px;
@@ -1350,8 +1376,7 @@ h2.page-subtitle {
   transition: none;
 }
 
-.social-link:hover {
-}
+.social-link:hover {}
 
 .footer-bottom {
   text-align: center;
@@ -1443,8 +1468,7 @@ h2.page-subtitle {
   transition: none;
 }
 
-.course-teacher-section:hover {
-}
+.course-teacher-section:hover {}
 
 .teacher-label {
   font-size: 12px;
@@ -1847,8 +1871,91 @@ h2.page-subtitle {
   transform: none;
 }
 
+/* 大屏幕优化 */
+@media (min-width: 768px) {
+  .search-form {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .search-type-button {
+    flex-shrink: 0;
+  }
+  
+  .search-input {
+    flex: 1;
+  }
+  
+  .search-button {
+    flex-shrink: 0;
+  }
+}
+
 /* 响应式设计 */
 @media (max-width: 767px) {
+  .header-content {
+    background-color: inherit;
+    border: none;
+    min-height: unset;
+    padding: 12px 12px 6px 12px;
+  }
+
+  .search-section {
+    margin-bottom: 16px;
+  }
+
+  .search-form {
+    flex-direction: row;
+    height: 48px;
+    gap: 6px;
+    padding: 6px;
+    box-shadow: none;
+    min-width: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .search-type-button {
+    width: auto;
+    min-width: 70px;
+    max-width: 90px;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    background: transparent;
+    flex-shrink: 0;
+    font-size: 13px;
+  }
+
+  .search-input {
+    min-width: 0;
+    flex: 1;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 6px 8px;
+    font-size: 14px;
+  }
+
+  .search-button {
+    width: auto;
+    min-width: 70px;
+    max-width: 90px;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    background: var(--color-primary);
+    flex-shrink: 0;
+    font-size: 13px;
+  }
+
   /* 移动端课程网格优化 */
   .course-grid {
     grid-template-columns: 1fr;
@@ -1906,7 +2013,7 @@ h2.page-subtitle {
 
   .course-rating-section {
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .rating-display {
@@ -2261,7 +2368,7 @@ h2.page-subtitle {
   }
 
   .course-rating-section {
-    margin-bottom: 5px;
+    margin-bottom: 2px;
     gap: 4px;
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 6px;
@@ -2839,7 +2946,7 @@ h2.page-subtitle {
   align-items: center;
   justify-content: center;
   padding: 8px 16px;
-  background-color: var(--color-accent);
+  background-color: var(--color-surface);
   color: var(--color-text);
   text-decoration: none;
   border-radius: 8px;
@@ -2867,7 +2974,7 @@ h2.page-subtitle {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .comment-card-content {
     padding: 16px;
   }
@@ -3003,7 +3110,7 @@ h2.page-subtitle {
 
 .material-card-actions {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   gap: 8px;
   margin-top: auto;
 }
@@ -3034,7 +3141,7 @@ h2.page-subtitle {
   align-items: center;
   justify-content: center;
   padding: 8px 16px;
-  background-color: var(--color-accent);
+  background-color: var(--color-surface);
   color: var(--color-text);
   text-decoration: none;
   border-radius: 8px;
@@ -3084,7 +3191,7 @@ h2.page-subtitle {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .material-card-content {
     padding: 16px;
   }
