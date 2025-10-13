@@ -25,13 +25,20 @@ func CourseNoteRoutes(r *gin.Engine) {
 
 	// 单个笔记操作路由
 	noteDetailGroup := r.Group("/api/v1/notes/:noteId")
-	noteDetailGroup.Use(middleware.AuthMiddleware())
 	{
-		// 更新课程笔记
-		noteDetailGroup.PUT("", controllers.UpdateCourseNote)
+		// 获取笔记详情（使用可选认证中间件）
+		noteDetailGroup.GET("", middleware.OptionalAuthMiddleware(), controllers.GetCourseNote)
 
-		// 删除课程笔记
-		noteDetailGroup.DELETE("", controllers.DeleteCourseNote)
+		// 需要认证的路由
+		authNoteDetailGroup := noteDetailGroup.Group("")
+		authNoteDetailGroup.Use(middleware.AuthMiddleware())
+		{
+			// 更新课程笔记
+			authNoteDetailGroup.PUT("", controllers.UpdateCourseNote)
+
+			// 删除课程笔记
+			authNoteDetailGroup.DELETE("", controllers.DeleteCourseNote)
+		}
 	}
 
 	// 用户笔记相关路由

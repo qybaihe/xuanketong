@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { evaluationRequestService, type EvaluationRequest } from '@/services/api'
 import axios from 'axios'
@@ -18,6 +18,7 @@ interface Course {
   subject: string;
   teacher: string;
   credits: number;
+  courseUnitName?: string;
   createdAt: string;
   updatedAt: string;
   // 兼容字段（大写）
@@ -29,6 +30,7 @@ interface Course {
   Subject?: string;
   Teacher?: string;
   Credits?: number;
+  CourseUnitName?: string;
   CreatedAt?: string;
   UpdatedAt?: string;
 }
@@ -45,6 +47,7 @@ const mapCourseData = (course: Record<string, unknown>): Course => {
     subject: course.subject as string,
     teacher: course.teacher as string,
     credits: course.credits as number,
+    courseUnitName: course.courseUnitName as string,
     createdAt: course.createdAt as string,
     updatedAt: course.updatedAt as string,
     // 兼容字段映射
@@ -56,21 +59,36 @@ const mapCourseData = (course: Record<string, unknown>): Course => {
     Subject: course.subject as string,
     Teacher: course.teacher as string,
     Credits: course.credits as number,
+    CourseUnitName: course.courseUnitName as string,
     CreatedAt: course.createdAt as string,
     UpdatedAt: course.updatedAt as string
   }
 }
 
 interface Rating {
-  ID: number;
-  UserID: number;
-  CourseID: number;
-  Score: number;
-  Difficulty?: number;
-  Usefulness?: number;
-  Teaching?: number;
+  id: number;
+  userId: number;
+  courseId: number;
+  score: number;
+  difficulty?: number;
+  usefulness?: number;
+  teaching?: number;
+  content?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  user?: {
+    username?: string;
+    nickname?: string;
+  };
+  // 前端映射的字段
+  ID?: number;
+  UserID?: number;
+  CourseID?: number;
+  Score?: number;
+  Content?: string;
   Username?: string;
   Nickname?: string;
+  CreatedAt?: string;
 }
 
 interface Comment {
@@ -84,6 +102,7 @@ interface Comment {
 }
 
 const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
 const course = ref<Course | null>(null)
 const ratings = ref<Rating[]>([])
@@ -92,35 +111,33 @@ const loading = ref(true)
 const evaluationRequestLoading = ref(false)
 const hasEvaluationRequested = ref(false)
 
+// 环境变量
+const backendBaseUrl = import.meta.env.VITE_BACKEND_BASE_URL
+
 // 笔记相关状态
 const noteContent = ref('')
 const noteLoading = ref(false)
 const noteSaving = ref(false)
 const showNoteEditor = ref(false)
 const activeTab = ref('edit')
+const isPublicNote = ref(false)
 interface Note {
   id: number
+  courseId: number
   content: string
+  authorId: number
   authorName: string
-  createdAt: string
+  isPublic: boolean
   isOwner: boolean
+  createdAt: string
+  updatedAt: string
 }
 
-interface User {
-  username?: string
-  nickname?: string
-}
 
-interface ApiResponse {
-  user?: User
-  UserID: number
-  score?: number
-  Score?: number
-  createdAt?: string
-}
 
 const notes = ref<Note[]>([])
 const editingNote = ref<Note | null>(null)
+const editingMaterial = ref<CourseMaterial | null>(null)
 
 // 资料相关状态
 interface CourseMaterial {
@@ -196,9 +213,12 @@ const currentUser = computed(() => authStore.user)
 // 计算平均评分
 const averageRating = computed(() => {
   if (ratings.value.length === 0) return 0
-  const validRatings = ratings.value.filter(rating => !isNaN(rating.Score) && isFinite(rating.Score))
+  const validRatings = ratings.value.filter(rating => 
+    (rating.Score !== undefined && !isNaN(rating.Score) && isFinite(rating.Score)) ||
+    (rating.score !== undefined && !isNaN(rating.score) && isFinite(rating.score))
+  )
   if (validRatings.length === 0) return 0
-  const sum = validRatings.reduce((acc, rating) => acc + rating.Score, 0)
+  const sum = validRatings.reduce((acc, rating) => acc + (rating.Score || rating.score || 0), 0)
   return Number((sum / validRatings.length).toFixed(1))
 })
 
@@ -206,10 +226,10 @@ const averageRating = computed(() => {
 const averageDifficulty = computed(() => {
   if (ratings.value.length === 0) return 0
   const validRatings = ratings.value.filter(rating =>
-    rating.Difficulty !== undefined && !isNaN(rating.Difficulty) && isFinite(rating.Difficulty)
+    rating.difficulty !== undefined && !isNaN(rating.difficulty) && isFinite(rating.difficulty)
   )
   if (validRatings.length === 0) return 0
-  const sum = validRatings.reduce((acc, rating) => acc + (rating.Difficulty as number), 0)
+  const sum = validRatings.reduce((acc, rating) => acc + (rating.difficulty as number), 0)
   return Number((sum / validRatings.length).toFixed(1))
 })
 
@@ -217,10 +237,10 @@ const averageDifficulty = computed(() => {
 const averageUsefulness = computed(() => {
   if (ratings.value.length === 0) return 0
   const validRatings = ratings.value.filter(rating =>
-    rating.Usefulness !== undefined && !isNaN(rating.Usefulness) && isFinite(rating.Usefulness)
+    rating.usefulness !== undefined && !isNaN(rating.usefulness) && isFinite(rating.usefulness)
   )
   if (validRatings.length === 0) return 0
-  const sum = validRatings.reduce((acc, rating) => acc + (rating.Usefulness as number), 0)
+  const sum = validRatings.reduce((acc, rating) => acc + (rating.usefulness as number), 0)
   return Number((sum / validRatings.length).toFixed(1))
 })
 
@@ -228,10 +248,10 @@ const averageUsefulness = computed(() => {
 const averageTeaching = computed(() => {
   if (ratings.value.length === 0) return 0
   const validRatings = ratings.value.filter(rating =>
-    rating.Teaching !== undefined && !isNaN(rating.Teaching) && isFinite(rating.Teaching)
+    rating.teaching !== undefined && !isNaN(rating.teaching) && isFinite(rating.teaching)
   )
   if (validRatings.length === 0) return 0
-  const sum = validRatings.reduce((acc, rating) => acc + (rating.Teaching as number), 0)
+  const sum = validRatings.reduce((acc, rating) => acc + (rating.teaching as number), 0)
   return Number((sum / validRatings.length).toFixed(1))
 })
 
@@ -292,7 +312,24 @@ const saveNote = async () => {
 
   try {
     noteSaving.value = true
-    const response = await CourseNoteApi.saveCourseNote(course.value.ID, noteContent.value, false)
+    let response
+    
+    if (editingNote.value) {
+      // 更新现有笔记
+      response = await CourseNoteApi.updateCourseNote(
+        editingNote.value.id, 
+        noteContent.value, 
+        isPublicNote.value
+      )
+    } else {
+      // 创建新笔记
+      response = await CourseNoteApi.saveCourseNote(
+        course.value.ID, 
+        noteContent.value, 
+        isPublicNote.value
+      )
+    }
+    
     if (response.success) {
       await fetchNotes(course.value.ID)
       closeNoteEditor()
@@ -300,6 +337,7 @@ const saveNote = async () => {
     }
   } catch (error) {
     console.error('保存笔记失败:', error)
+    alert('保存笔记失败，请重试')
   } finally {
     noteSaving.value = false
   }
@@ -308,6 +346,7 @@ const saveNote = async () => {
 const startNewNote = () => {
   editingNote.value = null
   noteContent.value = ''
+  isPublicNote.value = false
   showNoteEditor.value = true
   activeTab.value = 'edit'
 }
@@ -315,14 +354,129 @@ const startNewNote = () => {
 const editNote = (note: Note) => {
   editingNote.value = note
   noteContent.value = note.content
+  isPublicNote.value = note.isPublic
   showNoteEditor.value = true
   activeTab.value = 'edit'
+}
+
+const deleteNote = async (note: Note) => {
+  if (!confirm('确定要删除这条笔记吗？')) return
+  
+  if (!course.value?.ID) {
+    alert('课程信息错误，请刷新页面重试')
+    return
+  }
+  
+  try {
+    const response = await CourseNoteApi.deleteCourseNote(note.id)
+    if (response.success) {
+      await fetchNotes(course.value.ID)
+      console.log('笔记删除成功')
+    }
+  } catch (error) {
+    console.error('删除笔记失败:', error)
+    alert('删除笔记失败，请重试')
+  }
+}
+
+// 编辑资料
+const editMaterial = (material: CourseMaterial) => {
+  // 填充表单数据
+  materialName.value = material.materialName
+  materialType.value = material.type
+  if (material.type === 'cloud') {
+    cloudService.value = material.service
+  } else {
+    noteService.value = material.service
+  }
+  materialLink.value = material.link
+  accessPassword.value = material.accessPassword || ''
+  materialDescription.value = material.description || ''
+  
+  // 设置编辑模式
+  editingMaterial.value = material
+  showUploadModal.value = true
+}
+
+// 删除资料
+const deleteMaterial = async (materialId: number) => {
+  if (!confirm('确定要删除这个资料吗？')) return
+  
+  if (!course.value?.ID) {
+    alert('课程信息错误，请刷新页面重试')
+    return
+  }
+  
+  try {
+    const response = await CourseMaterialApi.deleteMaterial(materialId)
+    if (response.success) {
+      await fetchMaterials(course.value.ID)
+      console.log('资料删除成功')
+    }
+  } catch (error) {
+    console.error('删除资料失败:', error)
+    alert('删除资料失败，请重试')
+  }
+}
+
+// 编辑评价
+const editRating = (rating: Rating) => {
+  // 跳转到评价页面进行编辑
+  if (course.value?.ID && (rating.ID || rating.id)) {
+    const ratingId = rating.ID || rating.id
+    // 使用Vue Router进行跳转，避免页面重新加载
+    router.push({
+      name: 'course-rate',
+      params: { id: course.value.ID },
+      query: { edit: ratingId.toString() }
+    })
+  }
+}
+
+// 删除评价
+const deleteRating = async (ratingId: number) => {
+  if (!confirm('确定要删除这个评价吗？')) return
+  
+  try {
+    const response = await axios.delete(`${backendBaseUrl}/ratings/${ratingId}`)
+    if (response.status === 200) {
+      // 重新加载评价数据
+      if (course.value?.ID) {
+        const ratingsResponse = await axios.get(`${backendBaseUrl}/courses/${course.value.ID}/ratings`)
+        ratings.value = ratingsResponse.data.data.map((rating: Rating) => ({
+          ...rating,
+          ID: rating.id,
+          UserID: rating.userId,
+          CourseID: rating.courseId,
+          Score: !isNaN(rating.score as number) && isFinite(rating.score as number) ? rating.score : 0,
+          Content: rating.content || '',
+          Username: rating.user?.username || `用户${rating.userId}`,
+          Nickname: rating.user?.nickname || `用户${rating.userId}`,
+          CreatedAt: rating.createdAt
+        }))
+        comments.value = ratings.value.map((rating: Rating) => ({
+          ID: rating.ID || rating.id,
+          UserID: rating.UserID || rating.userId,
+          CourseID: rating.CourseID || rating.courseId,
+          Username: rating.Username,
+          Nickname: rating.Nickname,
+          Content: rating.Content || '',
+          CreatedAt: rating.CreatedAt ? new Date(rating.CreatedAt).toLocaleDateString() : new Date().toLocaleDateString()
+        }))
+      }
+      console.log('评价删除成功')
+    }
+  } catch (error) {
+    console.error('删除评价失败:', error)
+    alert('删除评价失败，请重试')
+  }
 }
 
 const closeNoteEditor = () => {
   showNoteEditor.value = false
   editingNote.value = null
   noteContent.value = ''
+  isPublicNote.value = false
   activeTab.value = 'edit'
 }
 
@@ -379,8 +533,17 @@ const fetchMaterials = async (courseId: number) => {
 }
 
 const uploadMaterialFile = async () => {
-  if (!materialName.value || !materialLink.value || !course.value?.ID) {
-    alert('请填写资料名称和资源链接！')
+  // 验证必填字段
+  if (!materialName.value?.trim()) {
+    alert('请填写资料名称！')
+    return
+  }
+  if (!materialLink.value?.trim()) {
+    alert('请填写资源链接！')
+    return
+  }
+  if (!course.value?.ID) {
+    alert('课程信息错误，请刷新页面重试！')
     return
   }
 
@@ -395,7 +558,15 @@ const uploadMaterialFile = async () => {
       description: materialDescription.value
     }
 
-    const response = await CourseMaterialApi.uploadMaterial(course.value.ID, materialData)
+    let response
+    if (editingMaterial.value) {
+      // 更新现有资料
+      response = await CourseMaterialApi.updateMaterial(editingMaterial.value.id, materialData)
+    } else {
+      // 创建新资料
+      response = await CourseMaterialApi.uploadMaterial(course.value.ID, materialData)
+    }
+
     if (response.success) {
       // 重新获取资料列表
       await fetchMaterials(course.value.ID)
@@ -408,6 +579,7 @@ const uploadMaterialFile = async () => {
       materialLink.value = ''
       accessPassword.value = ''
       materialDescription.value = ''
+      editingMaterial.value = null
       // 可以添加成功提示
       console.log('资料上传成功')
     }
@@ -439,25 +611,32 @@ onMounted(async () => {
   try {
     loading.value = true
     const courseId = parseInt(route.params.id as string)
-    const [courseResponse, ratingsResponse, commentsResponse] = await Promise.all([
+    const [courseResponse, ratingsResponse] = await Promise.all([
       axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/courses/${courseId}`),
-      axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/courses/${courseId}/ratings`),
-      axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/courses/${courseId}/comments`)
+      axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/courses/${courseId}/ratings`)
     ])
     course.value = mapCourseData(courseResponse.data.data)
     // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
-    ratings.value = ratingsResponse.data.data.map((rating: ApiResponse) => ({
+    ratings.value = ratingsResponse.data.data.map((rating: Rating) => ({
       ...rating,
-      Username: rating.user?.username || `用户${rating.UserID}`,
-      Nickname: rating.user?.nickname || `用户${rating.UserID}`,
-      Score: !isNaN(rating.score as number) && isFinite(rating.score as number) ? rating.score : (!isNaN(rating.Score as number) && isFinite(rating.Score as number) ? rating.Score : 0)
+      ID: rating.id,
+      UserID: rating.userId,
+      CourseID: rating.courseId,
+      Score: !isNaN(rating.score as number) && isFinite(rating.score as number) ? rating.score : 0,
+      Content: rating.content || '',
+      Username: rating.user?.username || `用户${rating.userId}`,
+      Nickname: rating.user?.nickname || `用户${rating.userId}`,
+      CreatedAt: rating.createdAt
     }))
-    // 使用后端返回的username，如果没有则使用nickname，如果都没有才使用默认
-    comments.value = (commentsResponse.data.data || []).map((comment: ApiResponse) => ({
-      ...comment,
-      Username: comment.user?.username || `用户${comment.UserID}`,
-      Nickname: comment.user?.nickname || `用户${comment.UserID}`,
-      CreatedAt: comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : new Date().toLocaleDateString()
+    // 将评分数据同时用作评论数据（统一系统）
+    comments.value = ratings.value.map((rating: Rating) => ({
+      ID: rating.ID || rating.id,
+      UserID: rating.UserID || rating.userId,
+      CourseID: rating.CourseID || rating.courseId,
+      Username: rating.Username,
+      Nickname: rating.Nickname,
+      Content: rating.Content || '',
+      CreatedAt: rating.CreatedAt ? new Date(rating.CreatedAt).toLocaleDateString() : new Date().toLocaleDateString()
     }))
 
     // 加载笔记和资料
@@ -545,6 +724,13 @@ onUnmounted(() => {
                 </svg>
                 <span class="meta-text">{{ course.Subject }}</span>
               </div>
+              <div v-if="course.CourseUnitName" class="meta-item">
+                <svg class="meta-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" stroke="var(--color-text)" stroke-width="2" fill="none" />
+                </svg>
+                <span class="meta-text">{{ course.CourseUnitName }}</span>
+              </div>
               <div class="meta-item">
                 <svg class="meta-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
                   xmlns="http://www.w3.org/2000/svg">
@@ -552,7 +738,7 @@ onUnmounted(() => {
                 </svg>
                 <span class="meta-text">{{ course.Credits }} 学分</span>
               </div>
-            </div>，尝试
+            </div>
 
             <div class="course-rating-summary">
               <div class="rating-stars">
@@ -597,10 +783,12 @@ onUnmounted(() => {
             </p>
           </div>
           <!-- Course Description Card -->
+          <!--
           <div class="card course-description">
             <h2 class="card-title">课程介绍</h2>
             <p class="description-text">{{ course.Description }}</p>
           </div>
+          -->
 
           <!-- Rating Section Card -->
           <div class="card rating-section">
@@ -720,7 +908,7 @@ onUnmounted(() => {
               <!-- 用户评分列表 -->
               <h3 class="user-ratings-title">用户评分</h3>
               <div class="rating-items">
-                <div v-for="rating in ratings" :key="rating.ID" class="rating-item">
+                <div v-for="rating in ratings" :key="rating.ID || rating.id" class="rating-item">
                   <div class="rating-user">
                     <span class="user-avatar">{{ (rating.Nickname || rating.Username)?.charAt(0) || 'U' }}</span>
                     <span class="user-name">{{ rating.Nickname || rating.Username }}</span>
@@ -728,12 +916,12 @@ onUnmounted(() => {
                   <div class="rating-score">
                     <div class="rating-stars">
                       <span v-for="i in 5" :key="i" class="star">
-                        <svg v-if="i <= Math.floor(rating.Score)" width="16" height="16" viewBox="0 0 24 24"
+                        <svg v-if="i <= Math.floor(rating.Score || rating.score || 0)" width="16" height="16" viewBox="0 0 24 24"
                           fill="var(--color-primary)">
                           <path
                             d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z" />
                         </svg>
-                        <svg v-else-if="i - 0.5 <= rating.Score" width="16" height="16" viewBox="0 0 24 24"
+                        <svg v-else-if="i - 0.5 <= (rating.Score || rating.score || 0)" width="16" height="16" viewBox="0 0 24 24"
                           fill="var(--color-primary)">
                           <path
                             d="M12 2l3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 13.87 2 9l6.91-1.74L12 2z" />
@@ -745,7 +933,7 @@ onUnmounted(() => {
                         </svg>
                       </span>
                     </div>
-                    <span class="score-value">{{ rating.Score }}</span>
+                    <span class="score-value">{{ rating.Score || rating.score }}</span>
                   </div>
                 </div>
               </div>
@@ -754,24 +942,38 @@ onUnmounted(() => {
 
           <!-- Comment Section Card -->
           <div class="card comment-section">
-            <h2 class="card-title">课程评论</h2>
+            <h2 class="card-title">课程评价</h2>
 
-            <div v-if="comments.length === 0" class="empty-state">
-              <p>暂无评论</p>
+            <div v-if="ratings.length === 0" class="empty-state">
+              <p>暂无评价</p>
             </div>
             <div v-else class="comment-items">
-              <div v-for="comment in comments" :key="comment.ID" class="comment-item">
+              <div v-for="rating in ratings" :key="rating.ID || rating.id" class="comment-item">
                 <div class="comment-header">
                   <div class="comment-user">
-                    <span class="user-avatar">{{ (comment.Nickname || comment.Username)?.charAt(0) || 'U' }}</span>
+                    <span class="user-avatar">{{ (rating.Nickname || rating.Username)?.charAt(0) || 'U' }}</span>
                     <div class="user-info">
-                      <span class="user-name">{{ comment.Nickname || comment.Username }}</span>
-                      <span class="comment-date">{{ comment.CreatedAt }}</span>
+                      <span class="user-name">{{ rating.Nickname || rating.Username }}</span>
+                      <span class="comment-date">{{ formatTime(rating.CreatedAt || new Date().toISOString()) }}</span>
                     </div>
+                  </div>
+                  <div v-if="authStore.isAuthenticated && authStore.user?.id === (rating.UserID || rating.userId)" class="comment-actions">
+                    <button @click="editRating(rating)" class="btn-icon-small" title="编辑评价">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" fill="none"/>
+                      </svg>
+                    </button>
+                    <button @click="deleteRating(rating.ID || rating.id)" class="btn-icon-small" title="删除评价">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2" stroke="currentColor" stroke-width="2" fill="none"/>
+                      </svg>
+                    </button>
                   </div>
                 </div>
                 <div class="comment-content">
-                  <p>{{ comment.Content }}</p>
+                  <div class="markdown-preview" v-html="parseMarkdown(rating.Content || '')"></div>
                 </div>
               </div>
             </div>
@@ -845,7 +1047,7 @@ onUnmounted(() => {
                     </div>
                   </div>
                   <div class="material-actions">
-                    <a :href="material.link" target="_blank" class="btn btn-primary">
+                    <a :href="`${backendBaseUrl}/materials/${material.id}/redirect`" target="_blank" class="btn btn-primary">
                       <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2"
@@ -855,6 +1057,20 @@ onUnmounted(() => {
                       </svg>
                       访问链接
                     </a>
+                    <div v-if="authStore.isAuthenticated && authStore.user?.id === material.uploaderId" class="material-owner-actions">
+                      <button @click="editMaterial(material)" class="btn-icon-small" title="编辑资料">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" fill="none"/>
+                          <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                      </button>
+                      <button @click="deleteMaterial(material.id)" class="btn-icon-small" title="删除资料">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2" fill="none"/>
+                          <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                      </button>
+                    </div>
                     <div v-if="material.accessPassword" class="password-info">
                       <span class="password-label">密码：</span>
                       <span class="password-value">{{ material.accessPassword }}</span>
@@ -912,14 +1128,30 @@ onUnmounted(() => {
                 </div>
 
                 <div class="editor-actions">
-                  <button @click="saveNote" class="btn btn-primary" :disabled="noteSaving">
-                    <svg v-if="noteSaving" class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
-                      <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                    </svg>
-                    {{ noteSaving ? '保存中...' : '保存笔记' }}
-                  </button>
+                  <div class="note-settings">
+                    <div class="public-option">
+                      <label class="checkbox-label">
+                        <input
+                          type="checkbox"
+                          v-model="isPublicNote"
+                          class="checkbox"
+                        />
+                        <span class="checkmark"></span>
+                        <span class="label-text">公开分享</span>
+                      </label>
+                      <p class="public-help">选择公开后，其他用户可以看到您的笔记内容</p>
+                    </div>
+                  </div>
+                  <div class="action-buttons">
+                    <button @click="saveNote" class="btn btn-primary" :disabled="noteSaving">
+                      <svg v-if="noteSaving" class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                        <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                      </svg>
+                      {{ noteSaving ? '保存中...' : (editingNote ? '更新笔记' : '保存笔记') }}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -942,17 +1174,27 @@ onUnmounted(() => {
                       <div class="note-author">
                         <div class="author-avatar">{{ note.authorName?.charAt(0) || 'U' }}</div>
                         <div class="author-info">
-                          <div class="author-name">{{ note.authorName }}</div>
+                          <div class="author-name">
+                            {{ note.authorName }}
+                            <span v-if="note.isPublic" class="public-badge">公开</span>
+                          </div>
                           <div class="note-date">{{ formatTime(note.createdAt) }}</div>
                         </div>
                       </div>
                       <div v-if="note.isOwner" class="note-actions">
-                        <button @click="editNote(note)" class="btn-icon-small">
+                        <button @click="editNote(note)" class="btn-icon-small" title="编辑笔记">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
                             <path
                               d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
                               fill="var(--color-text)" />
+                          </svg>
+                        </button>
+                        <button @click="deleteNote(note)" class="btn-icon-small delete-btn" title="删除笔记">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6" 
+                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                           </svg>
                         </button>
                       </div>
@@ -972,7 +1214,7 @@ onUnmounted(() => {
       <div v-if="showUploadModal" class="modal-overlay" @click="showUploadModal = false">
         <div class="modal-content" @click.stop>
           <div class="modal-header">
-            <h3>分享资料</h3>
+            <h3>{{ editingMaterial ? '编辑资料' : '分享资料' }}</h3>
             <button @click="showUploadModal = false" class="modal-close">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" />
@@ -991,8 +1233,8 @@ onUnmounted(() => {
             <div class="form-group">
               <label>资料类型 *</label>
               <div class="material-type-selector">
-                <button class="type-toggle" :class="{ active: materialType === 'cloud' }"
-                  @click="materialType = 'cloud'">
+                <button type="button" class="type-toggle" :class="{ active: materialType === 'cloud' }"
+                  @click.prevent="materialType = 'cloud'">
                   <svg class="type-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor"
@@ -1003,7 +1245,7 @@ onUnmounted(() => {
                   </svg>
                   网盘资源
                 </button>
-                <button class="type-toggle" :class="{ active: materialType === 'note' }" @click="materialType = 'note'">
+                <button type="button" class="type-toggle" :class="{ active: materialType === 'note' }" @click.prevent="materialType = 'note'">
                   <svg class="type-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -1019,7 +1261,7 @@ onUnmounted(() => {
               <label>{{ materialType === 'cloud' ? '网盘类型 *' : '笔记平台 *' }}</label>
               <div
                 :class="[materialType === 'cloud' ? 'cloud-type-dropdown' : 'note-type-dropdown', 'dropdown-container']">
-                <button class="cloud-type-button" @click="toggleServiceDropdown(materialType)">
+                <button type="button" class="cloud-type-button" @click.prevent="toggleServiceDropdown(materialType)">
                   <span>{{ materialType === 'cloud' ? cloudService : noteService }}</span>
                   <svg class="dropdown-arrow"
                     :class="{ 'rotated': materialType === 'cloud' ? showCloudTypeDropdown : showNoteTypeDropdown }"
@@ -1030,8 +1272,8 @@ onUnmounted(() => {
                 </button>
                 <div v-if="materialType === 'cloud' ? showCloudTypeDropdown : showNoteTypeDropdown"
                   class="cloud-type-options">
-                  <button v-for="service in (materialType === 'cloud' ? cloudServices : noteServices)" :key="service"
-                    @click="selectService(materialType, service)" class="cloud-type-option"
+                  <button type="button" v-for="service in (materialType === 'cloud' ? cloudServices : noteServices)" :key="service"
+                    @click.prevent="selectService(materialType, service)" class="cloud-type-option"
                     :class="{ active: (materialType === 'cloud' ? cloudService : noteService) === service }">
                     {{ service }}
                   </button>
@@ -1063,7 +1305,7 @@ onUnmounted(() => {
                 取消
               </button>
               <button type="submit" class="btn btn-primary" :disabled="uploadLoading">
-                {{ uploadLoading ? '上传中...' : '确认分享' }}
+                {{ uploadLoading ? '保存中...' : (editingMaterial ? '确认修改' : '确认分享') }}
               </button>
             </div>
           </form>
@@ -1124,18 +1366,6 @@ onUnmounted(() => {
 
 .back-button:hover .btn-icon {
   transform: none;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .back-button {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-  
-  .back-button .btn-icon {
-    font-size: 16px;
-  }
 }
 
 /* 加载状态 */
@@ -1496,6 +1726,14 @@ onUnmounted(() => {
 .comment-header {
   width: 100%;
   margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .user-info {
@@ -1517,6 +1755,28 @@ onUnmounted(() => {
 
 .comment-content p {
   margin: 0;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-display .rating-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.rating-display .star {
+  display: flex;
+  align-items: center;
+}
+
+.rating-display .rating-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
 }
 
 /* 笔记部分 */
@@ -1999,6 +2259,12 @@ onUnmounted(() => {
   gap: 8px;
 }
 
+.material-owner-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .password-info {
   display: flex;
   align-items: center;
@@ -2373,6 +2639,18 @@ onUnmounted(() => {
     flex-direction: column;
   }
 
+  /* 移动端按钮优化 */
+  .btn {
+    padding: 10px 16px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .btn-icon {
+    width: 14px;
+    height: 14px;
+  }
+
   .course-content {
     gap: 16px;
   }
@@ -2599,6 +2877,283 @@ onUnmounted(() => {
     margin-bottom: 10px;
   }
 
+  /* 笔记编辑器样式 */
+  .note-editor {
+    margin-top: 16px;
+  }
+
+  .editor-container {
+    margin-bottom: 16px;
+  }
+
+  .editor-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 16px;
+  }
+
+  .tab-button {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    color: var(--color-textSecondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .tab-button.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+  }
+
+  .note-textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-background);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+  }
+
+  .note-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+  }
+
+  .preview-content {
+    min-height: 200px;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-background);
+  }
+
+  .editor-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .note-settings {
+    display: flex;
+    align-items: center;
+  }
+
+  .public-option {
+    margin-bottom: 0;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .checkbox {
+    display: none;
+  }
+
+  .checkmark {
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #FFFFFF;
+    transition: transform 0.2s ease;
+  }
+
+  .checkbox:checked + .checkmark {
+    background-color: #76D7C4;
+  }
+
+  .checkbox:checked + .checkmark::after {
+    content: '✓';
+    color: #1A1A1A;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .label-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: #1A1A1A;
+  }
+
+  .public-help {
+    font-size: 14px;
+    color: #888888;
+    margin-top: 8px;
+    margin-left: 36px;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* 笔记列表样式 */
+  .notes-list {
+    margin-top: 16px;
+  }
+
+  .note-item {
+    padding: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    background: var(--color-background);
+    transition: all 0.2s ease;
+  }
+
+  .note-item:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .note-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .author-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .author-name {
+    font-weight: 600;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .public-badge {
+    background: var(--color-primary);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .note-date {
+    font-size: 12px;
+    color: var(--color-textSecondary);
+  }
+
+  .note-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .btn-icon-small {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--color-textSecondary);
+  }
+
+  .btn-icon-small svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .btn-icon-small:hover {
+    background: var(--color-border);
+    color: var(--color-text);
+  }
+
+  .btn-icon-small.delete-btn:hover {
+    background: #fee;
+    color: #e74c3c;
+  }
+
+  .note-content {
+    margin-top: 12px;
+  }
+
+  .markdown-preview {
+    line-height: 1.6;
+    color: var(--color-text);
+  }
+
+  .markdown-preview h1,
+  .markdown-preview h2,
+  .markdown-preview h3 {
+    margin: 16px 0 8px 0;
+    color: var(--color-text);
+  }
+
+  .markdown-preview p {
+    margin: 8px 0;
+  }
+
+  .markdown-preview code {
+    background: var(--color-border);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+  }
+
+  .markdown-preview pre {
+    background: var(--color-border);
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+
+  .markdown-preview blockquote {
+    border-left: 4px solid var(--color-primary);
+    padding-left: 12px;
+    margin: 12px 0;
+    color: var(--color-textSecondary);
+  }
+
   .rating-item {
     flex-direction: column;
     align-items: flex-start;
@@ -2634,6 +3189,8 @@ onUnmounted(() => {
     border-right: none;
     border-bottom: none;
     margin-top: auto;
+    gap: 8px;
+    padding: 12px 16px;
   }
 
   .modal-body {

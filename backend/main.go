@@ -108,8 +108,10 @@ func ensureTablesExist() error {
 			semester TEXT,
 			subject TEXT,
 			teacher TEXT,
-			credits INTEGER,
+			credits REAL,
 			image_url TEXT,
+			course_unit_name TEXT,
+			course_category TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)

@@ -53,6 +53,10 @@
             <el-tag v-if="course.subject" type="success">{{ course.subject }}</el-tag>
             <span v-else>未指定</span>
           </el-descriptions-item>
+          <el-descriptions-item label="开课单位">
+            <el-tag v-if="course.courseUnitName" type="warning">{{ course.courseUnitName }}</el-tag>
+            <span v-else>未指定</span>
+          </el-descriptions-item>
           <el-descriptions-item label="创建时间">
             {{ formatDate(course.created_at) }}
           </el-descriptions-item>
@@ -560,6 +564,26 @@ onMounted(() => {
   .action-buttons {
     flex-direction: column;
     align-items: center;
+  }
+
+  /* 描述列表单列显示 */
+  :deep(.el-descriptions__body) table {
+    table-layout: auto;
+  }
+  :deep(.el-descriptions__label) {
+    white-space: nowrap;
+  }
+  :deep(.el-descriptions__content) {
+    white-space: nowrap;
+  }
+  /* 表格横向滚动 */
+  .ratings-card .el-table__body-wrapper,
+  .materials-card .el-table__body-wrapper {
+    overflow-x: auto;
+  }
+  :deep(.el-table th),
+  :deep(.el-table td) {
+    white-space: nowrap;
   }
 }
 </style>

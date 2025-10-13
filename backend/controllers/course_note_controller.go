@@ -254,6 +254,53 @@ func DeleteCourseNote(c *gin.Context) {
 	})
 }
 
+// GetCourseNote 获取单个课程笔记详情
+func GetCourseNote(c *gin.Context) {
+	noteIDStr := c.Param("noteId")
+	noteID, err := strconv.ParseUint(noteIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的笔记ID"})
+		return
+	}
+
+	// 获取当前用户ID（可选）
+	var currentUserID uint
+	if userID, exists := c.Get("userId"); exists {
+		currentUserID = userID.(uint)
+	}
+
+	var note models.CourseNote
+	if err := config.DB.Where("id = ?", noteID).
+		Preload("Author").
+		First(&note).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "笔记不存在"})
+		return
+	}
+
+	// 如果笔记不是公开的，只有作者本人可以看到
+	if !note.IsPublic && currentUserID != note.AuthorID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "无权限查看此笔记"})
+		return
+	}
+
+	response := CourseNoteResponse{
+		ID:         note.ID,
+		CourseID:   note.CourseID,
+		Content:    note.Content,
+		AuthorID:   note.AuthorID,
+		AuthorName: note.Author.Nickname,
+		IsPublic:   note.IsPublic,
+		IsOwner:    currentUserID == note.AuthorID,
+		CreatedAt:  note.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:  note.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    response,
+	})
+}
+
 // GetUserNotes 获取用户的笔记列表
 func GetUserNotes(c *gin.Context) {
 	// 获取当前用户

@@ -11,7 +11,9 @@ type User struct {
 	Email     string    `gorm:"unique;not null" json:"email"`
 	Nickname  string    `json:"nickname"`
 	Avatar    string    `json:"avatar"`
-	Role      string    `gorm:"default:'user'" json:"role"` // user, admin
+	Role      string    `gorm:"default:'user'" json:"role"`     // user, admin
+	Status    string    `gorm:"default:'active'" json:"status"` // active, banned
+	BanReason string    `json:"ban_reason"` // 封禁原因
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }

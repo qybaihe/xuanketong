@@ -21,12 +21,15 @@ func AdminRoutes(router *gin.Engine) {
 		admin.GET("/users/:id", controllers.GetUserByID)
 		admin.PUT("/users/:id", controllers.UpdateUser)
 		admin.DELETE("/users/:id", controllers.DeleteUser)
+		admin.PUT("/users/:id/ban", controllers.BanUser)
+		admin.PUT("/users/:id/unban", controllers.UnbanUser)
 
 		admin.GET("/ratings", controllers.GetAllRatings)
 		admin.GET("/comments", controllers.GetAllComments)
 
 		// 课程管理路由
 		admin.POST("/courses", controllers.CreateCourse)
+		admin.POST("/courses/batch", controllers.BatchCreateCourses)
 		admin.GET("/courses", controllers.GetCourses)
 		admin.GET("/courses/:id", controllers.GetCourse)
 		admin.PUT("/courses/:id", controllers.UpdateCourse)

@@ -13,6 +13,7 @@ export interface MaterialData {
 export interface CourseMaterial {
   id: number
   courseId: number
+  courseName?: string
   materialName: string
   type: 'cloud' | 'note'
   service: string
@@ -47,6 +48,19 @@ export class CourseMaterialApi {
     } catch (error) {
       console.error('获取课程资料失败:', error)
       throw new Error('获取课程资料失败')
+    }
+  }
+
+  /**
+   * 获取单个课程资料详情
+   */
+  static async getCourseMaterial(materialId: number): Promise<ApiResponse<CourseMaterial>> {
+    try {
+      const response = await api.get(`/materials/${materialId}`)
+      return response.data
+    } catch (error) {
+      console.error('获取资料详情失败:', error)
+      throw new Error('获取资料详情失败')
     }
   }
 
@@ -99,6 +113,19 @@ export class CourseMaterialApi {
     } catch (error) {
       console.error('更新下载次数失败:', error)
       throw new Error('更新下载次数失败')
+    }
+  }
+
+  /**
+   * 获取热门资料
+   */
+  static async getPopularMaterials(limit: number = 10): Promise<ApiResponse<CourseMaterial[]>> {
+    try {
+      const response = await api.get(`/course-materials/popular?limit=${limit}`)
+      return response.data
+    } catch (error) {
+      console.error('获取热门资料失败:', error)
+      throw new Error('获取热门资料失败')
     }
   }
 }

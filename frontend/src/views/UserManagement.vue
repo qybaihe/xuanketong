@@ -50,7 +50,7 @@
         </div>
             <div class="stat-info">
               <h3 class="stat-value">{{ stats.new_users_today }}</h3>
-              <p class="stat-label">今日新增</p>
+              <p class="stat-label">管理员</p>
             </div>
           </div>
         </el-card>
@@ -66,7 +66,7 @@
             </div>
             <div class="stat-info">
               <h3 class="stat-value">{{ stats.banned_users }}</h3>
-              <p class="stat-label">被封禁用户</p>
+              <p class="stat-label">封禁用户</p>
             </div>
           </div>
         </el-card>
@@ -86,6 +86,7 @@
             />
           </el-form-item>
         </el-col>
+        <!--
         <el-col :xs="24" :sm="8" :md="6">
           <el-form-item label="邮箱">
             <el-input
@@ -94,6 +95,21 @@
               clearable
               @input="handleSearch"
             />
+          </el-form-item>
+        </el-col>
+        -->
+        <el-col :xs="24" :sm="8" :md="6">
+          <el-form-item label="角色">
+            <el-select
+              v-model="filters.role"
+              placeholder="选择角色"
+              clearable
+              @change="handleSearch"
+            >
+              <el-option label="全部" value="" />
+              <el-option label="管理员" value="admin" />
+              <el-option label="普通用户" value="user" />
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :xs="24" :sm="8" :md="6">
@@ -163,14 +179,14 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="注册时间" width="180">
+        <el-table-column prop="createdAt" label="注册时间" width="180">
           <template #default="{ row }">
-            {{ formatDate(row.created_at) }}
+            {{ formatDate(row.createdAt) }}
           </template>
         </el-table-column>
-        <el-table-column prop="last_login" label="最后登录" width="180">
+        <el-table-column prop="updatedAt" label="更新时间" width="180">
           <template #default="{ row }">
-            {{ row.last_login ? formatDate(row.last_login) : '从未登录' }}
+            {{ formatDate(row.updatedAt) }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
@@ -184,7 +200,7 @@
               查看
             </el-button>
             <el-button
-              v-if="row.status === 'active'"
+              v-if="row.role !== 'admin' && row.status === 'active'"
               type="warning"
               size="small"
               @click="banUser(row.id, row.username)"
@@ -193,7 +209,7 @@
               封禁
             </el-button>
             <el-button
-              v-else
+              v-if="row.role !== 'admin' && row.status === 'banned'"
               type="success"
               size="small"
               @click="unbanUser(row.id, row.username)"
@@ -260,11 +276,17 @@
               {{ selectedUser.status === 'active' ? '正常' : '封禁' }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="注册时间">
-            {{ formatDate(selectedUser.created_at) }}
+          <el-descriptions-item v-if="selectedUser.status === 'banned'" label="封禁原因" :span="2">
+            {{ selectedUser.ban_reason || '无' }}
           </el-descriptions-item>
-          <el-descriptions-item label="最后登录">
-            {{ selectedUser.last_login ? formatDate(selectedUser.last_login) : '从未登录' }}
+          <el-descriptions-item label="昵称">
+            {{ selectedUser.nickname || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="注册时间">
+            {{ formatDate(selectedUser.createdAt) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="更新时间">
+            {{ formatDate(selectedUser.updatedAt) }}
           </el-descriptions-item>
         </el-descriptions>
       </div>
@@ -285,6 +307,33 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 封禁用户对话框 -->
+    <el-dialog
+      v-model="banDialogVisible"
+      title="封禁用户"
+      width="500px"
+    >
+      <p>确定要封禁用户 "<strong>{{ banUserName }}</strong>" 吗？</p>
+      
+      <el-form-item label="封禁原因" required>
+        <el-input
+          v-model="banReason"
+          type="textarea"
+          :rows="3"
+          placeholder="请输入封禁原因..."
+          maxlength="200"
+          show-word-limit
+        />
+      </el-form-item>
+      
+      <template #footer>
+        <el-button @click="banDialogVisible = false">取消</el-button>
+        <el-button type="warning" @click="confirmBan">
+          确认封禁
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -299,18 +348,25 @@ interface User {
   id: number
   username: string
   email?: string
+  nickname?: string
+  avatar?: string
   role: string
   status: string
-  created_at: string
-  last_login?: string
+  ban_reason?: string
+  createdAt: string
+  updatedAt: string
 }
 
 const users = ref<User[]>([])
 const userDetailVisible = ref(false)
 const deleteDialogVisible = ref(false)
+const banDialogVisible = ref(false)
 const selectedUser = ref<User | null>(null)
 const currentDeleteId = ref<number | null>(null)
 const deleteUserName = ref('')
+const currentBanId = ref<number | null>(null)
+const banUserName = ref('')
+const banReason = ref('')
 
 const currentPage = ref(1)
 const pageSize = ref(20)
@@ -326,6 +382,7 @@ const stats = ref({
 const filters = reactive({
   username: '',
   email: '',
+  role: '',
   status: ''
 })
 
@@ -333,17 +390,18 @@ const loadUsers = async () => {
   loading.value = true
   try {
     const params = new URLSearchParams()
-    if (filters.username) params.append('username', filters.username)
-    if (filters.email) params.append('email', filters.email)
+    if (filters.username) params.append('keyword', filters.username)
+    if (filters.email) params.append('keyword', filters.email)
+    if (filters.role) params.append('role', filters.role)
     if (filters.status) params.append('status', filters.status)
     params.append('page', currentPage.value.toString())
-    params.append('limit', pageSize.value.toString())
+    params.append('pageSize', pageSize.value.toString())
     
     const response = await api.get(`/admin/users?${params}`)
     
     if (response.data.data) {
-      users.value = response.data.data.users || []
-      total.value = response.data.data.total || 0
+      users.value = response.data.data || []
+      total.value = response.data.total || 0
     } else {
       users.value = []
       total.value = 0
@@ -358,9 +416,14 @@ const loadUsers = async () => {
 
 const loadStats = async () => {
   try {
-    const response = await api.get('/admin/stats')
-    if (response.data.success) {
-      stats.value = response.data.data
+    const response = await api.get('/admin/user-stats')
+    if (response.data) {
+      stats.value = {
+        total_users: response.data.total_users || 0,
+        active_users: response.data.active_users || 0,
+        new_users_today: response.data.total_admins || 0,
+        banned_users: response.data.banned_users || 0
+      }
     }
   } catch (error) {
     console.error('获取统计数据失败:', error)
@@ -396,39 +459,46 @@ const viewUserDetails = async (id: number) => {
   }
 }
 
-const banUser = async (id: number, username: string) => {
+const banUser = (id: number, username: string) => {
+  currentBanId.value = id
+  banUserName.value = username
+  banReason.value = ''
+  banDialogVisible.value = true
+}
+
+const confirmBan = async () => {
+  if (!currentBanId.value || !banReason.value.trim()) {
+    ElMessage.warning('请输入封禁原因')
+    return
+  }
+
   try {
-    await ElMessageBox.confirm(
-      `确定要封禁用户 "${username}" 吗？`,
-      '确认封禁',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
-    
-    const response = await api.put(`/admin/users/${id}/ban`)
+    const response = await api.put(`/admin/users/${currentBanId.value}/ban`, {
+      reason: banReason.value.trim()
+    })
     if (response.status === 200) {
       ElMessage.success('用户封禁成功')
+      banDialogVisible.value = false
       loadUsers()
       loadStats()
     }
   } catch (error: unknown) {
-    if (error !== 'cancel') {
-      console.error('封禁用户失败:', error)
-      ElMessage.error('封禁用户失败')
-    }
+    console.error('封禁用户失败:', error)
+    ElMessage.error('封禁用户失败')
   }
 }
 
 const unbanUser = async (id: number, username: string) => {
   try {
+    // 先获取用户详情以显示封禁原因
+    const userResponse = await api.get(`/admin/users/${id}`)
+    const user = userResponse.data.data || userResponse.data
+    
     await ElMessageBox.confirm(
-      `确定要解封用户 "${username}" 吗？`,
+      `确定要解封用户 "${username}" 吗？\n\n封禁原因：${user.ban_reason || '无'}`,
       '确认解封',
       {
-        confirmButtonText: '确定',
+        confirmButtonText: '确定解封',
         cancelButtonText: '取消',
         type: 'success',
       }
@@ -593,19 +663,27 @@ onMounted(() => {
     font-size: 1.5rem;
   }
   
-  .stat-content {
-    flex-direction: column;
-    text-align: center;
-    gap: 10px;
+  /* 卡片列堆叠 */
+  .stats-row .el-col,
+  .filter-card .el-col {
+    margin-bottom: 12px;
+    flex: 0 0 100%;
+    max-width: 100%;
   }
-  
-  .stat-icon {
-    width: 40px;
-    height: 40px;
+  /* 表格横向滚动 */
+  .table-card .el-table__body-wrapper {
+    overflow-x: auto;
   }
-  
-  .stat-value {
-    font-size: 1.5rem;
+  :deep(.el-table th),
+  :deep(.el-table td) {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 576px) {
+  :deep(.el-dialog) {
+    width: 100% !important;
+    margin: 0 !important;
   }
 }
 </style>

@@ -258,6 +258,7 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 
 .search-section {
   position: relative;
+  overflow: visible;
 }
 
 .search-toggle {
@@ -289,6 +290,7 @@ const selectSearchType = (type: 'course' | 'teacher') => {
   position: absolute;
   top: 50%;
   left: 50%;
+  transform: translateX(-50%) translateY(-50%);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -299,6 +301,8 @@ const selectSearchType = (type: 'course' | 'teacher') => {
   padding: 8px;
   height: 48px;
   min-width: 400px;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: expandWidth 0.3s ease-out;
 }
 
@@ -512,6 +516,22 @@ const selectSearchType = (type: 'course' | 'teacher') => {
 /* Desktop-only elements */
 .desktop-only {
   display: block;
+}
+
+/* 中等屏幕尺寸优化 */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .search-input-container {
+    min-width: 350px;
+    max-width: 450px;
+  }
+}
+
+/* 小屏幕桌面端优化 */
+@media (max-width: 1200px) and (min-width: 1025px) {
+  .search-input-container {
+    min-width: 380px;
+    max-width: 480px;
+  }
 }
 
 /* Responsive Design */

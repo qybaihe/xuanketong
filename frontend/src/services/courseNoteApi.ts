@@ -55,9 +55,22 @@ export class CourseNoteApi {
   }
 
   /**
-   * 保存课程笔记
+   * 获取单个课程笔记详情
    */
-  static async saveCourseNote(courseId: number, content: string, isPublic: boolean = false): Promise<ApiResponse<CourseNote>> {
+  static async getCourseNote(noteId: number): Promise<ApiResponse<CourseNote>> {
+    try {
+      const response = await api.get(`/notes/${noteId}`)
+      return response.data
+    } catch (error) {
+      console.error('获取笔记详情失败:', error)
+      throw new Error('获取笔记详情失败')
+    }
+  }
+
+  /**
+   * 创建课程笔记
+   */
+  static async createCourseNote(courseId: number, content: string, isPublic: boolean = false): Promise<ApiResponse<CourseNote>> {
     try {
       const requestData: CreateNoteRequest = {
         content,
@@ -66,9 +79,16 @@ export class CourseNoteApi {
       const response = await api.post(`/course-notes/course/${courseId}`, requestData)
       return response.data
     } catch (error) {
-      console.error('保存笔记失败:', error)
-      throw new Error('保存笔记失败')
+      console.error('创建笔记失败:', error)
+      throw new Error('创建笔记失败')
     }
+  }
+
+  /**
+   * 保存课程笔记（兼容性方法）
+   */
+  static async saveCourseNote(courseId: number, content: string, isPublic: boolean = false): Promise<ApiResponse<CourseNote>> {
+    return this.createCourseNote(courseId, content, isPublic)
   }
 
   /**

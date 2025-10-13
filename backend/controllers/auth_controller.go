@@ -104,6 +104,12 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	// Check if user is banned
+	if user.Status == "banned" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "账号触发安全机制被临时禁止登录，请联系管理员"})
+		return
+	}
+
 	// Generate JWT token
 	token, err := utils.GenerateToken(user)
 	if err != nil {

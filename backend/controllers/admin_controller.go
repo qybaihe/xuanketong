@@ -70,6 +70,7 @@ func GetAllUsers(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 	keyword := c.Query("keyword")
 	role := c.Query("role")
+	status := c.Query("status")
 
 	var users []models.User
 	query := config.DB.Model(&models.User{})
@@ -83,6 +84,11 @@ func GetAllUsers(c *gin.Context) {
 	// 角色筛选
 	if role != "" {
 		query = query.Where("role = ?", role)
+	}
+
+	// 状态筛选
+	if status != "" {
+		query = query.Where("status = ?", status)
 	}
 
 	var total int64
@@ -199,6 +205,8 @@ func GetUserStats(c *gin.Context) {
 		TotalUsers        int64   `json:"total_users"`
 		TotalAdmins       int64   `json:"total_admins"`
 		TotalRegularUsers int64   `json:"total_regular_users"`
+		ActiveUsers       int64   `json:"active_users"`
+		BannedUsers       int64   `json:"banned_users"`
 		AverageRating     float64 `json:"average_rating"`
 		UsersWithComment  int64   `json:"users_with_comment"`
 	}
@@ -211,6 +219,12 @@ func GetUserStats(c *gin.Context) {
 
 	// 普通用户数
 	config.DB.Model(&models.User{}).Where("role = ?", "user").Count(&stats.TotalRegularUsers)
+
+	// 活跃用户数
+	config.DB.Model(&models.User{}).Where("status = ?", "active").Count(&stats.ActiveUsers)
+
+	// 封禁用户数
+	config.DB.Model(&models.User{}).Where("status = ?", "banned").Count(&stats.BannedUsers)
 
 	// 平均评分
 	config.DB.Model(&models.Rating{}).Select("avg(score)").Row().Scan(&stats.AverageRating)
@@ -233,3 +247,61 @@ func GetAllComments(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": comments})
 }
 
+// BanUser 封禁用户
+func BanUser(c *gin.Context) {
+	var user models.User
+	if err := config.DB.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
+		return
+	}
+
+	// 不允许封禁管理员账户
+	if user.Role == "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "不能封禁管理员账户"})
+		return
+	}
+
+	// 获取封禁原因
+	var banData struct {
+		Reason string `json:"reason" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&banData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "封禁原因不能为空"})
+		return
+	}
+
+	// 更新用户状态为封禁
+	user.Status = "banned"
+	user.BanReason = banData.Reason
+	if err := config.DB.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "封禁用户失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "用户封禁成功",
+		"data":    user,
+	})
+}
+
+// UnbanUser 解封用户
+func UnbanUser(c *gin.Context) {
+	var user models.User
+	if err := config.DB.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
+		return
+	}
+
+	// 更新用户状态为正常，清空封禁原因
+	user.Status = "active"
+	user.BanReason = ""
+	if err := config.DB.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "解封用户失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "用户解封成功",
+		"data":    user,
+	})
+}

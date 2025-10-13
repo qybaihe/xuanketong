@@ -40,6 +40,22 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// Check if user is banned
+		var user models.User
+		if err := config.DB.First(&user, claims.UserID).Error; err != nil {
+			log.Printf("User not found: %v", err)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			c.Abort()
+			return
+		}
+
+		if user.Status == "banned" {
+			log.Printf("Banned user attempted to access: %s", user.Username)
+			c.JSON(http.StatusForbidden, gin.H{"error": "账号触发安全机制被临时禁止登录，请联系管理员"})
+			c.Abort()
+			return
+		}
+
 		// Set user information in context
 		c.Set("userId", claims.UserID)
 		c.Set("username", claims.Username)

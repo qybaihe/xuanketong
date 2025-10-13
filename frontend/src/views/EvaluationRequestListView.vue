@@ -645,6 +645,7 @@ const formatDate = (dateString: string) => {
   .toolbar-content {
     flex-direction: column;
     text-align: center;
+    gap: 8px;
   }
   
   .course-grid {

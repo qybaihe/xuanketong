@@ -127,14 +127,6 @@
   background-color: var(--color-background) !important;
 }
 
-/* 表格操作列flex布局 */
-.el-table td.el-table__cell:last-child {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
-}
-
 /* 按钮组件样式覆盖 */
 .el-button {
   border-radius: 4px !important;
@@ -509,22 +501,68 @@
   color: var(--color-text) !important;
 }
 
+.el-message__content {
+  color: inherit !important;
+}
+
+.el-message__icon {
+  color: inherit !important;
+}
+
 .el-message--success {
   background-color: var(--color-success) !important;
   border-color: var(--color-success) !important;
-  color: var(--color-text) !important;
+  color: #ffffff !important;
+}
+
+.el-message--success .el-message__content {
+  color: #ffffff !important;
+}
+
+.el-message--success .el-message__icon {
+  color: #ffffff !important;
 }
 
 .el-message--warning {
   background-color: var(--color-warning) !important;
   border-color: var(--color-warning) !important;
-  color: var(--color-text) !important;
+  color: #000000 !important;
+}
+
+.el-message--warning .el-message__content {
+  color: #000000 !important;
+}
+
+.el-message--warning .el-message__icon {
+  color: #000000 !important;
 }
 
 .el-message--error {
   background-color: var(--color-error) !important;
   border-color: var(--color-error) !important;
-  color: var(--color-text) !important;
+  color: #ffffff !important;
+}
+
+.el-message--error .el-message__content {
+  color: #ffffff !important;
+}
+
+.el-message--error .el-message__icon {
+  color: #ffffff !important;
+}
+
+.el-message--info {
+  background-color: var(--color-info) !important;
+  border-color: var(--color-info) !important;
+  color: #ffffff !important;
+}
+
+.el-message--info .el-message__content {
+  color: #ffffff !important;
+}
+
+.el-message--info .el-message__icon {
+  color: #ffffff !important;
 }
 
 /* 消息框组件样式覆盖 */
@@ -537,7 +575,7 @@
 
 .el-message-box__header {
   background-color: transparent !important;
-  border-bottom: 1px solid var(--color-border) !important;
+  border-bottom: none !important;
   color: var(--color-text) !important;
 }
 
@@ -548,5 +586,5 @@
 
 .el-message-box__btns {
   background-color: transparent !important;
-  border-top: 1px solid var(--color-border) !important;
+  border-top: none !important;
 }

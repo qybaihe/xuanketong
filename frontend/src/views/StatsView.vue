@@ -509,4 +509,30 @@ onMounted(() => {
     height: 200px;
   }
 }
+
+/* 进一步移动端适配 */
+@media (max-width: 768px) {
+  /* 控制栏与图表列堆叠 */
+  .control-card .el-col,
+  .charts-section .el-col {
+    margin-bottom: 12px;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  /* 详细统计表横向滚动 */
+  .detailed-stats-section .el-table__body-wrapper {
+    overflow-x: auto;
+  }
+  :deep(.el-table th),
+  :deep(.el-table td) {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 576px) {
+  :deep(.el-dialog) {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}
 </style>
